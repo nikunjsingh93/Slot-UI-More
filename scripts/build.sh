@@ -1,5 +1,6 @@
 #!/bin/sh
 set -eu
+[ "$(uname -m)" = aarch64 ] || { echo 'Use the ARM64 build container.' >&2; exit 1; }
 repo=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 task_build=${SLOT_BUILD_DIR:-/tmp/slot-g350-portable}
 mkdir -p "$task_build/core-source" "$repo/dist"

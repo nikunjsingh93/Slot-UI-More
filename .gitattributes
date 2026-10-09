@@ -10,3 +10,5 @@
 *.patch -whitespace
 slot/licenses/** -whitespace
 LICENSE -whitespace
+patches/*-GPL-*.txt -whitespace
+patches/*-MPL-*.txt -whitespace
