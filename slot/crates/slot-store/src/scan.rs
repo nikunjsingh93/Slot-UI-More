@@ -56,7 +56,7 @@ pub fn scan(root: &Path) -> Result<Vec<Cart>, StoreError> {
         // A playlist is one shelf entry, rather than a duplicate for every disc.
         let entries: Vec<_> = entries.filter_map(Result::ok).collect();
         let mut playlist_discs = std::collections::HashSet::new();
-        if platform == Platform::Ps1 {
+        if matches!(platform, Platform::Ps1 | Platform::Dreamcast) {
             for entry in &entries {
                 let p = entry.path();
                 if p.extension().is_some_and(|e| e.eq_ignore_ascii_case("m3u")) {
@@ -98,7 +98,11 @@ pub fn scan(root: &Path) -> Result<Vec<Cart>, StoreError> {
                     header_title(&rom).unwrap_or_default(),
                     header_code(&rom).unwrap_or_default(),
                 ),
-                Platform::Ps1 | Platform::Snes | Platform::N64 => (stem.to_string(), String::new()),
+                Platform::Ps1
+                | Platform::Snes
+                | Platform::N64
+                | Platform::Dreamcast
+                | Platform::Psp => (stem.to_string(), String::new()),
                 _ => (crate::gb::title(&rom).unwrap_or_default(), String::new()),
             };
             carts.push(Cart {

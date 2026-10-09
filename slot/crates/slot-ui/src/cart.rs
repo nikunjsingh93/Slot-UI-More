@@ -87,7 +87,12 @@ enum Shape {
 
 pub fn gb_shell_of(cart: &Cart) -> Option<GbShell> {
     match cart.platform {
-        Platform::Gba | Platform::Ps1 | Platform::Snes | Platform::N64 => None,
+        Platform::Gba
+        | Platform::Ps1
+        | Platform::Snes
+        | Platform::N64
+        | Platform::Dreamcast
+        | Platform::Psp => None,
         Platform::Gb | Platform::Gbc => Some(match cart.shell.map(|c| c.outline) {
             Some(Outline::Notched) => GbShell::Notched,
             Some(Outline::Rounded) => GbShell::Rounded,
@@ -153,7 +158,8 @@ const GB_SEATED_H: u32 = 259;
 
 pub fn seated_box(platform: Platform) -> (u32, u32) {
     match platform {
-        Platform::Ps1 => (312, 312),
+        Platform::Ps1 | Platform::Dreamcast => (312, 312),
+        Platform::Psp => (312, 224),
         Platform::Snes => (240, 147),
         Platform::N64 => (240, 155),
         Platform::Gba => (SEATED_W, SEATED_H),
@@ -168,11 +174,19 @@ pub fn cart_box(platform: Platform) -> (u32, u32) {
     if platform == Platform::Snes {
         return (360, 220);
     }
-    if platform == Platform::Ps1 {
+    if matches!(platform, Platform::Ps1 | Platform::Dreamcast) {
         return (312, 312);
     }
+    if platform == Platform::Psp {
+        return (312, 224);
+    }
     let s = spec(match platform {
-        Platform::Gba | Platform::Ps1 | Platform::Snes | Platform::N64 => Shape::Gba,
+        Platform::Gba
+        | Platform::Ps1
+        | Platform::Snes
+        | Platform::N64
+        | Platform::Dreamcast
+        | Platform::Psp => Shape::Gba,
         Platform::Gb | Platform::Gbc => Shape::Gb(GbShell::Notched),
     });
     (s.w, s.h)
@@ -201,8 +215,11 @@ pub fn cart_face(cart: &Cart) -> CartFace {
     if cart.platform == Platform::Snes {
         return snes_face(cart);
     }
-    if cart.platform == Platform::Ps1 {
+    if matches!(cart.platform, Platform::Ps1 | Platform::Dreamcast) {
         return disc_face(cart);
+    }
+    if cart.platform == Platform::Psp {
+        return umd_face(cart);
     }
     let s = spec(shape_of(cart));
     let shell = shell_for(cart);
@@ -584,6 +601,42 @@ fn disc_face(cart: &Cart) -> CartFace {
         }
     }
     CartFace { rgba, w, h: w }
+}
+
+// PSP Universal Media Disc, with a white shell around the printed disc.
+fn umd_face(cart: &Cart) -> CartFace {
+    let (w, h) = (312u32, 224u32);
+    let disc = disc_face(cart);
+    let mut rgba = vec![0u8; (w * h * 4) as usize];
+    for y in 0..h {
+        for x in 0..w {
+            let dx = (x as f32 + 0.5 - 156.0).abs();
+            let lower = (y as f32 - 135.0).max(0.0);
+            let edge = 153.0 - dx;
+            if edge < 0.0 || y < 3 || dx * dx + lower * lower > 153.0 * 153.0 {
+                continue;
+            }
+            let o = ((y * w + x) * 4) as usize;
+            let shade = if edge < 4.0 || y < 7 || y > 218 {
+                164
+            } else {
+                234
+            };
+            rgba[o..o + 4].copy_from_slice(&[shade, shade, shade, 255]);
+            let rx = x as f32 + 0.5 - 156.0;
+            let ry = y as f32 + 0.5 - 111.0;
+            let r = rx.hypot(ry);
+            if r < 99.0 {
+                let sx = ((rx / 99.0 * 155.0 + 156.0) as u32).min(311);
+                let sy = ((ry / 99.0 * 155.0 + 156.0) as u32).min(311);
+                let d = ((sy * disc.w + sx) * 4) as usize;
+                if disc.rgba[d + 3] > 0 {
+                    rgba[o..o + 4].copy_from_slice(&disc.rgba[d..d + 4]);
+                }
+            }
+        }
+    }
+    CartFace { rgba, w, h }
 }
 
 // A grey SNES cartridge: label, moulded side ribs and bottom connector.

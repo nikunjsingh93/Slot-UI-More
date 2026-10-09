@@ -1,0 +1,52 @@
+{
+  "version": "0.1.9.2-experimental",
+  "target": "BATLEXP G350 existing Slot installation",
+  "base": "owner-confirmed stable 0.1.8",
+  "system_sha256": "bb9a6a3c10b4a6d8fe1655d7f43020e3438fcc7f67d961e2c81cac2689c6bd27",
+  "system_md5": "2433525e27560d7e39a368a47753a677",
+  "system_size": 1123733504,
+  "archive_sha256": "0e3377e86e997e6e507fbead319cdc8b187bfc8d4b53bd8f40ddaa0928694d07",
+  "archive_size": 1111906774,
+  "frontend_sha256": "6b30de29efc2f0ec6dd96e7d0f74ad3fcf77d2fa531352d6e1df204770ad22a9",
+  "core_sha256": {
+    "mgba_libretro.so": "962ab910d17db1298c6b41be1955b582d15e76b149c4d4ae3a7f2cb02ebc749b",
+    "parallel_n64_libretro.so": "6f06977c294b7e8ae336c3f57977a23448387d55a4618d18b3973a006a9ee628",
+    "ppsspp_libretro.so": "75b4972a0018addc3359b68b26136d5b75d9e7558bebbec6401b1421b1654969",
+    "flycast_libretro.so": "6d1bacd9ab8700d395f7147548d525deb7039456c722767bcc1b9e182380da0c",
+    "gpsp_libretro.so": "96a13edea672637ef5bf9705ac0b5887a4c6934937ffa163fc9560bec692ce12",
+    "snes9x2005_plus_libretro.so": "87ab323dc307ecf230e71d0c79c791ae850923f3225ce8547915b30748f4e79e",
+    "snes9x_libretro.so": "798f9862939fad25fd664b21a826f12c4d4f023ac6a091a2b55ebb88974f193f",
+    "pcsx_rearmed_libretro.so": "8eac8b03343943745e4bf1a2f97eb400b28631ad07b04405d86a342dcb5ad9af",
+    "mupen64plus_next_libretro.so": "4a258260f7dbb26057a6f17df19f1d27969bac14bd56fc20d7254b8de8f4ebd9"
+  },
+  "sources": {
+    "flycast": {
+      "repository": "https://github.com/flyinghead/flycast",
+      "tag": "v2.5",
+      "revision": "5f4eefab5852d1c832ad8ffdf514fef8c217f1ac",
+      "rendering": "GLES3; GLES2 build rejected after visual tennis-court test"
+    },
+    "ppsspp": {
+      "repository": "https://github.com/hrydgard/ppsspp",
+      "tag": "v1.20.4",
+      "revision": "fa50bb1976065c4f8b1b47af227d367fe9771555",
+      "patch": "Join emulation thread when unloading from paused/start-requested state"
+    }
+  },
+  "changes": [
+    "Fix repeated Dreamcast launch crash by retaining the Linux SH4 memory reservation",
+    "Dreamcast frameskip 1 and maximum adaptive frame skipping; unchanged CPU/audio clock",
+    "Dreamcast Flycast GLES3 / ARM64 dynarec / 320x240 / threaded rendering / frameskip 1 plus maximum adaptive / HLE BIOS",
+    "PSP PPSSPP 1.20.4 GLES / ARM64 JIT / native 480x270 letterboxed output / bounded auto frame skipping",
+    "DC and PSP shelves; printed compact discs and UMDs",
+    "One-second Menu-hold exits to Slot; face buttons remain game controls",
+    "Thread-safe framebuffer callback and correct hardware-context destruction order",
+    "PPSSPP paused/start-requested emulation thread joined safely on exit",
+    "Per-system VMU and memory-stick saves; PSP fonts/shaders/flash0 assets provisioned",
+    "Existing N64/SNES/PS1/GBA core payloads, audio routing and boot scripts retained"
+  ],
+  "validation": "Container ARM64/Mesa graphics, stereo PCM generation, state round trip, in-game PSP save, full Slot Menu-hold exit tested with owner-provided Virtua Tennis CHD and Virtua Tennis 3 ISO. No games or proprietary BIOS included.",
+  "hardware_validation": "Pending owner test; container timing does not measure G350 speed or audible audio quality.",
+  "tekken6": "Not on the connected card; untested. Demanding games may require additional game-specific tuning.",
+  "packaged_verification": "PASS: ZIP CRC/SHA256/MD5, matching pair, complete SquashFS extraction, preserved base-core hashes, dependencies, assets and boot syntax"
+}

@@ -1,0 +1,67 @@
+{
+  "slot-g350-0.1.8-parallel-n64-update.zip": {
+    "sha256": "f458278347885ae02fcefcb0ed527242a465cddd5f01b8f51c73038b6049ce87",
+    "size": 1097612213,
+    "tag": "v0.1.8"
+  },
+  "slot-g350-0.1.8-sources.zip": {
+    "sha256": "ba2d7e39f3a6becc89d459db2bd53cf28b0edc8a58eb265c0c18b81dbe93a980",
+    "size": 47561602,
+    "tag": "v0.1.8"
+  },
+  "G350-0.1.8-manifest.json": {
+    "sha256": "5f7ede067540166f251a07f81f7ee5afddc83132e66bfae001a0fe3edec5e3cb",
+    "size": 2665,
+    "tag": "v0.1.8"
+  },
+  "G350-0.1.8-UPDATE.md": {
+    "sha256": "82b2b004247266f3ef315555798078d0f20af6dafc87d260a0bc1f13032d4f2c",
+    "size": 3412,
+    "tag": "v0.1.8"
+  },
+  "G350-0.1.8-VALIDATION.json": {
+    "sha256": "38a71feb4a8d90728799cd964130de3c2cbba07741db16933cc3b90676febd04",
+    "size": 2611,
+    "tag": "v0.1.8"
+  },
+  "slot-g350-0.1.9.2-dreamcast-psp-update.zip": {
+    "sha256": "0e3377e86e997e6e507fbead319cdc8b187bfc8d4b53bd8f40ddaa0928694d07",
+    "size": 1111906774,
+    "tag": "v0.1.9.2"
+  },
+  "slot-g350-0.1.9.2-sources.zip": {
+    "sha256": "73bf0478933e8035eba442407063789b9331566804c85c882716bf9705535a5a",
+    "size": 716884441,
+    "tag": "v0.1.9.2"
+  },
+  "slot-g350-ps1-snes-n64-0.1.3-experimental.img.zip": {
+    "sha256": "0dbce54cb940d3d1ee6cbb05767ce57cf80de76148a52acb9927d32f94ebc869",
+    "size": 1111377560,
+    "tag": "v0.1.9.2"
+  },
+  "G350-0.1.9.2-manifest.json": {
+    "sha256": "86e11a827b7a2951a7dc1c00bded93b7f2c3506042da87de69911b1e2a9ddb06",
+    "size": 3482,
+    "tag": "v0.1.9.2"
+  },
+  "G350-0.1.9.2-UPDATE.md": {
+    "sha256": "447598b328e5318723a5301dd8b50e8c104fd0b615f104d88136b5026b22d04f",
+    "size": 2568,
+    "tag": "v0.1.9.2"
+  },
+  "G350-0.1.9.2-VALIDATION.json": {
+    "sha256": "7348a1f38ba8f29b56f1a0df8ed1cb60d3df93cc853eec5b121faa857b1ed001",
+    "size": 2461,
+    "tag": "v0.1.9.2"
+  },
+  "G350-0.1.3-image-manifest.json": {
+    "sha256": "687794ed69e84b946f7653111ff0199c8606953a50b93791cf9a063b6096a08c",
+    "size": 1628,
+    "tag": "v0.1.9.2"
+  },
+  "Slot-Auto-Artwork-Studio-v3.zip": {
+    "sha256": "83e57969877d79a04b862fa3118c931f3f1945054c583705dbf1a2a13be65736",
+    "size": 515288,
+    "tag": "v0.1.9.2"
+  }
+}

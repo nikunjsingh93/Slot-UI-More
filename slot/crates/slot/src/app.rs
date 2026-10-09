@@ -475,14 +475,18 @@ impl App {
             Some((at, i)) => {
                 self.shelf_at = at;
                 self.shelf_mut().select(i);
-                if self
-                    .seated_cart()
-                    .is_some_and(|c| c.platform == Platform::N64)
-                    || self.shelves[at].0 == Platform::N64
-                {
+                if self.seated_cart().is_some_and(|c| {
+                    matches!(
+                        c.platform,
+                        Platform::N64 | Platform::Dreamcast | Platform::Psp
+                    )
+                }) || matches!(
+                    self.shelves[at].0,
+                    Platform::N64 | Platform::Dreamcast | Platform::Psp
+                ) {
                     // A native core crash must never be relaunched on every
                     // service restart or power-on. N64 is launched manually.
-                    eprintln!("slot: N64 automatic resume skipped; returning to shelf");
+                    eprintln!("slot: 3D console automatic resume skipped; returning to shelf");
                     self.state.cart = None;
                     self.state.cart_platform = None;
                     self.persist();
@@ -829,7 +833,7 @@ impl App {
     pub fn may_rewind(&self) -> bool {
         !matches!(
             self.platform,
-            Platform::Ps1 | Platform::Snes | Platform::N64
+            Platform::Ps1 | Platform::Snes | Platform::N64 | Platform::Dreamcast | Platform::Psp
         ) && !self.link_active()
     }
 

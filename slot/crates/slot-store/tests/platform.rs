@@ -3,7 +3,10 @@ use slot_store::Platform;
 #[test]
 fn every_platform_has_a_directory() {
     let names: Vec<&str> = Platform::ALL.iter().map(|p| p.dir_name()).collect();
-    assert_eq!(names, vec!["GBA", "GB", "GBC", "PS1", "SNES", "N64"]);
+    assert_eq!(
+        names,
+        vec!["GBA", "GB", "GBC", "PS1", "SNES", "N64", "DC", "PSP"]
+    );
 }
 
 #[test]
@@ -16,7 +19,9 @@ fn every_platform_is_a_shelf_of_its_own() {
             Platform::Gbc,
             Platform::Ps1,
             Platform::Snes,
-            Platform::N64
+            Platform::N64,
+            Platform::Dreamcast,
+            Platform::Psp
         ]
     );
     for (i, p) in Platform::ALL.iter().enumerate() {

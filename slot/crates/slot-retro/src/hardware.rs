@@ -169,10 +169,18 @@ impl Display {
             if depth {
                 (hw.gl.gen_rb)(1, &mut hw.depth);
                 (hw.gl.bind_rb)(0x8d41, hw.depth);
-                (hw.gl.storage)(0x8d41, 0x81a5, width as i32, height as i32);
+                (hw.gl.storage)(
+                    0x8d41,
+                    if stencil { 0x88f0 } else { 0x81a5 },
+                    width as i32,
+                    height as i32,
+                );
                 (hw.gl.attach_rb)(0x8d40, 0x8d00, 0x8d41, hw.depth);
             }
-            if stencil {
+            if depth && stencil {
+                (hw.gl.attach_rb)(0x8d40, 0x8d20, 0x8d41, hw.depth);
+            }
+            if stencil && !depth {
                 (hw.gl.gen_rb)(1, &mut hw.stencil);
                 (hw.gl.bind_rb)(0x8d41, hw.stencil);
                 (hw.gl.storage)(0x8d41, 0x8d48, width as i32, height as i32);

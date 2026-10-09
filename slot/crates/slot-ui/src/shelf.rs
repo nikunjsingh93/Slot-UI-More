@@ -297,6 +297,8 @@ impl Shelf {
                     slot_store::Platform::Ps1
                         | slot_store::Platform::Snes
                         | slot_store::Platform::N64
+                        | slot_store::Platform::Dreamcast
+                        | slot_store::Platform::Psp
                 )
             {
                 let backing = match self.shells.get(i).copied().flatten() {

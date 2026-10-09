@@ -1,0 +1,26 @@
+{
+  "name": "Slot G350 PS1 + SNES + N64",
+  "version": "0.1.3-experimental",
+  "target": "BATLEXP G350 using the dedicated P4ELEC default panel DTB",
+  "hardware_tested": false,
+  "base_image": "PAN4ELEC-RG351MP.aarch64-20250312-G350.img.gz",
+  "base_image_sha256": "8c87d327db2efd4cbc76a8d22b1eb01a322fdcb2fc5121952b1d567da7ac9122",
+  "system_base": "PAN4ELEC-RG351MP.aarch64-20250315-G350.tar",
+  "system_base_sha256": "2440b8dcc3ec9a7d1c777536e0ab6cc408d6cea76892f7999c3a187434a4f98e",
+  "system_md5": "e289eca42104e230b33ea92ff6c2985a",
+  "image_sha256": "6eecbb2267a54f7cd6175048f84c82930df9958d6a3a888d6f4162caa1ddfb3a",
+  "archive_sha256": "0dbce54cb940d3d1ee6cbb05767ce57cf80de76148a52acb9927d32f94ebc869",
+  "image_size": 2198863872,
+  "archive_size": 1111377560,
+  "frontend_sha256": "8c944e4e424160549159cb6dca83d54f875ec8d61a1f0baa11c53be15cfabbc6",
+  "core_sha256": {
+    "mgba_libretro.so": "962ab910d17db1298c6b41be1955b582d15e76b149c4d4ae3a7f2cb02ebc749b",
+    "gpsp_libretro.so": "96a13edea672637ef5bf9705ac0b5887a4c6934937ffa163fc9560bec692ce12",
+    "snes9x_libretro.so": "798f9862939fad25fd664b21a826f12c4d4f023ac6a091a2b55ebb88974f193f",
+    "pcsx_rearmed_libretro.so": "8eac8b03343943745e4bf1a2f97eb400b28631ad07b04405d86a342dcb5ad9af",
+    "mupen64plus_next_libretro.so": "23cc73ac1d439fac429d36c4a13ae3a4e610a34c26528f866d4d396e0c1a8d0c"
+  },
+  "kernel_and_active_dtb": "Unchanged from dedicated G350 base image; identical in March 15 update",
+  "graphics": "SDL2 KMSDRM / GLES2 using the G350 Mali GBM libraries",
+  "content": "No PS1 BIOS or user game ROMs added; upstream DS BIOS directory removed"
+}

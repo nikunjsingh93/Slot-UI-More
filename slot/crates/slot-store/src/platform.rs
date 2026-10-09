@@ -9,16 +9,20 @@ pub enum Platform {
     Ps1,
     Snes,
     N64,
+    Dreamcast,
+    Psp,
 }
 
 impl Platform {
-    pub const ALL: [Platform; 6] = [
+    pub const ALL: [Platform; 8] = [
         Platform::Gba,
         Platform::Gb,
         Platform::Gbc,
         Platform::Ps1,
         Platform::Snes,
         Platform::N64,
+        Platform::Dreamcast,
+        Platform::Psp,
     ];
 
     pub fn name(self) -> &'static str {
@@ -29,6 +33,8 @@ impl Platform {
             Platform::Ps1 => "PlayStation",
             Platform::Snes => "Super Nintendo",
             Platform::N64 => "Nintendo 64",
+            Platform::Dreamcast => "Dreamcast",
+            Platform::Psp => "PSP",
         }
     }
 
@@ -40,6 +46,8 @@ impl Platform {
             Platform::Ps1 => "PS1",
             Platform::Snes => "SNES",
             Platform::N64 => "N64",
+            Platform::Dreamcast => "DC",
+            Platform::Psp => "PSP",
         }
     }
 
@@ -50,6 +58,8 @@ impl Platform {
             Platform::Ps1 => &["chd", "cue", "m3u", "pbp", "exe"],
             Platform::Snes => &["sfc", "smc"],
             Platform::N64 => &["z64", "n64", "v64"],
+            Platform::Dreamcast => &["chd", "gdi", "cdi", "cue", "m3u", "elf"],
+            Platform::Psp => &["iso", "cso", "pbp", "chd", "elf"],
         }
     }
 
@@ -57,7 +67,8 @@ impl Platform {
         match self {
             Platform::Gba => (240, 160),
             Platform::Gb | Platform::Gbc => (160, 144),
-            Platform::Ps1 | Platform::Snes | Platform::N64 => (640, 480),
+            Platform::Ps1 | Platform::Snes | Platform::N64 | Platform::Dreamcast => (640, 480),
+            Platform::Psp => (480, 272),
         }
     }
 

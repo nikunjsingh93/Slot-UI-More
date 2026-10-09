@@ -179,7 +179,9 @@ fn both_cores_are_told_about_colour_correction_in_their_own_words() {
             | Core::Snes9x
             | Core::Snes9x2005Plus
             | Core::Mupen64plus
-            | Core::ParallelN64 => {
+            | Core::ParallelN64
+            | Core::Flycast
+            | Core::Ppsspp => {
                 unreachable!("this test covers GBA cores")
             }
         };

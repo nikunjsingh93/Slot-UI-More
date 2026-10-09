@@ -1,0 +1,18 @@
+--- a/shell/libretro/libretro.cpp
++++ b/shell/libretro/libretro.cpp
+@@ -383,8 +383,14 @@
+ 	}
+ 	os_UninstallFaultHandler();
+ 	
+-#if defined(__APPLE__) || (defined(__GNUC__) && defined(__linux__) && !defined(__ANDROID__))
++#if defined(__APPLE__)
+ 	addrspace::release();
++#elif defined(__GNUC__) && defined(__linux__) && !defined(__ANDROID__)
++	// Linux retains emu/recompiler between retro_init calls (emuInited above).
++	// Keep their SH4 context reservation too: those objects contain pointers
++	// into p_sh4rcb. Releasing it lets another core occupy its address; the
++	// next reserve/load then dereferences stale pointers. reserve() reuses
++	// this single mapping on later launches, so reservations cannot grow.
+ #else
+ 	emu.term();
+ #endif

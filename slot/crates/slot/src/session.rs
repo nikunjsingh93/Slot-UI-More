@@ -169,6 +169,8 @@ impl Session {
                     | slot_store::Core::Snes9x2005Plus
                     | slot_store::Core::Mupen64plus
                     | slot_store::Core::ParallelN64
+                    | slot_store::Core::Flycast
+                    | slot_store::Core::Ppsspp
             ) && matches!(self.app.phase(), Phase::Playing { .. })
             {
                 use slot_input::Btn;
@@ -543,6 +545,8 @@ mod ps1_controls {
             (Platform::Snes, slot_store::Core::Snes9x2005Plus, "Cart.sfc"),
             (Platform::N64, slot_store::Core::ParallelN64, "Cart.n64"),
             (Platform::N64, slot_store::Core::Mupen64plus, "Cart.n64"),
+            (Platform::Dreamcast, slot_store::Core::Flycast, "Disc.chd"),
+            (Platform::Psp, slot_store::Core::Ppsspp, "Disc.iso"),
         ] {
             let root = tempfile::tempdir().unwrap();
             let mut session = Session::boot(root.path().to_path_buf());

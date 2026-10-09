@@ -3,7 +3,7 @@ use std::ffi::{c_char, c_int, c_uint, c_void, CString};
 use std::marker::PhantomData;
 use std::path::Path;
 use std::ptr;
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 
 use libloading::Library;
 
@@ -15,6 +15,8 @@ use crate::rumble::Rumble;
 const VIDEO_BYTES: usize = (GBA_W * GBA_H * 4) as usize;
 
 static LIVE: AtomicBool = AtomicBool::new(false);
+// Immutable core FBO handle may be queried while PPSSPP records GPU commands.
+static CORE_FBO: AtomicUsize = AtomicUsize::new(0);
 
 #[derive(Copy, Clone, PartialEq, Eq)]
 enum PixelFormat {
@@ -27,6 +29,7 @@ struct Host {
     format: PixelFormat,
     ps1: bool,
     n64: bool,
+    native_3d: bool,
     skip_video: bool,
     skipped_video: u8,
     axes: [i16; 4],
@@ -84,7 +87,7 @@ unsafe fn with_host<R>(f: impl FnOnce(&mut Host) -> R) -> Option<R> {
 
 #[cfg(target_os = "linux")]
 unsafe extern "C" fn hw_framebuffer() -> usize {
-    with_host(|h| h.hardware.as_ref().map_or(0, |gl| gl.fbo as usize)).unwrap_or(0)
+    CORE_FBO.load(Ordering::Acquire)
 }
 #[cfg(target_os = "linux")]
 unsafe extern "C" fn hw_proc(name: *const c_char) -> *const c_void {
@@ -427,7 +430,7 @@ unsafe extern "C" fn video_refresh(
     with_host(|h| {
         // Keep emulation and PCM running when audio is low, but avoid a
         // synchronous GPU readback on every frame. Never skip twice in a row.
-        if h.n64
+        if (h.n64 || h.native_3d)
             && h.skip_video
             && h.video.len() == width as usize * height as usize * 4
             && h.skipped_video == 0
@@ -439,7 +442,8 @@ unsafe extern "C" fn video_refresh(
         let mut owned = None;
         if data as usize == usize::MAX {
             #[cfg(target_os = "linux")]
-            if h.n64 && width > 0 && height > 0 && width <= 1024 && height <= 1024 {
+            if (h.n64 || h.native_3d) && width > 0 && height > 0 && width <= 1024 && height <= 1024
+            {
                 if let Some(gl) = &h.hardware {
                     gl.read_into(
                         width,
@@ -584,7 +588,7 @@ unsafe extern "C" fn input_poll() {}
 unsafe extern "C" fn input_state(port: c_uint, device: c_uint, _index: c_uint, id: c_uint) -> i16 {
     if device == DEVICE_ANALOG {
         return with_host(|h| {
-            if !h.n64 || port != 0 || _index > 1 || id > 1 {
+            if !(h.n64 || h.native_3d) || port != 0 || _index > 1 || id > 1 {
                 return 0;
             }
             if _index == 0 {
@@ -743,6 +747,7 @@ impl LibretroCore {
             format: PixelFormat::Xrgb8888,
             ps1: false,
             n64: false,
+            native_3d: false,
             skip_video: false,
             skipped_video: 0,
             axes: [0; 4],
@@ -780,7 +785,11 @@ impl LibretroCore {
             let name = n.to_string_lossy();
             name.contains("mupen64plus") || name.contains("parallel_n64")
         });
-        host.console_video |= host.n64;
+        host.native_3d = dylib.file_name().is_some_and(|n| {
+            let name = n.to_string_lossy();
+            name.contains("flycast") || name.contains("ppsspp")
+        });
+        host.console_video |= host.n64 || host.native_3d;
         unsafe {
             let _a = Active::bind(&mut host);
             (api.set_environment)(environment);
@@ -817,6 +826,20 @@ impl LibretroCore {
 
 impl Drop for LibretroCore {
     fn drop(&mut self) {
+        #[cfg(target_os = "linux")]
+        if self.host.native_3d && self.host.hardware.is_some() {
+            let destroy = self
+                .host
+                .hw_request
+                .as_mut()
+                .and_then(|r| r.context_destroy.take());
+            let _a = Active::bind(&mut self.host);
+            if let Some(destroy) = destroy {
+                unsafe {
+                    destroy();
+                }
+            }
+        }
         self.unload();
         unsafe {
             let _a = Active::bind(&mut self.host);
@@ -835,6 +858,7 @@ impl Drop for LibretroCore {
             }
             self.host.hardware.take();
         }
+        CORE_FBO.store(0, Ordering::Release);
         LIVE.store(false, Ordering::SeqCst);
     }
 }
@@ -967,9 +991,21 @@ impl RetroCore for LibretroCore {
                 version,
                 request.depth,
                 request.stencil,
-                geometry.geometry.max_width,
-                geometry.geometry.max_height,
+                if self.host.native_3d {
+                    geometry.geometry.base_width
+                } else {
+                    geometry.geometry.max_width
+                },
+                if self.host.native_3d {
+                    geometry.geometry.base_height
+                } else {
+                    geometry.geometry.max_height
+                },
             )?);
+            CORE_FBO.store(
+                self.host.hardware.as_ref().unwrap().fbo as usize,
+                Ordering::Release,
+            );
             let _a = Active::bind(&mut self.host);
             if let Some(reset) = request.context_reset {
                 unsafe {
@@ -1202,6 +1238,7 @@ mod tests {
             format: PixelFormat::Xrgb8888,
             ps1: false,
             n64: false,
+            native_3d: false,
             skip_video: false,
             skipped_video: 0,
             axes: [0; 4],

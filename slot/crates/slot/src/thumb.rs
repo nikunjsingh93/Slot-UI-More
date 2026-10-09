@@ -5,6 +5,10 @@ pub fn png(xrgb8888: &[u8]) -> Option<Vec<u8>> {
         (640, 480)
     } else if xrgb8888.len() == 256 * 192 * 4 {
         (256, 192)
+    } else if xrgb8888.len() == 480 * 270 * 4 {
+        (480, 270)
+    } else if xrgb8888.len() == 480 * 272 * 4 {
+        (480, 272)
     } else if xrgb8888.len() == 320 * 240 * 4 {
         (320, 240)
     } else {

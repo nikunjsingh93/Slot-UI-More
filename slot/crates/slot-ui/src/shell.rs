@@ -86,7 +86,12 @@ pub fn shell_for(cart: &Cart) -> Shell {
         return shell(choice.colour, finish);
     }
     match cart.platform {
-        Platform::Gba | Platform::Ps1 | Platform::Snes | Platform::N64 => gba_shell_for(&cart.code),
+        Platform::Gba
+        | Platform::Ps1
+        | Platform::Snes
+        | Platform::N64
+        | Platform::Dreamcast
+        | Platform::Psp => gba_shell_for(&cart.code),
         Platform::Gb | Platform::Gbc => gb_shell_for(&cart.rom),
     }
 }

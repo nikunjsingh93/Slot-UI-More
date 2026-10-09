@@ -82,6 +82,10 @@ impl GamePass {
             (640, 480)
         } else if xrgb8888.len() == 256 * 192 * 4 {
             (256, 192)
+        } else if xrgb8888.len() == 480 * 270 * 4 {
+            (480, 270)
+        } else if xrgb8888.len() == 480 * 272 * 4 {
+            (480, 272)
         } else if xrgb8888.len() == 320 * 240 * 4 {
             (320, 240)
         } else {
@@ -127,7 +131,12 @@ impl GamePass {
     }
 
     fn draw_source(&self, tex: gl::types::GLuint, quad: &Quad, src: [f32; 4]) {
-        let (x, y, w, h) = screen_rect(self.power);
+        let (x, mut y, w, mut h) = screen_rect(self.power);
+        if self.dims.0 == 480 && matches!(self.dims.1, 270 | 272) {
+            let fitted = h * (4.0 / 3.0) / (480.0 / self.dims.1 as f32);
+            y += (h - fitted) * 0.5;
+            h = fitted;
+        }
         unsafe {
             gl::UseProgram(self.prog);
             gl::Uniform2f(

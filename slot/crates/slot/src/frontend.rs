@@ -118,7 +118,12 @@ impl Frontend {
             .map(|c| {
                 let f = cart_face(c);
                 let tex = compositor.create_texture(f.w, f.h, &f.rgba);
-                if c.platform == slot_store::Platform::Ps1 {
+                if matches!(
+                    c.platform,
+                    slot_store::Platform::Ps1
+                        | slot_store::Platform::Dreamcast
+                        | slot_store::Platform::Psp
+                ) {
                     self.disc_faces.push(tex);
                 }
                 tex
@@ -296,6 +301,8 @@ impl Frontend {
                     | slot_store::Core::Snes9x2005Plus
                     | slot_store::Core::Mupen64plus
                     | slot_store::Core::ParallelN64
+                    | slot_store::Core::Flycast
+                    | slot_store::Core::Ppsspp
             ) && self.session.game_visible(),
         );
         compositor.set_blue_light(self.session.app().blue_light());

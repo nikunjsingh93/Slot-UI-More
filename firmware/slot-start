@@ -1,0 +1,108 @@
+#!/bin/sh
+set -eu
+export SLOT_DEVICE=g350
+export SLOT_ROOT=/storage/roms/Slot
+export HOME=/storage
+export LD_LIBRARY_PATH=/usr/lib:/usr/lib/pulseaudio
+mkdir -p "$SLOT_ROOT/System" "$SLOT_ROOT/Config"
+exec >> "$SLOT_ROOT/slot.log" 2>&1
+echo "slot: G350 0.1.9.2 startup $(date)"
+trap 'result=$?; echo "slot: startup script exited=$result before frontend exec"' EXIT
+echo 'slot: provisioning folders and missing cores' 
+for platform in GBA GB GBC PS1 SNES N64 DC PSP; do
+    for folder in Games Labels Saves States; do
+        mkdir -p "$SLOT_ROOT/$folder/$platform"
+    done
+done
+mkdir -p "$SLOT_ROOT/BIOS" "$SLOT_ROOT/Wallpapers"
+# Provision after first-boot partition resizing, and allow interrupted retries.
+for core in mgba gpsp pcsx_rearmed snes9x snes9x2005_plus mupen64plus_next parallel_n64 flycast ppsspp; do
+    if [ ! -f "$SLOT_ROOT/System/${core}_libretro.so" ]; then
+        echo "slot: adding core $core"
+        cp "/usr/share/slot/${core}_libretro.so" "$SLOT_ROOT/System/${core}_libretro.so.tmp"
+        mv "$SLOT_ROOT/System/${core}_libretro.so.tmp" "$SLOT_ROOT/System/${core}_libretro.so"
+    fi
+done
+# PPSSPP requires its freely distributed fonts/shaders/flash0 assets.
+mkdir -p "$SLOT_ROOT/BIOS/dc" "$SLOT_ROOT/BIOS/PPSSPP"
+if [ ! -f "$SLOT_ROOT/BIOS/PPSSPP/compat.ini" ]; then
+    echo 'slot: provisioning PSP fonts and assets'
+    cp -an /usr/share/slot/PPSSPP/. "$SLOT_ROOT/BIOS/PPSSPP/"
+fi
+for folder in SAVEDATA SYSTEM SYSTEM/CACHE GAME; do
+    mkdir -p "$SLOT_ROOT/Saves/PSP/MemoryStick/PSP/$folder"
+done
+# Replace the known 0.1.9/0.1.9.1 Flycast core, retaining custom cores.
+dc_core="$SLOT_ROOT/System/flycast_libretro.so"
+if [ -f "$dc_core" ]; then
+    dc_hash=$(sha256sum "$dc_core")
+    dc_hash=${dc_hash%% *}
+    if [ "$dc_hash" = "48ce0d4e10b6a120a178313040be22b9bf19cc3656e26bff32a5e17812ae04de" ]; then
+        echo 'slot: updating bundled Flycast for safe repeated launches'
+        cp /usr/share/slot/flycast_libretro.so "$dc_core.tmp"
+        mv "$dc_core.tmp" "$dc_core"
+    fi
+fi
+# Replace only known bundled 0.1.3/0.1.4 cores; preserve user-supplied cores.
+n64_core="$SLOT_ROOT/System/mupen64plus_next_libretro.so"
+if [ -f "$n64_core" ]; then
+    n64_hash=$(sha256sum "$n64_core")
+    n64_hash=${n64_hash%% *}
+    if [ "$n64_hash" = "23cc73ac1d439fac429d36c4a13ae3a4e610a34c26528f866d4d396e0c1a8d0c" ] || [ "$n64_hash" = "7bcac66a18d624f68debf38c2a2b9f4d7f4d447c2a3775ff9b564c43ababdd91" ]; then
+        echo 'slot: updating bundled N64 core for ARM64 context repair'
+        cp /usr/share/slot/mupen64plus_next_libretro.so "$n64_core.tmp"
+        mv "$n64_core.tmp" "$n64_core"
+    fi
+fi
+if [ ! -f "$SLOT_ROOT/README.txt" ]; then
+    cp /usr/share/slot/README.txt "$SLOT_ROOT/README.txt"
+fi
+if [ ! -f "$SLOT_ROOT/Config/input-trace" ]; then
+    : # Optional user-created trace marker is left untouched.
+fi
+if [ -f "$SLOT_ROOT/Config/use-emulationstation" ]; then
+    /usr/bin/emustation-config
+    exec /usr/bin/emulationstation
+fi
+# Slot controls volume in software; prevent the base daemon changing it twice.
+/usr/bin/timeout -k 2 10 systemctl stop volume.service lastgame-fbg.service uni_scrngrb.service jslisten.service pulseaudio.service g350_hp.service 2>/dev/null || true
+echo 'slot: hardware audio initialization'
+# Open the hardware plug explicitly; stale base default/dmix settings cannot redirect it.
+export SLOT_ALSA_DEVICE=plughw:0,0
+if [ -s "$SLOT_ROOT/Config/audio-device" ]; then
+    SLOT_ALSA_DEVICE=$(head -n 1 "$SLOT_ROOT/Config/audio-device")
+    export SLOT_ALSA_DEVICE
+fi
+/usr/bin/timeout -k 2 5 aplay -l || true
+/usr/bin/timeout -k 2 5 amixer -c 0 contents || true
+/usr/bin/timeout -k 2 5 /usr/bin/slot-audio-route || true
+/usr/bin/slot-audio-route watch &
+for governor in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do
+    [ ! -f "$governor" ] || echo performance > "$governor" || true
+done
+# Use the GPU's normal stock frequency range for emulation, without overclocking.
+for gpu in /sys/class/devfreq/*gpu*; do
+    if [ -f "$gpu/available_governors" ] && grep -qw performance "$gpu/available_governors"; then
+        echo performance > "$gpu/governor" || true
+        echo "slot: GPU performance governor $gpu"
+    fi
+done
+# Memory-controller performance matches the base firmware Max Performance setting.
+# Leave all min/max frequencies and overclock locks unchanged.
+for dmc in /sys/class/devfreq/*dmc*; do
+    if [ -f "$dmc/available_governors" ] && grep -qw performance "$dmc/available_governors"; then
+        echo performance > "$dmc/governor" || true
+        echo "slot: DMC performance governor $dmc"
+    fi
+done
+for policy in /sys/devices/system/cpu/cpufreq/policy* /sys/class/devfreq/*gpu* /sys/class/devfreq/*dmc*; do
+    [ -d "$policy" ] || continue
+    for setting in scaling_cur_freq scaling_max_freq cur_freq max_freq governor; do
+        if [ -r "$policy/$setting" ]; then
+            echo "slot: performance $policy/$setting=$(cat "$policy/$setting")"
+        fi
+    done
+done
+echo "slot: launching frontend"
+cd "$SLOT_ROOT"
+exec /usr/bin/slot-g350

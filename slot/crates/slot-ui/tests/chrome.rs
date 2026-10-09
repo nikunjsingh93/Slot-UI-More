@@ -45,7 +45,9 @@ fn label_band(c: &Cart) -> (f32, f32) {
         Platform::Gb | Platform::Gbc => (GB_LABEL_Y as f32, GB_LABEL_H as f32),
         Platform::Snes => (24.0, 139.0),
         Platform::N64 => (18.0, 190.0),
-        Platform::Ps1 => unreachable!("cartridge label geometry does not apply to discs"),
+        Platform::Ps1 | Platform::Dreamcast | Platform::Psp => {
+            unreachable!("cartridge label geometry does not apply to discs")
+        }
     };
     let k = seated_box(c.platform).1 as f32 / cart_box(c.platform).1 as f32;
     (y * k, h * k)

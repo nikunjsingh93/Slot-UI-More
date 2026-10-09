@@ -1,0 +1,38 @@
+Slot base: d249d7731e52fabf3272119d4d3fd4702107951a plus this fork
+PCSX ReARMed: c8816799b50388e61cfe237fe2cdbb7d8175f20a
+Snes9x: fae2fea08f74180759ef540ee94259213f503480
+mGBA: e31759b24e7a4e3899285ff720d7b573ac328ae7 plus retained patches
+gpSP: 7b2dd37394e2822110cacef321e9bb291a305b77 plus retained patch
+
+Rebuild in a fresh ARM64 Linux environment using Rust 1.96 and a Bullseye
+compatible compiler/runtime. Install pkg-config, libasound2-dev, libudev-dev,
+cmake, python3, e2fsprogs, fdisk, mtools, dosfstools, zip, unzip, squashfs-tools,
+git and curl. Mount this bundle as /work/g350 and outputs as /outputs.
+Run rebuild.sh. It modifies image files only; it never writes a physical disk.
+Run tests as an ordinary user with SLOT_SILENT=1. The README and validation
+notes explain the single excluded upstream timing benchmark and limitations.
+
+The base image and March 15 system update are fetched from P4ELEC and verified
+against the recorded SHA-256 values. Full P4ELEC/AmberELEC OS component source
+is maintained upstream; this bundle contains the fork's frontend/core sources.
+Preserve license terms, notices and corresponding sources when redistributing.
+
+0.1.3: Mupen64Plus-Next libretro/mupen64plus-libretro-nx
+12edd2c74a517ff86dfa8cfc71ad75e4c10486d5
+GLES2 Cortex-A53 AArch64 dynarec; HLE RSP; parallel RDP/RSP disabled.
+Build: make platform=arm64_cortex_a53_gles2 HAVE_PARALLEL_RSP=0 HAVE_PARALLEL_RDP=0 -j4
+
+0.1.4: SNES Plus libretro/snes9x2005
+a79dfe9047e7fec58808aefe48ad2bf499c7af11
+make platform=unix USE_BLARGG_APU=1 -j4
+0.1.4: N64 same pinned 0.1.3 source archive, with the two source overlays
+in mupen-patches/: GLES2 isGLESX, no persistent buffers/base vertex, and
+UnbufferedDrawer selected for GLES2. Apply before a clean core build.
+
+0.1.4 N64 hotfix: same pinned Mupen source plus mupen-patches/libretro-common/libco/aarch64.c. Preserve AAPCS64 d8-d15 across each coroutine switch; initialize slots 22-29. Clean rebuild mandatory.
+
+0.1.5: N64 core unchanged from ARM64 hotfix; native 320x240 frontend video path, in-place readback conversion, bounded readback skip, no synchronous framebuffer copies, GPU upscale and native thumbnails.
+
+0.1.7: remove standalone, restore libretro controls, 256x192 viewport, native internal factor 1, geometry-sized host FBO and stock GPU performance governor. N64 core binary unchanged from fixed 0.1.4/0.1.5.
+
+0.1.8: ParaLLEl f8605345e13c018a30c8f4ed03c05d8fc8f70be8; GLES2 and Cortex-A35; ARM64 libco d8-d15 repair. CPU/GPU/DMC stock performance governors. See bootdiag/parallel-source.json for source SHA256.

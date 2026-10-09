@@ -73,12 +73,18 @@ fn open_named(
     paths: &[PathBuf],
 ) -> Option<Box<dyn RetroCore>> {
     let bios = root::bios_dir(root);
-    let saves = if core == Core::PcsxRearmed {
-        root.join("Saves/PS1")
-    } else {
-        root::saves_dir(root)
+    let saves = match core {
+        Core::PcsxRearmed => root.join("Saves/PS1"),
+        Core::Flycast => root.join("Saves/DC"),
+        Core::Ppsspp => root.join("Saves/PSP/MemoryStick"),
+        _ => root::saves_dir(root),
     };
     let _ = std::fs::create_dir_all(&saves);
+    if core == Core::Ppsspp {
+        for folder in ["PSP/SAVEDATA", "PSP/SYSTEM", "PSP/SYSTEM/CACHE", "PSP/GAME"] {
+            let _ = std::fs::create_dir_all(saves.join(folder));
+        }
+    }
     for path in paths {
         if !path.exists() {
             continue;
@@ -116,7 +122,9 @@ pub fn colour_option(which: Core, on: bool) -> Option<(&'static str, &'static st
         | Core::Snes9x
         | Core::Snes9x2005Plus
         | Core::Mupen64plus
-        | Core::ParallelN64 => None,
+        | Core::ParallelN64
+        | Core::Flycast
+        | Core::Ppsspp => None,
         Core::Mgba => Some(("mgba_color_correction", if on { "Auto" } else { "OFF" })),
         Core::Gpsp => Some((
             "gpsp_color_correction",
@@ -141,6 +149,34 @@ pub fn apply_core_options(
     bios: bool,
     colour: bool,
 ) {
+    if which == Core::Flycast {
+        core.set_option("reicast_internal_resolution", "320x240");
+        core.set_option("reicast_threaded_rendering", "enabled");
+        core.set_option("reicast_alpha_sorting", "per-triangle (normal)");
+        core.set_option("reicast_enable_dsp", "disabled");
+        core.set_option("reicast_hle_bios", "enabled");
+        core.set_option("reicast_digital_triggers", "enabled");
+        core.set_option("reicast_per_content_vmus", "VMU A1");
+        // Render every other frame while retaining the emulated CPU/audio clock.
+        // Maximum adaptive skipping also lets the CPU continue when Mali is busy.
+        core.set_option("reicast_frame_skipping", "1");
+        core.set_option("reicast_auto_skip_frame", "more");
+        eprintln!("slot: Dreamcast Flycast / GLES3 / 320x240 / threaded renderer / frameskip 1 + maximum adaptive / HLE BIOS");
+        return;
+    }
+    if which == Core::Ppsspp {
+        core.set_option("ppsspp_backend", "opengl");
+        core.set_option("ppsspp_software_rendering", "disabled");
+        core.set_option("ppsspp_cpu_core", "JIT");
+        core.set_option("ppsspp_internal_resolution", "480x272");
+        core.set_option("ppsspp_frameskip", "1");
+        core.set_option("ppsspp_auto_frameskip", "enabled");
+        core.set_option("ppsspp_texture_scaling_level", "disabled");
+        core.set_option("ppsspp_texture_shader", "disabled");
+        core.set_option("ppsspp_frame_duplication", "disabled");
+        eprintln!("slot: PSP PPSSPP / GLES2 / native 480x272 / JIT / bounded auto frameskip");
+        return;
+    }
     if which == Core::ParallelN64 {
         core.set_option("parallel-n64-cpucore", "dynamic_recompiler");
         core.set_option("parallel-n64-rspplugin", "hle");

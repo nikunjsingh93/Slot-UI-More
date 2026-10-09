@@ -1,0 +1,48 @@
+{
+  "shipping_binary_entrypoint": "slot: gl context: SDL KMS/DRM init: KMSDRM not available\nPASS: shipping binary selects handheld KMS/DRM without desktop display variables",
+  "repeated_console_launches": "PASS DC \u2192 PSP \u2192 DC (resume) \u2192 DC \u2192 PSP \u2192 DC, video/state/clean teardown",
+  "dc": {
+    "video_audio_state_roundtrip": "PASS",
+    "diagnostics": [
+      "OUTPUT lit=76761 samples=22876902 audible=12737991 changed=1797 bytes=307200",
+      "BENCH fps=142.11 ms=7.037 samples=22876902 seconds_of_audio=259.38 changed_frames=1797 bytes=307200 lit=76761 av_fps=59.94 state=36040863"
+    ],
+    "slot_menu_hold_exit": "PASS"
+  },
+  "psp": {
+    "video_audio_state_roundtrip": "PASS",
+    "diagnostics": [
+      "OUTPUT lit=129173 samples=3089536 audible=2263554 changed=1213 bytes=518400",
+      "BENCH fps=340.89 ms=2.934 samples=3089536 seconds_of_audio=35.03 changed_frames=1213 bytes=518400 lit=129173 av_fps=59.940059940059946 state=41943040"
+    ],
+    "slot_menu_hold_exit": "PASS",
+    "memory_stick_save": "PASS"
+  },
+  "n64": {
+    "video_audio_state_roundtrip": "PASS",
+    "diagnostics": [
+      "PASS REAL CORE ABI: 500 retro_run calls preserved all d8-d15",
+      "OUTPUT lit=63324 samples=3113686 audible=2840076 changed=533 bytes=307200",
+      "BENCH fps=906.32 ms=1.103 samples=3113686 seconds_of_audio=35.30 changed_frames=533 bytes=307200 lit=63324 av_fps=50 state=16789312"
+    ]
+  },
+  "relevant-tests.log": {
+    "passed": 560,
+    "failed": 0
+  },
+  "controls-regression.log": {
+    "passed": 48,
+    "failed": 0
+  },
+  "permission-test.log": {
+    "passed": 1,
+    "failed": 0
+  },
+  "full_workspace_suite_limitations": {
+    "unchanged_timing_test": "Fails identically on preserved 0.1.8 test binary: synthetic 5ms fast-forward probe reports 4.7 frames/present. Worker implementation unchanged in this release.",
+    "sfx_tests": "Two CPAL hardware-output tests fail because the container has no default physical audio device; audio payload and route unchanged. Real core nonzero PCM and null-device integration tested separately.",
+    "permission_test": "Run separately as nobody, since root bypasses read-only directory permissions; PASS."
+  },
+  "package": "PASS: ZIP CRC/SHA256/MD5, matching pair, complete SquashFS extraction, preserved base-core hashes, dependencies, assets and boot syntax",
+  "hardware_performance": "Pending owner testing. Container checks do not measure physical G350 speed."
+}

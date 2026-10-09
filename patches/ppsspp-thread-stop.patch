@@ -1,0 +1,15 @@
+diff --git a/libretro/libretro.cpp b/libretro/libretro.cpp
+index 3b2f103..7e37489 100644
+--- a/libretro/libretro.cpp
++++ b/libretro/libretro.cpp
+@@ -1453,7 +1453,9 @@ namespace Libretro
+ 
+    void EmuThreadStop()
+    {
+-      if (emuThreadState != EmuThreadState::RUNNING)
++      // Slot may unload immediately after a save-state or a pause. Join the
++      // existing thread in those states too, before deleting its GL context.
++      if (!emuThread.joinable())
+          return;
+ 
+       emuThreadState = EmuThreadState::QUIT_REQUESTED;

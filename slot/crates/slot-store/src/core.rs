@@ -15,6 +15,8 @@ pub enum Core {
     Mupen64plus,
     Snes9x2005Plus,
     ParallelN64,
+    Flycast,
+    Ppsspp,
 }
 
 impl Core {
@@ -29,6 +31,8 @@ impl Core {
             Core::Mupen64plus => "mupen64plus_next",
             Core::Snes9x2005Plus => "snes9x2005_plus",
             Core::ParallelN64 => "parallel_n64",
+            Core::Flycast => "flycast",
+            Core::Ppsspp => "ppsspp",
         }
     }
 
@@ -45,6 +49,8 @@ impl Core {
             Core::Mupen64plus => "Mupen64Plus-Next",
             Core::Snes9x2005Plus => "Snes9x 2005 Plus",
             Core::ParallelN64 => "ParaLLEl N64",
+            Core::Flycast => "Flycast",
+            Core::Ppsspp => "PPSSPP",
         }
     }
 
@@ -57,6 +63,8 @@ impl Core {
             "mupen64plus_next" => Some(Core::Mupen64plus),
             "snes9x2005_plus" => Some(Core::Snes9x2005Plus),
             "parallel_n64" => Some(Core::ParallelN64),
+            "flycast" => Some(Core::Flycast),
+            "ppsspp" => Some(Core::Ppsspp),
             _ => None,
         }
     }
@@ -67,6 +75,8 @@ impl Core {
             Core::Snes9x | Core::Snes9x2005Plus => platform == Platform::Snes,
             Core::Mupen64plus | Core::ParallelN64 => platform == Platform::N64,
             Core::PcsxRearmed => platform == Platform::Ps1,
+            Core::Flycast => platform == Platform::Dreamcast,
+            Core::Ppsspp => platform == Platform::Psp,
             Core::Gpsp => platform == Platform::Gba,
         }
     }
@@ -77,6 +87,8 @@ impl Core {
             Platform::Ps1 => Core::PcsxRearmed,
             Platform::Snes => Core::Snes9x2005Plus,
             Platform::N64 => Core::ParallelN64,
+            Platform::Dreamcast => Core::Flycast,
+            Platform::Psp => Core::Ppsspp,
         }
     }
 }

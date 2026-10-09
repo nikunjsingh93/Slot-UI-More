@@ -1,0 +1,14 @@
+{
+  "flycast": {
+    "repository": "https://github.com/flyinghead/flycast",
+    "tag": "v2.5",
+    "revision": "5f4eefab5852d1c832ad8ffdf514fef8c217f1ac",
+    "rendering": "GLES3; GLES2 build rejected after visual tennis-court test"
+  },
+  "ppsspp": {
+    "repository": "https://github.com/hrydgard/ppsspp",
+    "tag": "v1.20.4",
+    "revision": "fa50bb1976065c4f8b1b47af227d367fe9771555",
+    "patch": "Join emulation thread when unloading from paused/start-requested state"
+  }
+}
