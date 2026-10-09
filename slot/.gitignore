@@ -1,0 +1,23 @@
+/target
+**/*.rs.bk
+*.pdb
+
+/docs/
+/CLAUDE.md
+/.ralph/
+/.superpowers/
+
+/vendor
+/sdcard
+/dist
+*.dylib
+*.so
+
+.DS_Store
+/.idea/
+/target-device
+/target-verify
+/dist-device
+
+# Parallel implementation worktrees, never content.
+/.worktrees

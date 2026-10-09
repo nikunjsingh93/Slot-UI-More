@@ -1,0 +1,38 @@
+{
+  "version": "0.1.8-experimental",
+  "target": "BATLEXP G350 existing Slot installation",
+  "system_sha256": "76c7fa4a5b6b75a323debcde121d35837705f9dfed78e8e7a2e767bdd9988455",
+  "system_md5": "651351a2f9c3f85591a57200853e1d8c",
+  "system_size": 1109368832,
+  "archive_sha256": "f458278347885ae02fcefcb0ed527242a465cddd5f01b8f51c73038b6049ce87",
+  "archive_size": 1097612213,
+  "frontend_sha256": "09032c1eadf2a9695de750585ee3d75267ee7554d3b1a9c82bc24fe04beef2ca",
+  "core_sha256": {
+    "mgba_libretro.so": "962ab910d17db1298c6b41be1955b582d15e76b149c4d4ae3a7f2cb02ebc749b",
+    "parallel_n64_libretro.so": "6f06977c294b7e8ae336c3f57977a23448387d55a4618d18b3973a006a9ee628",
+    "gpsp_libretro.so": "96a13edea672637ef5bf9705ac0b5887a4c6934937ffa163fc9560bec692ce12",
+    "snes9x2005_plus_libretro.so": "87ab323dc307ecf230e71d0c79c791ae850923f3225ce8547915b30748f4e79e",
+    "snes9x_libretro.so": "798f9862939fad25fd664b21a826f12c4d4f023ac6a091a2b55ebb88974f193f",
+    "pcsx_rearmed_libretro.so": "8eac8b03343943745e4bf1a2f97eb400b28631ad07b04405d86a342dcb5ad9af",
+    "mupen64plus_next_libretro.so": "4a258260f7dbb26057a6f17df19f1d27969bac14bd56fc20d7254b8de8f4ebd9"
+  },
+  "parallel_source": {
+    "repository": "https://github.com/libretro/parallel-n64",
+    "revision": "f8605345e13c018a30c8f4ed03c05d8fc8f70be8",
+    "source_sha256": "344cfa8bbbab1a2e1370a3f70de6b12e04f7ded95dd04f953c475941d19ad9b8",
+    "source_url": "https://codeload.github.com/libretro/parallel-n64/tar.gz/f8605345e13c018a30c8f4ed03c05d8fc8f70be8"
+  },
+  "n64_backend": "64-bit ParaLLEl N64 libretro / Glide64 GLES2 / HLE / 320x240 / ARM64 d8-d15 repair",
+  "changes": [
+    "N64 defaults to ParaLLEl, retaining Mupen64Plus-Next for explicit per-game overrides",
+    "Existing Slot N64 button mapping; hold Menu alone for one second to return to shelf",
+    "CPU/GPU/DMC performance governors within existing stock frequency limits",
+    "Console processing-time and audio-starvation diagnostics every five seconds",
+    "Retain SNES/PS1/audio/display fixes; no standalone emulator"
+  ],
+  "hardware_validation": "Pending owner test. Container Mesa/ALSA-null tests verify integration, not handheld speed or audible quality.",
+  "video_match": "Same ParaLLEl core family; 64-bit build for current Slot runtime, not the video's reported 32-bit build.",
+  "packaged_verification": "PASS: complete ZIP payload/CRC read, MD5/SHA256 pair, full SquashFS extraction, payload hashes, core dependency resolution, shell syntax/modes, notices and empty storage/dev",
+  "source_archive_sha256": "ba2d7e39f3a6becc89d459db2bd53cf28b0edc8a58eb265c0c18b81dbe93a980",
+  "source_archive_size": 47561602
+}

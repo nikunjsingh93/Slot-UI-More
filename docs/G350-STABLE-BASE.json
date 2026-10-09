@@ -1,0 +1,14 @@
+{
+  "version": "0.1.8",
+  "status": "owner-confirmed stable baseline",
+  "target": "BATLEXP G350",
+  "confirmed_date": "2026-10-09",
+  "owner_report": "now it works amazingly keep this version as base now",
+  "firmware_archive": "slot-g350-0.1.8-parallel-n64-update.zip",
+  "firmware_archive_sha256": "f458278347885ae02fcefcb0ed527242a465cddd5f01b8f51c73038b6049ce87",
+  "system_sha256": "76c7fa4a5b6b75a323debcde121d35837705f9dfed78e8e7a2e767bdd9988455",
+  "system_md5": "651351a2f9c3f85591a57200853e1d8c",
+  "source_archive": "slot-g350-0.1.8-sources.zip",
+  "source_archive_sha256": "ba2d7e39f3a6becc89d459db2bd53cf28b0edc8a58eb265c0c18b81dbe93a980",
+  "future_work": "Derive PSP/Dreamcast experimental builds from these sources. Preserve baseline firmware/source archives and existing N64, SNES, PS1, audio, display and button/one-second Menu-hold behavior."
+}

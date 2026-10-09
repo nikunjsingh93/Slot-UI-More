@@ -1,0 +1,12 @@
+* text=auto eol=lf
+*.sh text eol=lf
+*.py text eol=lf
+*.rs text eol=lf
+*.patch text eol=lf
+*.png binary
+*.jpg binary
+*.ttf binary
+*.woff2 binary
+*.patch -whitespace
+slot/licenses/** -whitespace
+LICENSE -whitespace

@@ -1,0 +1,355 @@
+version: '3'
+
+vars:
+  CORE: vendor/mgba_libretro.dylib
+  GPSP_HOST: vendor/gpsp_libretro.dylib
+  MGBA_COMMIT: e31759b24e7a4e3899285ff720d7b573ac328ae7
+  GPSP_COMMIT: 7b2dd37394e2822110cacef321e9bb291a305b77
+
+tasks:
+  default:
+    desc: List available tasks
+    silent: true
+    cmds:
+      - task --list
+
+  build:
+    desc: Debug build of the whole workspace
+    cmds:
+      - cargo build --workspace
+
+  release:
+    desc: Release build of the slot binary
+    cmds:
+      - cargo build --release -p slot
+
+  test:
+    desc: Run the whole test suite
+    cmds:
+      - cargo test --workspace
+
+  test:one:
+    desc: Run tests matching FILTER, eg task test:one FILTER=gesture
+    requires:
+      vars: [FILTER]
+    cmds:
+      - cargo test --workspace {{.FILTER}}
+
+  fmt:
+    desc: Format the workspace
+    cmds:
+      - cargo fmt --all
+
+  fmt:check:
+    desc: Fail if anything is unformatted
+    cmds:
+      - cargo fmt --all -- --check
+
+  lint:
+    desc: Clippy over all targets with warnings denied
+    cmds:
+      - cargo clippy --workspace --all-targets -- -D warnings
+
+  lint:device:
+    desc: Clippy the device build, which the host lint never compiles
+    cmds:
+      - cargo clippy -p slot --no-default-features --features device -- -D warnings
+
+  check:
+    desc: Everything a CI run would do
+    cmds:
+      - task: fmt:check
+      - task: lint
+      - task: lint:device
+      - task: test
+      - task: test:card
+
+  test:card:
+    desc: Test the scripts slot ships on the card, off-device
+    cmds:
+      - sh card/test-slotlink.sh
+      - sh card/test-led.sh
+      - sh card/test-coresave.sh
+
+  core:
+    desc: >-
+      Build mGBA and fetch gpSP for this host. A missing core silently runs the mock (a test
+      pattern and a sine tone) instead
+    cmds:
+      - task: core:mgba:host
+      - task: core:gpsp:host
+
+  core:mgba:host:
+    desc: Build mgba_libretro for this host from the pinned libretro/mgba commit and cores/mgba's patches
+    status:
+      - test -f {{.CORE}}
+      - test "$(cat {{.CORE}}.meta 2>/dev/null)" = "$(sh cores/mgba/build.sh stamp {{.MGBA_COMMIT}})"
+    cmds:
+      - sh cores/mgba/build.sh build {{.MGBA_COMMIT}} target/mgba {{.CORE}}
+      - file {{.CORE}} | grep -q Mach-O
+      - 'echo "built {{.CORE}}"'
+
+  core:gpsp:host:
+    desc: Fetch the host gpSP core from the libretro buildbot
+    status:
+      - test -f {{.GPSP_HOST}}
+    cmds:
+      - |
+        set -euo pipefail
+        case "$(uname -m)" in
+          arm64)  arch=arm64 ;;
+          x86_64) arch=x86_64 ;;
+          *) echo "unsupported arch $(uname -m)" >&2; exit 1 ;;
+        esac
+        mkdir -p vendor
+        curl -fsSL -o vendor/gpsp-host.zip \
+          "https://buildbot.libretro.com/nightly/apple/osx/${arch}/latest/gpsp_libretro.dylib.zip"
+        unzip -o -q vendor/gpsp-host.zip -d vendor
+        rm -f vendor/gpsp-host.zip
+        file {{.GPSP_HOST}} | grep -q Mach-O
+        echo "fetched {{.GPSP_HOST}}"
+
+  core:update:
+    desc: Rebuild mGBA and re-fetch gpSP for this host even if they are already vendored
+    cmds:
+      - rm -f {{.CORE}} {{.CORE}}.meta {{.GPSP_HOST}}
+      - task: core
+
+  icons:
+    desc: Re-fetch the nerd font symbols used by the HUD
+    vars:
+      ASSETS: crates/slot-ui/assets
+      TTF: SymbolsNerdFontMono-Regular.ttf
+    cmds:
+      - |
+        set -euo pipefail
+        tmp="$(mktemp -d)"
+        trap 'rm -rf "$tmp"' EXIT
+        curl -fsSL -o "$tmp/symbols.zip" \
+          "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/NerdFontsSymbolsOnly.zip"
+        unzip -o -q "$tmp/symbols.zip" '{{.TTF}}' LICENSE -d "$tmp"
+        mv "$tmp/{{.TTF}}" "{{.ASSETS}}/{{.TTF}}"
+        mv "$tmp/LICENSE" "{{.ASSETS}}/{{.TTF}}.LICENSE.txt"
+        echo "fetched {{.ASSETS}}/{{.TTF}}"
+
+  sdcard:
+    desc: Create an empty content root, ROOT defaults to ./sdcard
+    deps: [build]
+    vars:
+      ROOT: '{{.ROOT | default "./sdcard"}}'
+    cmds:
+      - ./target/debug/slot --init-root {{.ROOT}}
+      - 'echo "content root ready at {{.ROOT}}: roms in Games/GBA, Games/GB or Games/GBC, labels in the matching Labels/GBA, Labels/GB or Labels/GBC, battery saves in the matching Saves/GBA, Saves/GB or Saves/GBC, save states under the matching States/GBA, States/GB or States/GBC, gba_bios.bin in BIOS, pngs in Wallpapers, palette in Config/theme.txt"'
+      - 'echo "nothing is moved for you: a file loose at the top of Games/, Saves/, Labels/ or States/ is left where it is and never reaches the shelf"'
+
+  run:
+    desc: >-
+      Run slot. against SLOT_ROOT, defaults to ./sdcard. SLOT_LINK_PORT moves the link
+      session off 7211, which is what lets two copies on one machine link to each other -
+      off-device both are on loopback, so the port is all that separates them
+    deps: [core]
+    env:
+      SLOT_ROOT: '{{.SLOT_ROOT | default "./sdcard"}}'
+    cmds:
+      - cargo run --release -p slot
+
+  run:bare:
+    desc: Run with no title bar or border, for screenshots and screen capture
+    deps: [core]
+    env:
+      SLOT_ROOT: '{{.SLOT_ROOT | default "./sdcard"}}'
+      SLOT_BARE: '1'
+    cmds:
+      - cargo run --release -p slot
+
+  run:debug:
+    desc: Run an unoptimised build, for a debugger. Will not hold 60 fps.
+    deps: [core]
+    env:
+      SLOT_ROOT: '{{.SLOT_ROOT | default "./sdcard"}}'
+    cmds:
+      - cargo run -p slot
+
+  dist:
+    desc: Build the copy-to-SD2 tree, OUT defaults to ./dist
+    deps: [core, release]
+    vars:
+      OUT: '{{.OUT | default "dist"}}'
+    cmds:
+      - rm -rf {{.OUT}}
+      - ./target/release/slot --init-root {{.OUT}}
+      - cp target/release/slot {{.OUT}}/System/slot
+      - cp {{.CORE}} {{.GPSP_HOST}} {{.OUT}}/System/
+      - 'echo "dist ready at {{.OUT}}, copy its contents to SD2"'
+
+  core:device:
+    desc: Build the aarch64 linux mgba core for the device bundle, in the box the device build uses
+    status:
+      - test -f vendor/mgba_libretro.so
+      - test "$(cat vendor/mgba_libretro.so.meta 2>/dev/null)" = "$(sh cores/mgba/build.sh stamp {{.MGBA_COMMIT}})"
+    cmds:
+      - task: device:sh
+        vars:
+          CMD: sh cores/mgba/build.sh build {{.MGBA_COMMIT}} target-device/mgba vendor/mgba_libretro.so
+      - file vendor/mgba_libretro.so | grep -q aarch64
+      - 'echo "built vendor/mgba_libretro.so"'
+
+  core:gpsp:
+    desc: >-
+      Build the aarch64 linux gpSP core from its pinned source archive, which ships beside it
+      as its GPL-2.0 section 3(a) corresponding source
+    status:
+      - test -f vendor/gpsp_libretro.so
+      - test -f vendor/gpsp-src.tar.gz
+      - test "$(cat vendor/gpsp-src.sha 2>/dev/null)" = "{{.GPSP_COMMIT}}"
+      - test "$(cat vendor/gpsp_libretro.so.meta 2>/dev/null)" = "$(sh cores/gpsp/build.sh stamp {{.GPSP_COMMIT}})"
+      - test "$(cat vendor/gpsp-src.meta 2>/dev/null)" = "$(sh cores/gpsp/build.sh stamp {{.GPSP_COMMIT}})"
+    cmds:
+      - |
+        set -euo pipefail
+        mkdir -p vendor
+        rm -f vendor/gpsp_libretro.so vendor/gpsp_libretro.so.meta \
+              vendor/gpsp-src.tar.gz vendor/gpsp-src.sha vendor/gpsp-src.meta
+        curl -fsSL -o vendor/gpsp-src.tar.gz \
+          "https://github.com/libretro/gpsp/archive/{{.GPSP_COMMIT}}.tar.gz"
+        tar -tzf vendor/gpsp-src.tar.gz | grep "^gpsp-{{.GPSP_COMMIT}}/Makefile$" > /dev/null
+      - task: device:sh
+        vars:
+          CMD: >-
+            sh cores/gpsp/build.sh build {{.GPSP_COMMIT}} vendor/gpsp-src.tar.gz
+            target-device/gpsp vendor/gpsp_libretro.so
+      - file vendor/gpsp_libretro.so | grep -q aarch64
+      - echo "{{.GPSP_COMMIT}}" > vendor/gpsp-src.sha
+      - cp vendor/gpsp_libretro.so.meta vendor/gpsp-src.meta
+      - 'echo "built vendor/gpsp_libretro.so from vendor/gpsp-src.tar.gz @ {{.GPSP_COMMIT}}"'
+
+  core:gpsp:update:
+    desc: Refetch gpSP's source archive and rebuild the core from it, even if the set is current
+    cmds:
+      - >-
+        rm -f vendor/gpsp_libretro.so vendor/gpsp_libretro.so.meta vendor/gpsp-src.tar.gz
+        vendor/gpsp-src.sha vendor/gpsp-src.meta
+      - task: core:gpsp
+
+  core:gpsp:test:
+    desc: Prove gpSP's Advance Wars session-flip patch still fixes what it was written for
+    deps: [core:gpsp]
+    cmds:
+      - sh cores/gpsp/test/run.sh vendor/gpsp-src.tar.gz
+
+  device:sh:
+    desc: Run CMD on the box the device build wants, fetching one if this is not it
+    internal: true
+    requires:
+      vars: [CMD]
+    cmds:
+      - |
+        set -eu
+        if [ "$(uname -s)-$(uname -m)" = "Linux-aarch64" ]; then
+          sh -c '{{.CMD}}'
+        else
+          docker run --rm -v "$PWD":/src -w /src rust:1-bullseye sh -c '{{.CMD}}'
+        fi
+
+  build:device:
+    desc: Build for the H700, in an arm64 container unless this is already one
+    cmds:
+      - task: device:sh
+        vars:
+          CMD: >-
+            cargo build --profile device --target-dir target-device
+            -p slot --no-default-features --features device
+      - file target-device/device/slot | grep -q aarch64
+      - 'echo "built target-device/device/slot"'
+
+  bench:device:
+    desc: Build core_bench, slot-retro's headless core benchmark, for the H700. It never ships
+    cmds:
+      - task: device:sh
+        vars:
+          CMD: >-
+            cargo build --profile device --target-dir target-device
+            -p slot-retro --example core_bench
+      - file target-device/device/examples/core_bench | grep -q aarch64
+      - 'echo "built target-device/device/examples/core_bench, adb push it to /tmp/core_bench"'
+
+  dist:device:
+    desc: Build the SD2 tree for an H700 device, OUT defaults to ./dist-device
+    deps: [core:device, core:gpsp, build:device]
+    vars:
+      OUT: '{{.OUT | default "dist-device"}}'
+    cmds:
+      - rm -rf {{.OUT}}
+      - task: device:sh
+        vars:
+          CMD: ./target-device/device/slot --init-root {{.OUT}}
+      - cp target-device/device/slot {{.OUT}}/System/slot
+      - cp card/System/* {{.OUT}}/System/
+      - file vendor/mgba_libretro.so | grep -q aarch64
+      - file vendor/gpsp_libretro.so | grep -q aarch64
+      - cp vendor/mgba_libretro.so {{.OUT}}/System/
+      - cp vendor/gpsp_libretro.so {{.OUT}}/System/
+      - cp -r licenses {{.OUT}}/System/licenses
+      - |
+        set -euo pipefail
+        sha="$(cat vendor/gpsp-src.sha)"
+        cp vendor/gpsp-src.tar.gz "{{.OUT}}/System/licenses/gpsp-${sha}.tar.gz"
+        cp vendor/gpsp-src.meta "{{.OUT}}/System/licenses/gpsp-${sha}.meta"
+        for p in cores/gpsp/*.patch; do
+          cp "$p" "{{.OUT}}/System/licenses/gpsp-$(basename "$p")"
+        done
+      - |
+        set -euo pipefail
+        commit="$(grep '^commit=' vendor/mgba_libretro.so.meta | cut -d= -f2)"
+        cp vendor/mgba_libretro.so.meta "{{.OUT}}/System/licenses/mgba-${commit}.meta"
+        for p in cores/mgba/*.patch; do
+          cp "$p" "{{.OUT}}/System/licenses/mgba-$(basename "$p")"
+        done
+      - 'echo "device tree ready at {{.OUT}}, copy its contents to SD2"'
+
+  deploy:device:
+    desc: Build and push onto a device over adb, then restart it. SD defaults to /mnt/sdcard
+    deps: [core:device, core:gpsp, build:device]
+    vars:
+      SD: '{{.SD | default "/mnt/sdcard"}}'
+    cmds:
+      - adb wait-for-device
+      - file vendor/mgba_libretro.so | grep -q aarch64
+      - file vendor/gpsp_libretro.so | grep -q aarch64
+      - adb push target-device/device/slot '{{.SD}}/System/slot'
+      - for f in card/System/*; do adb push "$f" '{{.SD}}/System/'; done
+      - adb push vendor/mgba_libretro.so '{{.SD}}/System/mgba_libretro.so'
+      - adb push vendor/gpsp_libretro.so '{{.SD}}/System/gpsp_libretro.so'
+      - adb push licenses '{{.SD}}/System/'
+      - |
+        set -euo pipefail
+        sha="$(cat vendor/gpsp-src.sha)"
+        adb push vendor/gpsp-src.tar.gz "{{.SD}}/System/licenses/gpsp-${sha}.tar.gz"
+        adb push vendor/gpsp-src.meta "{{.SD}}/System/licenses/gpsp-${sha}.meta"
+        for p in cores/gpsp/*.patch; do
+          adb push "$p" "{{.SD}}/System/licenses/gpsp-$(basename "$p")"
+        done
+      - |
+        set -euo pipefail
+        commit="$(grep '^commit=' vendor/mgba_libretro.so.meta | cut -d= -f2)"
+        adb push vendor/mgba_libretro.so.meta "{{.SD}}/System/licenses/mgba-${commit}.meta"
+        for p in cores/mgba/*.patch; do
+          adb push "$p" "{{.SD}}/System/licenses/mgba-$(basename "$p")"
+        done
+      - adb shell 'chmod +x {{.SD}}/System/slot && sync'
+      - adb reboot
+      - adb wait-for-device
+      - 'echo "deployed to {{.SD}}, device rebooting"'
+
+  log:device:
+    desc: Read slot's log back off a connected device
+    vars:
+      SD: '{{.SD | default "/mnt/sdcard"}}'
+    cmds:
+      - adb shell 'cat {{.SD}}/slot.log'
+
+  clean:
+    desc: Remove build output and dist
+    cmds:
+      - cargo clean
+      - rm -rf dist dist-device target-device

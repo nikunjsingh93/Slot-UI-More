@@ -1,0 +1,87 @@
+{
+  "environment": "ARM64 container, Mesa software GLES, ALSA null; not G350 hardware measurements",
+  "core_1200_frame_checks": [
+    {
+      "game": "Re-Volt",
+      "checks": "ABI/graphics/audio/save-state round trip PASS",
+      "values": {
+        "fps": "128.74",
+        "ms": "7.768",
+        "samples": "1982880",
+        "seconds_of_audio": "22.48",
+        "changed_frames": "167",
+        "bytes": "307200",
+        "lit": "62601",
+        "av_fps": "50",
+        "state": "16789312"
+      }
+    },
+    {
+      "game": "Wave-Race",
+      "checks": "ABI/graphics/audio/save-state round trip PASS",
+      "values": {
+        "fps": "331.82",
+        "ms": "3.014",
+        "samples": "2052738",
+        "seconds_of_audio": "23.27",
+        "changed_frames": "333",
+        "bytes": "307200",
+        "lit": "63325",
+        "av_fps": "50",
+        "state": "16789312"
+      }
+    },
+    {
+      "game": "V-Rally",
+      "checks": "ABI/graphics/audio/save-state round trip PASS",
+      "values": {
+        "fps": "399.55",
+        "ms": "2.503",
+        "samples": "1953886",
+        "seconds_of_audio": "22.15",
+        "changed_frames": "8",
+        "bytes": "307200",
+        "lit": "26101",
+        "av_fps": "50",
+        "state": "16789312"
+      }
+    }
+  ],
+  "frontend_60_second_checks": [
+    {
+      "game": "Re-Volt",
+      "seconds": 60,
+      "frontend_audio_video_input_menu_exit": "PASS",
+      "register_abi": "PASS"
+    },
+    {
+      "game": "Wave-Race",
+      "seconds": 60,
+      "frontend_audio_video_input_menu_exit": "PASS",
+      "register_abi": "PASS"
+    },
+    {
+      "game": "V-Rally",
+      "seconds": 60,
+      "frontend_audio_video_input_menu_exit": "PASS",
+      "register_abi": "PASS"
+    }
+  ],
+  "checks": [
+    "Slot/retro/input/store library tests",
+    "40 input gesture integration tests",
+    "Store tests including N64 default and explicit core overrides",
+    "SNES/PS1 audio stall regression and N64 boot recovery",
+    "Production Clippy warnings denied",
+    "Core/register ABI, nonblack video, PCM generation and save-state round trip",
+    "Full frontend Menu-hold return to shelf",
+    "Complete ZIP/SYSTEM checksum, SquashFS extraction and dependency checks"
+  ],
+  "limitations": [
+    "Automated startup/menu sequences; not controlled race benchmarks",
+    "No physical frame-rate or audible-quality validation",
+    "64-bit ParaLLEl, not video-reported 32-bit variant",
+    "Prior all-integration device test command included host-only tests and failed to compile; focused device suites above passed"
+  ],
+  "device_result": "Pending owner test"
+}

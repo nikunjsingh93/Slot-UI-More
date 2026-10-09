@@ -1,0 +1,12 @@
+[package]
+name = "slot-retro"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+libloading.workspace = true
+
+[build-dependencies]
+cc = "1"

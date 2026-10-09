@@ -1,0 +1,60 @@
+# Changelog
+
+## [1.4.0](https://github.com/BrandonKowalski/slot/releases/tag/v1.4.0) - 2026-10-07
+
+- The volume bar shows a headphones icon while they are plugged in.
+- Speaker and headphones keep their own volume and mute, and switch the moment you plug / unplug.
+- Settings moved from `System/` to a new `Config/` folder, so replacing `System/` on update no longer resets them. slot moves them on first boot.
+- The quick menu and power menu wrap from the last item to the first, and back.
+
+## [1.3.0](https://github.com/BrandonKowalski/slot/releases/tag/v1.3.0) - 2026-10-07
+
+- The SP boots to a slot logo instead of BaseOS's. slot installs `System/bootlogo.bmp` on first run and keeps the original as `bootlogo.baseos.bmp`.
+
+## [1.2.2](https://github.com/BrandonKowalski/slot/releases/tag/v1.2.2)
+
+- Fix for hitch in games caused by autosave. The autosave now writes to the card in the background.
+
+## [1.2.1](https://github.com/BrandonKowalski/slot/releases/tag/v1.2.1)
+
+- Shell colors from Cart Studio now apply to games with accented names.
+- Clear GBA carts no longer show their circuit board above the label.
+
+## [1.2.0](https://github.com/BrandonKowalski/slot/releases/tag/v1.2.0)
+
+- Hold X for turbo A and Y for turbo B.
+- Carts on the shelf are larger, and shrink into the slot as they go in.
+- Carts are drawn at their real proportions, so full label scans fit without cropping.
+- Jumping a letter with Up or Down shows the letter in the slot.
+- Saves now stick for games whose save is smaller than the core first reports, such as Golden Sun on mGBA.
+- The seated cart no longer shows through the slot as a game starts.
+- SELECT reaches the game as soon as it can no longer be the start of a shortcut.
+
+## [1.1.0](https://github.com/BrandonKowalski/slot/releases/tag/v1.1.0)
+
+- Fast-forward runs several game frames per refresh, so it is properly fast, and rewind no longer records while fast forwarding.
+- The About label credits BaseOS.
+
+## [1.0.0](https://github.com/BrandonKowalski/slot/releases/tag/v1.0.0)
+
+- Game Boy and Game Boy Color, each on its own shelf. L1 and R1 switch shelves, and carts are drawn at their own size in their own plastics.
+- Two cores, mGBA and gpSP. Press START on a cart to open it and swap the chip.
+- Link play between two RG SPs over WiFi: the link cable and the Wireless Adapter for Pokémon trades and Advance Wars, mGBA's link mode for Mario Kart, and Game Boy link for Tetris.
+- A quick menu on the shelf for fast forward speed and sound, rumble, colour correction, the date and time, and About.
+- Game Boy games stretch to fill the screen with L1 and go back with R1.
+- The real BIOS boot animation plays when the card has one.
+- Per-cart shell colors, set in `cart_shell.ini`.
+- Up and Down jump through the shelf a letter at a time.
+- Your own folder layout on the card is kept, and slot runs on upstream BaseOS.
+
+## [0.1.1](https://github.com/BrandonKowalski/slot/releases/tag/v0.1.1)
+
+- The game holds still behind the power menu.
+- Rewind records at every speed and replays exactly what happened.
+
+## [0.1.0](https://github.com/BrandonKowalski/slot/releases/tag/v0.1.0)
+
+- First release: a GBA-only shelf of cartridges with an insert scrape and clunk.
+- The game in the slot resumes on the next boot. Closing the lid sleeps and saves.
+- Save states with a switcher, rewind, fast-forward, brightness, blue light and volume.
+- A power menu on a held POWER, and an About label.
