@@ -418,6 +418,24 @@ unsafe fn report_audio_status(skip: bool) {
     status(true, if skip { 0 } else { 100 }, skip);
 }
 
+fn native_framebuffer_size(value: &str) -> Option<(u32, u32)> {
+    let (w, h) = value.split_once('x')?;
+    let (w, h) = (w.parse::<u32>().ok()?, h.parse::<u32>().ok()?);
+    (w > 0 && h > 0 && w <= 1024 && h <= 1024).then_some((w, h))
+}
+
+fn hardware_readback_is_async(host: &Host) -> bool {
+    #[cfg(target_os = "linux")]
+    {
+        host.hardware.as_ref().is_some_and(|gl| gl.asynchronous())
+    }
+    #[cfg(not(target_os = "linux"))]
+    {
+        let _ = host;
+        false
+    }
+}
+
 unsafe extern "C" fn video_refresh(
     data: *const c_void,
     width: c_uint,
@@ -432,6 +450,7 @@ unsafe extern "C" fn video_refresh(
         // synchronous GPU readback on every frame. Never skip twice in a row.
         if (h.n64 || h.native_3d)
             && h.skip_video
+            && !hardware_readback_is_async(h)
             && h.video.len() == width as usize * height as usize * 4
             && h.skipped_video == 0
         {
@@ -444,7 +463,7 @@ unsafe extern "C" fn video_refresh(
             #[cfg(target_os = "linux")]
             if (h.n64 || h.native_3d) && width > 0 && height > 0 && width <= 1024 && height <= 1024
             {
-                if let Some(gl) = &h.hardware {
+                if let Some(gl) = &mut h.hardware {
                     gl.read_into(
                         width,
                         height,
@@ -456,7 +475,7 @@ unsafe extern "C" fn video_refresh(
                 return;
             }
             #[cfg(target_os = "linux")]
-            if let Some(gl) = &h.hardware {
+            if let Some(gl) = &mut h.hardware {
                 owned = gl.read(
                     width,
                     height,
@@ -987,21 +1006,40 @@ impl RetroCore for LibretroCore {
             };
             let mut geometry = SystemAvInfo::default();
             unsafe { (self.api.get_system_av_info)(&mut geometry) };
+            let dreamcast = self
+                .host
+                .declared
+                .contains_key("reicast_internal_resolution");
+            let dc_size = dreamcast
+                .then(|| self.option("reicast_internal_resolution"))
+                .flatten()
+                .and_then(|value| native_framebuffer_size(&value));
             self.host.hardware = Some(display.open(
                 version,
                 request.depth,
                 request.stencil,
-                if self.host.native_3d {
+                if let Some((width, _)) = dc_size {
+                    width
+                } else if self.host.native_3d {
                     geometry.geometry.base_width
                 } else {
                     geometry.geometry.max_width
                 },
-                if self.host.native_3d {
+                if let Some((_, height)) = dc_size {
+                    height
+                } else if self.host.native_3d {
                     geometry.geometry.base_height
                 } else {
                     geometry.geometry.max_height
                 },
             )?);
+            if dreamcast && std::env::var_os("SLOT_DC_SYNC_READBACK").is_none() {
+                self.host
+                    .hardware
+                    .as_mut()
+                    .unwrap()
+                    .enable_async_readback(display);
+            }
             CORE_FBO.store(
                 self.host.hardware.as_ref().unwrap().fbo as usize,
                 Ordering::Release,

@@ -147,6 +147,7 @@ impl Display {
                 stencil: 0,
                 width,
                 height,
+                readback: None,
             };
             (hw.gl.gen_fbo)(1, &mut hw.fbo);
             (hw.gl.bind_fbo)(0x8d40, hw.fbo);
@@ -264,6 +265,7 @@ pub struct Hardware {
     stencil: u32,
     width: u32,
     height: u32,
+    readback: Option<crate::readback::Readback>,
 }
 impl Hardware {
     pub fn current(&self) -> bool {
@@ -276,19 +278,44 @@ impl Hardware {
             ) != 0
         }
     }
-    pub fn read(&self, w: u32, h: u32, bottom_left: bool) -> Option<Vec<u8>> {
+    pub fn enable_async_readback(&mut self, display: &Display) {
+        self.readback = unsafe { crate::readback::Readback::new(display) };
+        eprintln!(
+            "slot: Dreamcast readback: {}",
+            if self.readback.is_some() {
+                "GLES3 pixel-pack queue (nonblocking, three buffers)"
+            } else {
+                "synchronous driver fallback"
+            }
+        );
+    }
+    pub fn asynchronous(&self) -> bool {
+        self.readback.is_some()
+    }
+    pub fn read(&mut self, w: u32, h: u32, bottom_left: bool) -> Option<Vec<u8>> {
         let mut data = Vec::new();
         self.read_into(w, h, bottom_left, &mut data).then_some(data)
     }
-    pub fn read_into(&self, w: u32, h: u32, bottom_left: bool, data: &mut Vec<u8>) -> bool {
+    pub fn read_into(&mut self, w: u32, h: u32, bottom_left: bool, data: &mut Vec<u8>) -> bool {
         if w == 0 || h == 0 || w > self.width || h > self.height {
             return false;
         }
-        data.resize((w * h * 4) as usize, 0);
         unsafe {
             let mut previous = 0;
             (self.gl.get_int)(0x8ca6, &mut previous);
             (self.gl.bind_fbo)(0x8d40, self.fbo);
+            if let Some(readback) = &mut self.readback {
+                if let Some(fresh) = readback.capture(w, h, data) {
+                    (self.gl.bind_fbo)(0x8d40, previous as u32);
+                    if fresh {
+                        rgba_to_xrgb(data, w as usize, h as usize, bottom_left);
+                    }
+                    return fresh;
+                }
+                eprintln!("slot: Dreamcast asynchronous readback unavailable; reverting to synchronous readback");
+                self.readback = None;
+            }
+            data.resize((w * h * 4) as usize, 0);
             (self.gl.read)(
                 0,
                 0,
@@ -308,6 +335,7 @@ impl Drop for Hardware {
     fn drop(&mut self) {
         unsafe {
             self.current();
+            self.readback = None;
             (self.gl.delete_fbo)(1, &self.fbo);
             (self.gl.delete_tex)(1, &self.tex);
             if self.depth != 0 {
@@ -347,6 +375,69 @@ fn rgba_to_xrgb(data: &mut [u8], w: usize, h: usize, bottom_left: bool) {
 #[cfg(test)]
 mod tests {
     use super::rgba_to_xrgb;
+    #[test]
+    fn asynchronous_gles_readback_keeps_colour_and_reinitializes_on_resize() {
+        use super::{Display, H};
+        use libloading::Library;
+        use std::ffi::CStr;
+        // Keep EGL linked for the test process: Mesa registers thread-local
+        // destructors that must still exist after the test worker returns.
+        #[link(name = "EGL")]
+        extern "C" {
+            fn eglGetPlatformDisplay(platform: u32, native: H, attrs: *const isize) -> H;
+            fn eglInitialize(display: H, major: *mut i32, minor: *mut i32) -> u32;
+            fn eglTerminate(display: H) -> u32;
+        }
+        unsafe {
+            let egl = Library::new("libEGL.so.1").unwrap();
+            let d = eglGetPlatformDisplay(0x31dd, std::ptr::null_mut(), std::ptr::null());
+            assert!(!d.is_null());
+            assert_ne!(
+                eglInitialize(d, std::ptr::null_mut(), std::ptr::null_mut()),
+                0
+            );
+            let display = Display {
+                display: d as usize,
+                egl,
+            };
+            let mut hardware = display.open(3, true, true, 32, 24).unwrap();
+            hardware.enable_async_readback(&display);
+            assert!(hardware.asynchronous());
+            let clear_colour = std::mem::transmute::<
+                *const std::ffi::c_void,
+                unsafe extern "C" fn(f32, f32, f32, f32),
+            >(
+                display.proc(CStr::from_bytes_with_nul_unchecked(b"glClearColor\0")),
+            );
+            let clear = std::mem::transmute::<*const std::ffi::c_void, unsafe extern "C" fn(u32)>(
+                display.proc(CStr::from_bytes_with_nul_unchecked(b"glClear\0")),
+            );
+            let finish = std::mem::transmute::<*const std::ffi::c_void, unsafe extern "C" fn()>(
+                display.proc(CStr::from_bytes_with_nul_unchecked(b"glFinish\0")),
+            );
+            let mut video = Vec::new();
+            clear_colour(1.0, 0.0, 0.0, 1.0);
+            clear(0x4000);
+            assert!(!hardware.read_into(32, 24, true, &mut video));
+            finish(); // Test completion only; the shipping queue never blocks.
+            clear_colour(0.0, 1.0, 0.0, 1.0);
+            clear(0x4000);
+            assert!(hardware.read_into(32, 24, true, &mut video));
+            assert_eq!(video.len(), 32 * 24 * 4);
+            assert!(video.chunks_exact(4).all(|p| p == [0, 0, 255, 0]));
+            finish();
+            assert!(hardware.read_into(32, 24, true, &mut video));
+            assert!(video.chunks_exact(4).all(|p| p == [0, 255, 0, 0]));
+            // A new capture shape must discard the previous size's queued pixels.
+            assert!(!hardware.read_into(16, 12, true, &mut video));
+            finish();
+            assert!(hardware.read_into(16, 12, true, &mut video));
+            assert_eq!(video.len(), 16 * 12 * 4);
+            assert!(video.chunks_exact(4).all(|p| p == [0, 255, 0, 0]));
+            drop(hardware);
+            eglTerminate(d);
+        }
+    }
     #[test]
     fn readback_swizzles_and_flips_odd_height_without_moving_middle_row() {
         let mut pixels = vec![1, 2, 3, 255, 4, 5, 6, 255, 7, 8, 9, 255];

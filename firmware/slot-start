@@ -6,7 +6,7 @@ export HOME=/storage
 export LD_LIBRARY_PATH=/usr/lib:/usr/lib/pulseaudio
 mkdir -p "$SLOT_ROOT/System" "$SLOT_ROOT/Config"
 exec >> "$SLOT_ROOT/slot.log" 2>&1
-echo "slot: G350 0.1.9.2 startup $(date)"
+echo "slot: G350 0.1.9.3 startup $(date)"
 trap 'result=$?; echo "slot: startup script exited=$result before frontend exec"' EXIT
 echo 'slot: provisioning folders and missing cores' 
 for platform in GBA GB GBC PS1 SNES N64 DC PSP; do

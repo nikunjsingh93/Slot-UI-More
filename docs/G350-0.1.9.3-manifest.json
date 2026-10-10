@@ -1,0 +1,51 @@
+{
+  "version": "0.1.9.3-experimental",
+  "target": "BATLEXP G350 existing Slot installation",
+  "base": "0.1.9.2 / owner-confirmed 0.1.8 stable cores",
+  "system_sha256": "4d9ffe43790b69b5b0ba2c320f14c1c91d4d9742ccb3702fcf2639037477a9ce",
+  "system_md5": "4499aca20545336cf07b62d7f064be6b",
+  "system_size": 1123717120,
+  "archive_sha256": "26de1d1dbd2d780eae374df31c33d9b3b2b578ae3065e657f7ef3264e8a8eef0",
+  "archive_size": 1111890531,
+  "frontend_sha256": "0c7831b06aab9f21a33042f06684498ebeb1b2e969bae93d3a4e0c4b4d6a9ee9",
+  "core_sha256": {
+    "mgba_libretro.so": "962ab910d17db1298c6b41be1955b582d15e76b149c4d4ae3a7f2cb02ebc749b",
+    "parallel_n64_libretro.so": "6f06977c294b7e8ae336c3f57977a23448387d55a4618d18b3973a006a9ee628",
+    "ppsspp_libretro.so": "75b4972a0018addc3359b68b26136d5b75d9e7558bebbec6401b1421b1654969",
+    "flycast_libretro.so": "6d1bacd9ab8700d395f7147548d525deb7039456c722767bcc1b9e182380da0c",
+    "gpsp_libretro.so": "96a13edea672637ef5bf9705ac0b5887a4c6934937ffa163fc9560bec692ce12",
+    "snes9x2005_plus_libretro.so": "87ab323dc307ecf230e71d0c79c791ae850923f3225ce8547915b30748f4e79e",
+    "snes9x_libretro.so": "798f9862939fad25fd664b21a826f12c4d4f023ac6a091a2b55ebb88974f193f",
+    "pcsx_rearmed_libretro.so": "8eac8b03343943745e4bf1a2f97eb400b28631ad07b04405d86a342dcb5ad9af",
+    "mupen64plus_next_libretro.so": "4a258260f7dbb26057a6f17df19f1d27969bac14bd56fc20d7254b8de8f4ebd9"
+  },
+  "sources": {
+    "flycast": {
+      "repository": "https://github.com/flyinghead/flycast",
+      "tag": "v2.5",
+      "revision": "5f4eefab5852d1c832ad8ffdf514fef8c217f1ac",
+      "rendering": "GLES3; GLES2 build rejected after visual tennis-court test"
+    },
+    "ppsspp": {
+      "repository": "https://github.com/hrydgard/ppsspp",
+      "tag": "v1.20.4",
+      "revision": "fa50bb1976065c4f8b1b47af227d367fe9771555",
+      "patch": "Join emulation thread when unloading from paused/start-requested state"
+    }
+  },
+  "changes": [
+    "Dreamcast offscreen framebuffer matches the configured 320x240 internal resolution instead of 640x480; 75% fewer allocated framebuffer pixels",
+    "Bounded three-buffer GLES3 pixel-pack readback; only completed GPU fences are mapped, with synchronous driver fallback",
+    "dArkOS RK3326-style per-strip alpha sorting and disabled modifier volumes; disabled RTT readback, deferred swapping, anisotropic filtering and texture upscaling",
+    "Existing threaded rendering and fixed/adaptive frame skipping retained; emulated CPU/audio clocks unchanged",
+    "All emulator core payloads, working audio routing, PSP settings, N64/SNES/PS1 behavior and one-second Menu-hold controls retained"
+  ],
+  "validation": "60 slot-retro tests including real GLES3 colour/resize/teardown; Virtua Tennis and Crazy Taxi 2 existing state restore, generated PCM and graphics; six mixed DC/PSP launches and state round trips; full Slot Menu-hold exit; actual KMS/DRM executable and dependency checks; ZIP CRC and matching SYSTEM checksums.",
+  "hardware_validation": "Pending owner test. ARM64 container uses Mesa software rendering; its timings do not measure G350 frame rates or audible audio quality.",
+  "graphics_tradeoff": "Per-strip transparency and disabled modifier volumes can alter transparency/shadows in some games. No experimental per-vertex depth shader is enabled.",
+  "research": [
+    "https://github.com/christianhaitian/dArkOS/blob/master/retrorun/configs/retrorun.cfg.rk3326",
+    "https://github.com/navy1978/retrorun/blob/master/profiles/flycast2022-lowend/README.md",
+    "https://docs.libretro.com/library/flycast/"
+  ]
+}

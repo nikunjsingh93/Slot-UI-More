@@ -5,6 +5,8 @@ mod hardware;
 mod libretro;
 mod link;
 mod mock;
+#[cfg(target_os = "linux")]
+mod readback;
 mod rumble;
 
 pub use core::{AvInfo, ButtonMask, CoreError, RetroCore, GBA_H, GBA_W};

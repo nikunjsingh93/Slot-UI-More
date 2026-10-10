@@ -152,7 +152,13 @@ pub fn apply_core_options(
     if which == Core::Flycast {
         core.set_option("reicast_internal_resolution", "320x240");
         core.set_option("reicast_threaded_rendering", "enabled");
-        core.set_option("reicast_alpha_sorting", "per-triangle (normal)");
+        // Same low-end renderer settings used by dArkOS's RK3326 RetroRun profile.
+        core.set_option("reicast_alpha_sorting", "per-strip (fast, least accurate)");
+        core.set_option("reicast_volume_modifier_enable", "disabled");
+        core.set_option("reicast_enable_rttb", "disabled");
+        core.set_option("reicast_delay_frame_swapping", "disabled");
+        core.set_option("reicast_anisotropic_filtering", "off");
+        core.set_option("reicast_texupscale", "1");
         core.set_option("reicast_enable_dsp", "disabled");
         core.set_option("reicast_hle_bios", "enabled");
         core.set_option("reicast_digital_triggers", "enabled");
@@ -161,7 +167,7 @@ pub fn apply_core_options(
         // Maximum adaptive skipping also lets the CPU continue when Mali is busy.
         core.set_option("reicast_frame_skipping", "1");
         core.set_option("reicast_auto_skip_frame", "more");
-        eprintln!("slot: Dreamcast Flycast / GLES3 / 320x240 / threaded renderer / frameskip 1 + maximum adaptive / HLE BIOS");
+        eprintln!("slot: Dreamcast Flycast / GLES3 / native 320x240 framebuffer / per-strip sorting / threaded renderer / frameskip 1 + adaptive / HLE BIOS");
         return;
     }
     if which == Core::Ppsspp {
