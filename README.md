@@ -1,6 +1,6 @@
 # Slot UI for BATLEXP G350
 
-Backup of the customized Slot frontend and firmware work for the RK3326 BATLEXP G350. The accepted stable baseline is **0.1.8**. **0.1.9.2** adds PSP/Dreamcast and repairs repeated Dreamcast launches; its latest physical performance still needs confirmation on the handheld.
+Backup of the customized Slot frontend and firmware work for the RK3326 BATLEXP G350. The accepted stable baseline is **0.1.8**. **0.1.9.2** adds PSP/Dreamcast and repairs repeated Dreamcast launches. The user confirmed Dreamcast save states and repeated launches now work; Dreamcast frame rates and audio still need improvement.
 
 The user tested 0.1.8's SNES/N64/PS1 fixes and confirmed that PSP and Dreamcast launch on 0.1.9.1. PSP Virtua Tennis 3 worked well. Dreamcast Virtua Tennis was slow and crashed when reopened after PSP. 0.1.9.2 repairs the reproduced memory-lifecycle fault and reduces Dreamcast rendering work using frame skipping. Do not install the superseded 0.1.9 desktop-build update.
 
@@ -9,12 +9,16 @@ The user tested 0.1.8's SNES/N64/PS1 fixes and confirmed that PSP and Dreamcast 
 - `slot/`: complete customized Rust frontend, input/audio/rendering code and tests.
 - `patches/`: core patches, pinned core revisions and submodule inventories.
 - `firmware/slot-start`: final boot/provisioning script, including the checksum-specific Flycast upgrade.
-- `studio/`: Artwork Studio v3 (GBA/GB/GBC/SNES/PS1/N64) and manual SNES/PS1 studio.
+- `studio/`: current Artwork Studio v4 for SNES/PS1/N64/DC/PSP, plus editable source and a portable build script. GBA/GB/GBC use the original Cart Studio.
 - `docs/`: release instructions, checksums, validation and stable-base record.
 - `scripts/`: portable build/packaging scripts and the actual-executable startup check.
 - GitHub Releases: matching SYSTEM update pairs, complete corresponding source archives, and a fresh-install base image. Large binaries live in Releases rather than Git history.
 
 No games, private game-test media, saves or proprietary BIOS files are included. The repository remains private; download release assets while signed in.
+
+## Artwork studio
+
+Open `studio/Slot-Auto-Artwork-Studio-v4.html` in Chrome or Edge. Choose the Slot folder, let original cartridge/disc artwork download, then save ready labels. Dreamcast reads `Games/DC`; PSP reads `Games/PSP`. Existing labels are preserved unless replacement is enabled. Logos and covers provide fallbacks when scans are missing. See the studio guide for formats and scan adjustments. Rebuild it with `python studio/source/build.py`; no external Python packages are needed. Only the current HTML, guide and necessary source files are kept here; local screenshots, test media, caches and duplicate ZIPs are excluded.
 
 ## Using the update
 
