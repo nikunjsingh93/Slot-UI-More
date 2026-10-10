@@ -8,8 +8,6 @@ pub fn ring_capacity(sample_rate: u32) -> usize {
     sample_rate as usize * 8 / 60
 }
 
-const MAX_WAIT: Duration = Duration::from_millis(50);
-
 struct Inner {
     buf: Vec<i16>,
     head: usize,
@@ -32,6 +30,7 @@ pub struct Ring {
     underruns: AtomicU64,
     consuming: AtomicBool,
     priming: AtomicBool,
+    wait_ms: AtomicU32,
 }
 
 impl Ring {
@@ -56,6 +55,7 @@ impl Ring {
             underruns: AtomicU64::new(0),
             consuming: AtomicBool::new(true),
             priming: AtomicBool::new(false),
+            wait_ms: AtomicU32::new(50),
         }
     }
 
@@ -76,6 +76,48 @@ impl Ring {
         self.underruns.store(0, Ordering::Relaxed);
         self.consuming.store(true, Ordering::Relaxed);
         self.priming.store(false, Ordering::Relaxed);
+        self.wait_ms.store(50, Ordering::Relaxed);
+    }
+
+    /// Select a larger queue only for burst-producing cores; reset on system changes.
+    pub fn configure_buffer_ms(&self, millis: u32) {
+        let rate = self.sample_rate();
+        if rate == 0 {
+            return;
+        }
+        let frames = if millis == 0 {
+            ring_capacity(rate)
+        } else {
+            rate as usize * millis.min(500) as usize / 1000
+        };
+        self.wait_ms.store(
+            if millis == 0 {
+                50
+            } else {
+                (millis / 2).clamp(50, 250)
+            },
+            Ordering::Relaxed,
+        );
+        if frames == self.capacity_frames() {
+            return;
+        }
+        let mut i = self.lock();
+        i.buf = vec![0; frames * 2];
+        i.head = 0;
+        i.len = drc_target(frames) * 2;
+        i.pending.clear();
+        i.placed = 0;
+        i.pending_at = 0;
+        i.drained = 0;
+        self.capacity.store(frames, Ordering::Relaxed);
+        self.queued.store(i.len, Ordering::Relaxed);
+        self.priming.store(false, Ordering::Relaxed);
+        self.consuming.store(true, Ordering::Relaxed);
+        self.room.notify_all();
+    }
+
+    fn max_wait(&self) -> Duration {
+        Duration::from_millis(u64::from(self.wait_ms.load(Ordering::Relaxed)))
     }
 
     pub fn push(&self, samples: &[i16]) {
@@ -93,7 +135,7 @@ impl Ring {
             self.push(samples);
             return;
         }
-        let deadline = Instant::now() + MAX_WAIT;
+        let deadline = Instant::now() + self.max_wait();
         let mut rest = samples;
         let mut i = self.lock();
         loop {
@@ -122,7 +164,7 @@ impl Ring {
         if self.sample_rate() == 0 || target_frames == 0 || self.muted() {
             return false;
         }
-        let until = Instant::now() + MAX_WAIT;
+        let until = Instant::now() + self.max_wait();
         let mut i = self.lock();
         while i.len / 2 > target_frames && !self.muted() {
             let Some(left) = until.checked_duration_since(Instant::now()) else {
@@ -270,4 +312,41 @@ fn write_into<'a>(i: &mut Inner, samples: &'a [i16]) -> &'a [i16] {
     i.buf[..n - first].copy_from_slice(&samples[first..n]);
     i.len += n;
     &samples[n..]
+}
+
+#[cfg(test)]
+mod burst_tests {
+    use super::*;
+
+    fn after_render_gap(buffer_ms: u32) -> u64 {
+        let ring = Ring::new(0);
+        ring.reopen(48_000);
+        ring.configure_buffer_ms(buffer_ms);
+        // Replace startup silence with already-produced audio, then model a
+        // 120 ms graphics stall while ALSA continues consuming 10 ms periods.
+        ring.fill(&mut vec![0; ring.queued_frames() * 2]);
+        ring.push(&vec![1000; drc_target(ring.capacity_frames()) * 2]);
+        ring.clear_faults();
+        for _ in 0..12 {
+            ring.fill(&mut [0; 960]);
+        }
+        ring.underruns()
+    }
+
+    #[test]
+    fn dreamcast_queue_survives_a_render_gap_that_starves_the_default_queue() {
+        assert!(after_render_gap(0) > 0);
+        assert_eq!(after_render_gap(320), 0);
+    }
+
+    #[test]
+    fn switching_back_to_a_normal_core_restores_its_queue_and_wait_limit() {
+        let ring = Ring::new(0);
+        ring.reopen(48_000);
+        ring.configure_buffer_ms(320);
+        assert_eq!(ring.max_wait(), Duration::from_millis(160));
+        ring.configure_buffer_ms(0);
+        assert_eq!(ring.capacity_frames(), ring_capacity(48_000));
+        assert_eq!(ring.max_wait(), Duration::from_millis(50));
+    }
 }

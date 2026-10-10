@@ -6,7 +6,7 @@ export HOME=/storage
 export LD_LIBRARY_PATH=/usr/lib:/usr/lib/pulseaudio
 mkdir -p "$SLOT_ROOT/System" "$SLOT_ROOT/Config"
 exec >> "$SLOT_ROOT/slot.log" 2>&1
-echo "slot: G350 0.1.9.3 startup $(date)"
+echo "slot: G350 0.1.9.4 startup $(date)"
 trap 'result=$?; echo "slot: startup script exited=$result before frontend exec"' EXIT
 echo 'slot: provisioning folders and missing cores' 
 for platform in GBA GB GBC PS1 SNES N64 DC PSP; do
@@ -25,10 +25,16 @@ for core in mgba gpsp pcsx_rearmed snes9x snes9x2005_plus mupen64plus_next paral
 done
 # PPSSPP requires its freely distributed fonts/shaders/flash0 assets.
 mkdir -p "$SLOT_ROOT/BIOS/dc" "$SLOT_ROOT/BIOS/PPSSPP"
-if [ ! -f "$SLOT_ROOT/BIOS/PPSSPP/compat.ini" ]; then
-    echo 'slot: provisioning PSP fonts and assets'
-    cp -an /usr/share/slot/PPSSPP/. "$SLOT_ROOT/BIOS/PPSSPP/"
-fi
+# BusyBox cp -n skips an already-existing destination directory entirely.
+# Copy missing individual asset files, allowing interrupted provisioning retries.
+find /usr/share/slot/PPSSPP -type f | while IFS= read -r asset; do
+    relative=${asset#/usr/share/slot/PPSSPP/}
+    target="$SLOT_ROOT/BIOS/PPSSPP/$relative"
+    if [ ! -f "$target" ]; then
+        mkdir -p "${target%/*}"
+        cp "$asset" "$target"
+    fi
+done
 for folder in SAVEDATA SYSTEM SYSTEM/CACHE GAME; do
     mkdir -p "$SLOT_ROOT/Saves/PSP/MemoryStick/PSP/$folder"
 done

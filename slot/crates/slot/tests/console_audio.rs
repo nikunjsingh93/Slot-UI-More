@@ -17,8 +17,17 @@ struct Tone {
     phase: f64,
     audio: Vec<i16>,
     video: Vec<u8>,
+    burst: bool,
+    calls: u64,
 }
 impl RetroCore for Tone {
+    fn audio_buffer_ms(&self) -> u32 {
+        if self.burst {
+            320
+        } else {
+            0
+        }
+    }
     fn gba_turbo(&self) -> bool {
         false
     }
@@ -29,6 +38,15 @@ impl RetroCore for Tone {
         Ok(())
     }
     fn run_frame(&mut self, _: ButtonMask) {
+        if self.burst {
+            self.calls += 1;
+            self.audio.clear();
+            if self.calls % 3 == 0 {
+                std::thread::sleep(Duration::from_millis(100));
+                self.audio = vec![12000; (self.rate / 10.0) as usize * 2];
+            }
+            return;
+        }
         self.phase += self.rate / self.fps;
         let n = self.phase.floor() as usize;
         self.phase -= n as f64;
@@ -71,6 +89,8 @@ fn snes_and_ps1_pcm_remain_continuous_when_display_is_slow_or_stalls() {
                 phase: 0.0,
                 audio: vec![],
                 video: vec![0; 240 * 160 * 4],
+                burst: false,
+                calls: 0,
             }),
             PathBuf::from("fixture"),
             ring.clone(),
@@ -127,4 +147,50 @@ fn snes_and_ps1_pcm_remain_continuous_when_display_is_slow_or_stalls() {
             captured.len() / 2
         );
     }
+}
+
+#[test]
+fn dreamcast_bursts_keep_pcm_continuous_without_idle_sleeps_on_empty_calls() {
+    let ring = Arc::new(Ring::new(0));
+    ring.reopen(48000);
+    let emu = EmuHandle::spawn(
+        Box::new(Tone {
+            rate: 44100.0,
+            fps: 59.94,
+            phase: 0.0,
+            audio: vec![],
+            video: vec![0; 312 * 312 * 4],
+            burst: true,
+            calls: 0,
+        }),
+        PathBuf::from("burst fixture"),
+        ring.clone(),
+        None,
+        None,
+    );
+    let began = Instant::now();
+    while emu.state() == CoreState::Loading {
+        assert!(began.elapsed() < Duration::from_secs(2));
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    emu.set_speed(Speed::Normal);
+    let began = Instant::now();
+    let mut capture = Vec::new();
+    for n in 0..220 {
+        let mut out = [0; 960];
+        ring.fill(&mut out);
+        capture.extend_from_slice(&out);
+        if let Some(wait) =
+            (began + Duration::from_millis((n + 1) * 10)).checked_duration_since(Instant::now())
+        {
+            std::thread::sleep(wait);
+        }
+    }
+    let starved = ring.underruns();
+    drop(emu);
+    assert_eq!(starved, 0, "bursty renderer starved {starved} samples");
+    assert!(
+        capture[48000..].iter().all(|s| *s != 0),
+        "bursty audio acquired a silent gap after warmup"
+    );
 }

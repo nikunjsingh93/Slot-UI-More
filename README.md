@@ -1,8 +1,8 @@
 # Slot UI for BATLEXP G350
 
-Backup of the customized Slot frontend and firmware work for the RK3326 BATLEXP G350. The accepted stable baseline is **0.1.8**. **0.1.9.2** adds PSP/Dreamcast and repairs repeated Dreamcast launches. The user confirmed Dreamcast save states and repeated launches now work; **0.1.9.3** reduces Dreamcast framebuffer allocation, queues GLES3 readback and applies lighter rendering settings; physical performance validation is pending.
+Backup of the customized Slot frontend and firmware work for the RK3326 BATLEXP G350. The accepted stable baseline is **0.1.8**. **0.1.9.2** adds PSP/Dreamcast and repairs repeated Dreamcast launches. The owner confirmed that **0.1.9.3** substantially improves Dreamcast speed, with SoulCalibur almost full speed; sound still has dropouts. **0.1.9.4** targets those audio gaps with Dreamcast-specific buffering and pacing, corrects the PSP UMD shell and repairs PSP asset provisioning. Audible validation of 0.1.9.4 is pending on the handheld.
 
-The user tested 0.1.8's SNES/N64/PS1 fixes and confirmed that PSP and Dreamcast launch on 0.1.9.1. PSP Virtua Tennis 3 worked well. Dreamcast Virtua Tennis was slow and crashed when reopened after PSP. 0.1.9.2 repairs the reproduced memory-lifecycle fault and reduces Dreamcast rendering work using frame skipping. Do not install the superseded 0.1.9 desktop-build update.
+Dreamcast's faster renderer, state format and relaunch repair are preserved. PSP worked well; its gameplay settings and the accepted SNES/N64/PS1 settings are unchanged. The Dreamcast buffer adds about 93 ms of target audio latency and cannot compensate for sustained emulation below real time. Do not install the superseded 0.1.9 desktop-build update.
 
 ## Backed up here
 
@@ -22,7 +22,7 @@ Open `studio/Slot-Auto-Artwork-Studio-v4.html` in Chrome or Edge. Choose the Slo
 
 ## Using the update
 
-Download the 0.1.9.3 update ZIP from [Releases](https://github.com/nikunjsingh93/slot-ui-g350/releases). With the handheld off, replace **both** SYSTEM and SYSTEM.md5 on PAN4ELC. Safely eject and boot. Games live under `GAMES/Slot/Games`: `DC`, `PSP`, `N64`, `SNES`, `PS1`, `GBA`, `GB`, `GBC`. Keep a GDI's track files beside its GDI.
+Download the 0.1.9.4 update ZIP from [Releases](https://github.com/nikunjsingh93/slot-ui-g350/releases). With the handheld off, replace **both** SYSTEM and SYSTEM.md5 on PAN4ELC. Safely eject and boot. Games live under `GAMES/Slot/Games`: `DC`, `PSP`, `N64`, `SNES`, `PS1`, `GBA`, `GB`, `GBC`. Keep a GDI's track files beside its GDI.
 
 **Hold Menu alone for one second to quit to Slot.** X/Y alone are game buttons; save/load uses Menu + X/Y. PSP/DC automatic boot into a running game is disabled to avoid crash loops; manually launch from the shelf. DC VMU saves are under `Slot/Saves/DC`, and PSP memory-stick saves under `Slot/Saves/PSP/MemoryStick/PSP/SAVEDATA`.
 

@@ -883,6 +883,17 @@ impl Drop for LibretroCore {
 }
 
 impl RetroCore for LibretroCore {
+    fn audio_buffer_ms(&self) -> u32 {
+        if self
+            .host
+            .declared
+            .contains_key("reicast_internal_resolution")
+        {
+            320
+        } else {
+            0
+        }
+    }
     fn supports_rewind(&self) -> bool {
         !self.host.ps1 && !self.host.console_video
     }

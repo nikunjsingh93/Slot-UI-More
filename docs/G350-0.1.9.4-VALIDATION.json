@@ -1,0 +1,16 @@
+{
+  "version": "0.1.9.4-experimental",
+  "date": "2026-10-09",
+  "shipping_build": "ARM64 Bullseye; device profile; no default features; device feature; KMS/DRM entrypoint and dependencies verified",
+  "audio": "Burst queue survives 120 ms render gap; normal profile resets; timed PCM remains continuous through 100 ms bursts and empty callbacks; original SNES/PS1 test passes",
+  "core_lifecycle": "Existing Dreamcast state restored; changing video and nonzero stereo PCM; six mixed DC/PSP sessions and state round trips; full frontend Menu-hold exit passed",
+  "psp_assets": "Firmware BusyBox: 189 files provisioned into an existing empty directory; retry repairs missing asset and preserves modified existing file",
+  "studio": "Offline Playwright geometry/centre tests and local label preview passed; portable source rebuild matches HTML; ZIP CRC verified; v3 alias updated",
+  "packaging": "All core SHA256 hashes match 0.1.9.3; matching SYSTEM.md5; ZIP CRC verified",
+  "sd_install": "SYSTEM SHA256 and MD5 read back after flushed write; matching checksum file; Slot file metadata and configuration hash preserved",
+  "system_sha256": "cb08010b9554c602489c404557e572f508782b54899bf8769bc87bd348c20309",
+  "archive_sha256": "9581d66652c0950cba02090abbcc1af41c48a231738ff8901183a6f9473e4e8a",
+  "hardware_validation": "Pending owner sound test. Owner confirmed previous 0.1.9.3 improves Dreamcast speed. Container and simulated PCM tests do not establish physical performance or audible sound quality.",
+  "audio_latency": "Dreamcast target 160 ms, about 93 ms higher; capacity 320 ms; other systems retain previous profile",
+  "excluded": "No games, user saves, private test media, proprietary BIOS or redundant core/source archives uploaded"
+}

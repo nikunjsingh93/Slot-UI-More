@@ -18,9 +18,9 @@ subprocess.run(['sh','-n',str(root/'usr/bin/slot-start')],check=True)
 system=out/'SYSTEM'
 subprocess.run(['mksquashfs',str(root),str(system),'-noappend','-comp','gzip','-b','131072','-processors','4','-no-progress'],check=True)
 md5=digest(system,'md5');pair=out/'SYSTEM.md5';pair.write_text(md5+'  target/SYSTEM\n')
-archive=out/'slot-g350-0.1.9.3-rebuilt-update.zip'
+archive=out/'slot-g350-0.1.9.4-rebuilt-update.zip'
 with zipfile.ZipFile(archive,'w',zipfile.ZIP_DEFLATED,compresslevel=6) as z:z.write(system,'SYSTEM');z.write(pair,'SYSTEM.md5')
 with zipfile.ZipFile(archive) as z:assert z.testzip() is None
-manifest=dict(version='0.1.9.3-rebuilt',system_sha256=digest(system),system_md5=md5,archive_sha256=digest(archive),core_sha256={p.name:digest(p) for p in (root/'usr/share/slot').glob('*.so')})
+manifest=dict(version='0.1.9.4-rebuilt',system_sha256=digest(system),system_md5=md5,archive_sha256=digest(archive),core_sha256={p.name:digest(p) for p in (root/'usr/share/slot').glob('*.so')})
 (out/'rebuilt-manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
 print('PASS rebuilt matching SYSTEM pair and ZIP; dependencies and preserved stable cores verified')

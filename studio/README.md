@@ -8,7 +8,7 @@ Open `Slot-Auto-Artwork-Studio-v4.html` in Chrome or Edge. Choose **Slot folder*
 | Games/PS1 | chd, cue, m3u, pbp, exe | 312×312 |
 | Games/N64 | z64, n64, v64 | 180×190 |
 | Games/DC | chd, gdi, cdi, cue, m3u | 312×312 |
-| Games/PSP | iso, cso, pbp | 312×312 disc print, shown inside Slot's 312×224 UMD shell |
+| Games/PSP | iso, cso, pbp | 312×312 disc print, shown inside Slot's 312×328 UMD shell |
 
 Files are written to `Labels/<system>/<exact game filename stem>.png`. Existing labels are kept by default. Enable **Replace existing labels** if you want to replace older logos, then save the previews. GBA/GB/GBC remain handled by the original Cart Studio.
 
@@ -21,3 +21,5 @@ ROM contents are never read or uploaded for matching. Small PS1/DC playlists are
 Browser validation covered live scans for all five systems, your Dreamcast/PSP tennis filenames, Tekken 6 artwork, original disc transparency and UMD previews, PS1/DC playlists, unchanged existing labels, exact output filenames/dimensions, direct writes, ZIP export, folder-upload fallback, logos when scans fail, offline retry, and mobile layout. This update changes the artwork studio only.
 
 The ZIP contains the standalone HTML, this guide, and editable source with a portable Python build script and JSZip's license. To rebuild, run `python source/build.py --output Slot-Auto-Artwork-Studio-v4.html` from the extracted folder. Python uses only its standard library.
+
+UMD correction (0.1.9.4): the round window and flared lower shell match the physical UMD front. New PSP scan labels preserve the printed hub rather than cutting a CD spindle hole through it. Existing PNGs still work; enable replacement in Studio to regenerate an older scan if its printed centre is incomplete.

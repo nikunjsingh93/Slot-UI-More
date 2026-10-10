@@ -74,6 +74,11 @@ impl From<std::io::Error> for CoreError {
 }
 
 pub trait RetroCore: Send {
+    /// Extra frontend buffering for cores that deliver PCM in render-sized bursts.
+    /// Zero retains the normal low-latency queue.
+    fn audio_buffer_ms(&self) -> u32 {
+        0
+    }
     fn supports_rewind(&self) -> bool {
         true
     }

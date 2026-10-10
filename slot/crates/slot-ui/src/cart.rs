@@ -159,7 +159,7 @@ const GB_SEATED_H: u32 = 259;
 pub fn seated_box(platform: Platform) -> (u32, u32) {
     match platform {
         Platform::Ps1 | Platform::Dreamcast => (312, 312),
-        Platform::Psp => (312, 224),
+        Platform::Psp => (312, 328),
         Platform::Snes => (240, 147),
         Platform::N64 => (240, 155),
         Platform::Gba => (SEATED_W, SEATED_H),
@@ -178,7 +178,7 @@ pub fn cart_box(platform: Platform) -> (u32, u32) {
         return (312, 312);
     }
     if platform == Platform::Psp {
-        return (312, 224);
+        return (312, 328);
     }
     let s = spec(match platform {
         Platform::Gba
@@ -603,35 +603,97 @@ fn disc_face(cart: &Cart) -> CartFace {
     CartFace { rgba, w, h: w }
 }
 
-// PSP Universal Media Disc, with a white shell around the printed disc.
+// UMD front: round clear window, thin plastic rim and flared lower shell.
 fn umd_face(cart: &Cart) -> CartFace {
-    let (w, h) = (312u32, 224u32);
-    let disc = disc_face(cart);
+    let (w, h) = (312u32, 328u32);
+    let print = cart.label.as_deref().and_then(|p| art::cover(p, 312, 312));
+    let scanned = print.as_ref().is_some_and(|p| p[3] < 8);
+    let legacy_hole = print
+        .as_ref()
+        .is_some_and(|p| scanned && p[((156 * 312 + 156) * 4 + 3) as usize] < 8);
+    let disc = print
+        .map(|rgba| CartFace {
+            rgba,
+            w: 312,
+            h: 312,
+        })
+        .unwrap_or_else(|| disc_face(cart));
     let mut rgba = vec![0u8; (w * h * 4) as usize];
     for y in 0..h {
         for x in 0..w {
-            let dx = (x as f32 + 0.5 - 156.0).abs();
-            let lower = (y as f32 - 135.0).max(0.0);
-            let edge = 153.0 - dx;
-            if edge < 0.0 || y < 3 || dx * dx + lower * lower > 153.0 * 153.0 {
+            let rx = x as f32 + 0.5 - 156.0;
+            let ry = y as f32 + 0.5 - 151.0;
+            let r = rx.hypot(ry);
+            let qx = rx.abs() - 126.0;
+            let qy = (y as f32 + 0.5 - 244.0).abs() - 51.0;
+            let base = qx.max(0.0).hypot(qy.max(0.0)) + qx.max(qy).min(0.0) - 23.0;
+            let edge = (r - 149.0).min(base);
+            if edge >= 0.0 {
                 continue;
             }
             let o = ((y * w + x) * 4) as usize;
-            let shade = if edge < 4.0 || y < 7 || y > 218 {
-                164
+            let shade = if edge > -2.0 {
+                169
+            } else if r > 140.0 && r < 143.0 {
+                147
             } else {
-                234
+                (243.0 - y as f32 * 0.035) as u8
             };
-            rgba[o..o + 4].copy_from_slice(&[shade, shade, shade, 255]);
-            let rx = x as f32 + 0.5 - 156.0;
-            let ry = y as f32 + 0.5 - 111.0;
-            let r = rx.hypot(ry);
-            if r < 99.0 {
-                let sx = ((rx / 99.0 * 155.0 + 156.0) as u32).min(311);
-                let sy = ((ry / 99.0 * 155.0 + 156.0) as u32).min(311);
+            rgba[o..o + 4].copy_from_slice(&[
+                shade,
+                shade,
+                shade,
+                (255.0 * (-edge).min(1.0)) as u8,
+            ]);
+            if r < 135.0 {
+                let sx = ((rx / 135.0 * 155.0 + 156.0) as u32).min(311);
+                let sy = ((ry / 135.0 * 155.0 + 156.0) as u32).min(311);
                 let d = ((sy * disc.w + sx) * 4) as usize;
                 if disc.rgba[d + 3] > 0 {
                     rgba[o..o + 4].copy_from_slice(&disc.rgba[d..d + 4]);
+                } else if scanned {
+                    rgba[o..o + 4].copy_from_slice(&[255, 255, 255, 255]);
+                }
+                // The front cover hides the disc spindle opening; keep its UMD hub opaque.
+                if r < 27.0 && !scanned {
+                    let hub = if r > 24.0 { 190 } else { 244 };
+                    rgba[o..o + 4].copy_from_slice(&[hub, hub, hub, 255]);
+                }
+                // Old Studio PNGs lost their printed hub to a CD-style cutout.
+                // Replace that complete hub with a coherent UMD front marking.
+                if legacy_hole && r < 64.0 {
+                    rgba[o..o + 4].copy_from_slice(&[255, 255, 255, 255]);
+                }
+            }
+        }
+    }
+    if let Some(font) = text::label_font() {
+        for (label, bw, bh, left, top, colour, px) in [
+            ("UMD", 60u32, 22u32, 126u32, 140u32, [44u8, 60, 78], 18.0),
+            ("PSP", 64, 22, 17, 283, [163, 164, 167], 18.0),
+            ("legacy UMD", 116, 42, 98, 127, [113, 123, 186], 36.0),
+            ("UNIVERSAL MEDIA DISC", 116, 14, 98, 166, [75, 75, 75], 8.0),
+        ] {
+            if label == "UMD" && scanned {
+                continue;
+            }
+            if (label == "legacy UMD" || label == "UNIVERSAL MEDIA DISC") && !legacy_hole {
+                continue;
+            }
+            let label = if label == "legacy UMD" { "UMD" } else { label };
+            let mut ink = vec![0u8; (bw * bh * 4) as usize];
+            let layout = text::fit_box(font, label, bw as f32, bh as f32, 1, px, 6.0);
+            text::draw_centred(&mut ink, bw, bh, &layout, colour);
+            for yy in 0..bh {
+                for xx in 0..bw {
+                    let src = ((yy * bw + xx) * 4) as usize;
+                    let dst = (((top + yy) * w + left + xx) * 4) as usize;
+                    let alpha = ink[src + 3] as u32;
+                    for k in 0..3 {
+                        rgba[dst + k] = ((ink[src + k] as u32 * alpha
+                            + rgba[dst + k] as u32 * (255 - alpha))
+                            / 255) as u8;
+                    }
                 }
             }
         }

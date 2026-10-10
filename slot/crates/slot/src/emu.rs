@@ -516,6 +516,11 @@ impl Worker {
             }
         }
         let av = core.av_info();
+        let burst_audio = core.audio_buffer_ms() > 0;
+        ring.configure_buffer_ms(core.audio_buffer_ms());
+        if burst_audio {
+            eprintln!("slot: Dreamcast PCM queue: {} ms capacity / {} ms target; audio-first burst pacing", core.audio_buffer_ms(), core.audio_buffer_ms() / 2);
+        }
         let device_hz = match ring.sample_rate() {
             0 => av.sample_rate,
             hz => hz as f64,
@@ -793,9 +798,10 @@ impl Worker {
                     }
                 }
                 flush_outbound(&mut transport, &link);
-                self.publish(core.video_xrgb8888());
-                self.frame_done(served);
-
+                if !burst_audio {
+                    self.publish(core.video_xrgb8888());
+                    self.frame_done(served);
+                }
                 since_snapshot += 1;
                 if cable.is_some() || speed == Speed::Fast {
                     since_snapshot = 0;
@@ -850,6 +856,11 @@ impl Worker {
                         );
                     }
                 }
+                // Feed PCM before copying/publishing video, especially after a long render.
+                if burst_audio {
+                    self.publish(core.video_xrgb8888());
+                    self.frame_done(served);
+                }
             }
 
             if let Some((began, core_time)) = fast_span.take() {
@@ -888,7 +899,7 @@ impl Worker {
             // Console sound follows the PCM clock, independently of display latches.
             // A missed redraw must not remove a complete frame of SNES/PS1 audio.
             if console
-                && audio_ready
+                && (audio_ready || burst_audio)
                 && speed == Speed::Normal
                 && !rewinding
                 && !ring.muted()
