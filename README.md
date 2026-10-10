@@ -24,9 +24,87 @@ Open `studio/Slot-Auto-Artwork-Studio-v4.html` in Chrome or Edge. Choose the Slo
 
 Download the 0.1.9.4 update ZIP from [Releases](https://github.com/nikunjsingh93/slot-ui-g350/releases). With the handheld off, replace **both** SYSTEM and SYSTEM.md5 on PAN4ELC. Safely eject and boot. Games live under `GAMES/Slot/Games`: `DC`, `PSP`, `N64`, `SNES`, `PS1`, `GBA`, `GB`, `GBC`. Keep a GDI's track files beside its GDI.
 
-**Hold Menu alone for one second to quit to Slot.** X/Y alone are game buttons; save/load uses Menu + X/Y. PSP/DC automatic boot into a running game is disabled to avoid crash loops; manually launch from the shelf. DC VMU saves are under `Slot/Saves/DC`, and PSP memory-stick saves under `Slot/Saves/PSP/MemoryStick/PSP/SAVEDATA`.
+**Hold Menu alone for one second to quit to Slot.** On PS1/SNES/N64/DC/PSP, X/Y alone are game buttons; **Menu + X saves**, and **Menu + Y loads**. Game Boy systems use the different shortcuts listed below. PSP/DC automatic boot into a running game is disabled to avoid crash loops; manually launch from the shelf. DC VMU saves are under `Slot/Saves/DC`, and PSP memory-stick saves under `Slot/Saves/PSP/MemoryStick/PSP/SAVEDATA`.
 
 For a fresh card, flash the supplied 0.1.3 base image, allow its initial partition setup to finish, then shut down and apply the latest matching SYSTEM pair. The base image alone is an older release; the update is required. Follow `docs/G350-0.1.3-UPDATE.md` for the G350 panel variants if applicable. This repository is for the G350, not Anbernic H700 devices.
+
+## Controls and hotkeys
+
+These are the current G350 0.1.9.4 controls, checked against the input/session code. **Menu** means the handheld's centre **M** button; L1/R1 are the first shoulder buttons and L2/R2 the second pair. For a combination, hold the first button, tap the second, then release both. A long hold of Menu **alone** quits the game.
+
+### Save and load by system
+
+| System / bundled emulator | Save a state while playing | Load the newest saved state |
+|---|---|---|
+| PS1 / PCSX ReARMed | Menu + X | Menu + Y |
+| SNES / Snes9x 2005 Plus (or Snes9x) | Menu + X | Menu + Y |
+| N64 / ParaLLEl N64 (or Mupen64Plus Next) | Menu + X | Menu + Y |
+| Dreamcast / Flycast | Menu + X | Menu + Y |
+| PSP / PPSSPP | Menu + X | Menu + Y |
+| GBA / mGBA or gpSP | Select + R1 | Select + L1 |
+| GB / mGBA | Select + R1 | Select + L1 |
+| GBC / mGBA | Select + R1 | Select + L1 |
+
+For Game Boy **Select** combinations, press the second button promptly, within about **0.6 seconds** of pressing Select. Holding Select longer hands it to the game instead. For example, on PS1: hold M, tap X, release both to save; hold M, tap Y, release both to load.
+
+Save states are emulator snapshots, separate from a game's normal memory-card/VMU/memory-stick saves. Loading restores the saved moment. Use the browser below to choose an older state; the quick load shortcut chooses the newest saved state. Normal game saves remain managed through each game's own save menu.
+
+### Common controls while playing
+
+| Button / action | Result |
+|---|---|
+| Hold Menu alone for about 1 second | Save the resume data and return to the Slot shelf |
+| Double-tap Menu quickly (within about 0.35 seconds) | Open the saved-state picture browser, if this game has saved states |
+| Volume + / Volume − | Adjust the current speaker/headphone volume; holding repeats |
+| Press both volume buttons together | Toggle mute; press them together again to unmute |
+| Tap Power | Sleep / wake |
+| Hold Power for about 1 second | Open Restart / Power off; select with Up/Down, confirm with A, cancel with B |
+| PS1 only: Menu + R2 | Cycle to the next disc in a loaded multi-disc playlist |
+
+For PS1 disc switching, launch the game's `.m3u` playlist with all discs listed, then use Menu + R2 when the game requests the next disc. A single-disc file has no next disc. PSP and Dreamcast do not have this disc-switch shortcut.
+
+### Saved-state picture browser (all systems)
+
+Double-tap Menu during gameplay to open it. Gameplay pauses while the browser is open.
+
+| Button | Result |
+|---|---|
+| Left / Right | Choose a saved state |
+| A | Load the selected state and resume |
+| B, or double-tap Menu again | Close the browser and resume |
+| X | Undo the most recent manual save/load, when offered (within 30 seconds) |
+| Y | Delete the selected saved state |
+
+### Extra Game Boy shortcuts (GBA / GB / GBC)
+
+These apply while playing Game Boy systems. On PS1/SNES/N64/DC/PSP, the face, shoulder, Start and Select buttons go to the game instead; L2/R2 do **not** trigger rewind/fast-forward there, and Select combinations do **not** adjust display settings there. Return to the shelf for those settings.
+
+| Button / combination | Result |
+|---|---|
+| Hold L2 | Rewind; release to play normally |
+| Hold R2 | Fast-forward; release to play normally |
+| Double-tap R2 quickly | Keep fast-forward on; tap R2 again to stop |
+| Hold X / hold Y | Turbo A / turbo B |
+| Select + Up / Down | Increase / decrease brightness |
+| Select + Right / Left | Increase / decrease blue-light filtering |
+| Select + Y | Toggle colour correction |
+| GB/GBC only: L1 / R1 alone | Stretched picture / actual-size picture |
+| GBA only: Select + Menu | Open Slot's link-play menu for a supported game/core; G350 multiplayer connectivity has not been validated |
+
+Load-state, rewind and fast-forward are unavailable during an active link-play session. Select remains a normal game button when tapped on its own.
+
+### Slot shelf and settings
+
+| Button | Result |
+|---|---|
+| Left / Right | Browse games; holding continues scrolling |
+| Up / Down | Jump to the previous / next starting letter |
+| L1 / R1 | Switch system shelves |
+| A | Launch the selected game |
+| Tap Menu | Open settings; B or Menu closes them |
+| Start on a GBA game | Choose mGBA / gpSP: Left/Right chooses, A keeps the choice, B cancels |
+
+In settings, Up/Down selects a row, Left/Right changes its value, and A opens the selected item. The volume and Power controls above also work on the shelf. This documentation update does not change the firmware or require a reflash.
 
 ## Rebuild on another laptop
 
