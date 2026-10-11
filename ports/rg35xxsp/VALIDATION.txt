@@ -1,0 +1,47 @@
+Slot RG35XX SP 0.2.0 -- validation and limitations
+
+PASS official RG35XX SP BaseOS 1.3.0 input archive SHA256 against upstream.
+PASS shipping AArch64 frontend built with locked dependencies, device profile,
+     no default/host features; SLOT_DEVICE=rg35xxsp selects H700 fbdev EGL.
+PASS all nine cores dlopen(RTLD_NOW), exports/API and system-info checks inside
+     the real BaseOS root, without fallback to the compiler host's libraries.
+     Flycast requires added libgomp1 10.2.1-6; dependency closure passes.
+PASS 50 frontend device unit tests including console X/Y, consumed Menu chords,
+     D-pad/analog toggle/release and long-Menu ejection on N64/DC/PSP.
+PASS two N64 mapping tests including Select=C-down, shoulders and C-buttons.
+PASS three UI tests covering toast rendering and round disc geometry.
+PASS five framebuffer mode/size/error checks.
+PASS three GLES upload tests for N64/PS1/PSP using Mesa headless surfaces.
+PASS actual SP frontend presentation viewport fills 640x480; disc pixel bounds
+     remain round/centred after the full-panel blit.
+PASS two optimized serial PCM continuity tests: SNES/PS1 normal and stalled
+     video consumption; Dreamcast bursts/empty callbacks. A preliminary debug
+     timing run during parallel compilation starved; optimized serial tests
+     pass. These fixtures do not measure physical audio or game speed.
+PASS real BaseOS BusyBox first-boot installation: eight system folders,
+     189 PPSSPP files, copied-file hashes, idempotence, corrupt archive failure,
+     interrupted-install retry, preservation of games/saves/labels/config/BIOS,
+     unrelated frontend protection and shell syntax.
+PASS patched rootfs readback hashes and e2fsck -fn.
+PASS GPT check; the official vendor table has its original small-entry-table
+     warning. All sectors outside rootfs p5, including boot chain/kernel,
+     boot-resource and GPT metadata, are byte-identical to the official image.
+PASS ZIP CRC and SHA256 of the decompressed image versus final raw image.
+PASS all nine core hashes match G350 0.1.9.4; no G350 kernel/GPU/audio configs
+     or commercial ROMs are copied. Only the H700 frontend, cores and assets.
+PASS source overlay applies to pinned e787972; portable scripts parse in
+     Python 3.9 and expose their input/output arguments; source ZIP CRC passes.
+
+Not hardware-validated: device boot, visible screen dimensions, audible sound,
+volume, hinge suspend/wake, charger behavior, WiFi and real-game performance.
+The new RG35XX SP has not arrived. This remains an experimental first port.
+No full-speed guarantee for Dreamcast/PSP/N64. H700's actual Mali driver/context
+compatibility needs owner testing; Mesa tests are only renderer regressions.
+The SP has no analog sticks. D-pad analog control is full deflection and cannot
+offer independent simultaneous analog/digital directions or fine steering.
+
+This build uses the same emulation settings as G350 0.1.9.4, stock performance
+governors, DC 320x240 and PSP 480x272. Save states can depend on core/version;
+keep backups and transfer ordinary in-game saves first.
+
+No SD card was flashed or modified during this build.

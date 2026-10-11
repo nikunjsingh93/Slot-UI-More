@@ -1,0 +1,6 @@
+09aa6232b1d6520d84551100cc37b0d50788ab48ee07510bb141562c0f3e28a2  slot-rg35xxsp-0.2.0.img
+cb8fd4620304e5ac17bc03ab590ca9a87e3b5a18ec5234b2f52ad490083e5f4e  slot-rg35xxsp-0.2.0.img.zip
+28f55baf8b4cb7b4ba28794d1fab9361b45c59c561ecb32e8adc527407f76f90  slot-rg35xxsp-0.2.0-sources.zip
+3d2b93fad0f3f873e67fedd9ca7a57ddb4657a6f7d7456fc2eb3a646cd4d4c49  slot-rg35xxsp-0.2.0-START-HERE.txt
+4f1d369aa561997a204b0ac0ac6e17aa82775bc382c4e69864fa3683b8ccdd95  slot-rg35xxsp-0.2.0-manifest.json
+0b8f38a31b354f302a1da967dae600dbc0c1a705e0176796c3afac676eda59e5  slot-rg35xxsp-0.2.0-VALIDATION.txt

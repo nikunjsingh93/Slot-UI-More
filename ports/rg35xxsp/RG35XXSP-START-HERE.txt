@@ -1,0 +1,86 @@
+Slot RG35XX SP 0.2.0 -- eight-system single-card image
+
+For Anbernic RG35XX SP only. Do not use on RG SP, RG34XX SP or G350.
+Experimental hardware port: boot, sound, hinge and game speed need checking
+on your new handheld. GB/GBC/GBA/SNES/PS1/N64/DC/PSP emulators are included.
+No games or proprietary BIOS files are included.
+
+1. Extract slot-rg35xxsp-0.2.0.img.zip. Flash its .img to a 16 GB or larger
+   microSD using your usual imager (for example Rufus or balenaEtcher).
+   Flashing replaces the contents of the selected card. Keep your G350
+   card intact; use a different card for the SP.
+2. Put that card in TF1; leave TF2 empty. Boot with the charger disconnected
+   and the device charged. Leave the lid open during initial setup.
+   FIRST BOOT expands and reformats the data partition, then installs Slot.
+   Wait for Slot's clock/setup screen BEFORE copying any games.
+3. Set the clock, shut down through Slot's Power menu, move the card to the
+   computer, and use the large BASEOS data partition. Windows may also
+   offer to format small Linux partitions: cancel those prompts.
+4. Copy your existing G350 Slot/Games and Slot/Labels folders to Games and
+   Labels at the ROOT of BASEOS. Copy BIOS and Saves similarly. Keep the
+   SP's new System folder. Do not copy G350 SYSTEM, SYSTEM.md5, System,
+   Config/slot.state or Linux/boot partitions onto this SP card.
+5. Safely eject and boot. Hold Menu alone about one second to return to
+   Slot. The upstream one-cart mode prevents ejecting the only game;
+   have at least two games on the card to use the shelf normally.
+
+Game folders (at BASEOS root):
+  Games/GB     .gb / .gbc
+  Games/GBC    .gbc / .gb
+  Games/GBA    .gba
+  Games/SNES   .sfc / .smc
+  Games/PS1    .chd / .cue (keep .bin tracks) / .m3u / .pbp
+  Games/N64    .z64 / .n64 / .v64
+  Games/DC     .chd / .gdi (keep tracks) / .cdi / .cue / .m3u
+  Games/PSP    .iso / .cso / .pbp / .chd
+Extract .zip/.7z ROMs first. A multidisc playlist must use relative paths.
+
+Artwork: copy your existing Labels/<SYSTEM> folders. For new artwork open
+Tools/Slot-Auto-Artwork-Studio-v4.html on the computer in Chrome/Edge and
+choose BASEOS itself (the folder containing Games, Labels and System).
+It supports SNES/PS1/N64/DC/PSP; GB/GBC/GBA use the original Cart Studio.
+
+Save/load shortcuts:
+  PS1/SNES/N64/DC/PSP: Menu + X saves, Menu + Y loads.
+  GB/GBC/GBA: Select + R1 saves, Select + L1 loads (tap second button
+  within 0.6 seconds). L2 rewinds, R2 fast-forwards; X/Y are turbo A/B.
+  Double-tap Menu: saved-state picture browser. Left/Right chooses,
+  A loads, B returns, X undoes the last action, Y deletes that state.
+  PS1 only: Menu + R2 cycles the discs of an .m3u playlist.
+  Power tap: sleep/wake. Power hold ~1 second: Restart / Power off menu.
+  Volume +/-: volume. Both together: mute/unmute.
+  Shelf: Left/Right games, Up/Down letters, L1/R1 systems, A starts.
+  Hold A ~0.5 seconds on shelf to start clean without loading a resume.
+
+SP analog controls (there are no physical sticks):
+  N64 starts with D-pad = left analog stick.
+  DC/PSP start with D-pad = digital directional buttons.
+  Menu + Select switches between digital D-pad and analog stick while
+  playing N64/DC/PSP. The toast confirms the new mode. It resets on launch.
+  N64: A=A, B=B, L2=Z, L1=L, R1=R, Start=Start;
+  X=C-up, Y=C-left, R2=C-right, Select=C-down.
+  PSP face positions match PlayStation: B=cross, A=circle, X=triangle,
+  Y=square, L1=L, R1=R, Start=Start, Select=Select.
+  D-pad analog mode gives full directional deflection; fine analog
+  steering and simultaneous analog + digital directions are limited.
+
+Performance: includes the accepted G350 cores/settings, native DC 320x240,
+PSP 480x272, N64 320x240, JIT/dynarec and bounded frameskip. The SP uses its
+own H700 kernel/Mali driver/audio support, with highest stock clocks.
+DC/PSP/N64 speed depends on the game. Full-speed Tekken 6 is not guaranteed.
+This is a port, not a measured benchmark on the RG35XX SP yet.
+
+Normal in-game saves should transfer. Keep original save-state backups;
+states are core/version dependent and may not be portable across devices.
+Dreamcast VMUs: Saves/DC. PSP saves: Saves/PSP/MemoryStick/PSP/SAVEDATA.
+PS1 and Dreamcast have HLE BIOS fallbacks. If needed, copy your own BIOS
+to BIOS/ (PS1) and BIOS/dc/ (Dreamcast). PPSSPP assets are preinstalled.
+
+If first boot fails, inspect slot-install.log and baseos-boot.log on BASEOS.
+If Slot or a game fails, inspect slot.log (previous launch: slot.log.1).
+Use this same image again for a fresh flash; G350 updates are incompatible.
+Generic upstream BaseOS updates do not include this custom installer.
+
+Sources and license notices: System/licenses/SOURCES.txt. The companion
+sources ZIP includes this frontend and SP packaging scripts. Core sources
+and restore instructions are in the existing GitHub v0.1.9.2 source release.

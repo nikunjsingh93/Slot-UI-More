@@ -1,4 +1,6 @@
-# Slot UI for BATLEXP G350
+# Slot UI for BATLEXP G350 and RG35XX SP
+
+**RG35XX SP 0.2.0** is a separate experimental H700 port with GB/GBC/GBA/SNES/PS1/N64/DC/PSP. Its single flashable image installs Slot automatically after first-boot expansion. Use the [SP guide and build source](ports/rg35xxsp/README.md) and the `rg35xxsp-v0.2.0` Release. The SP has its own kernel/drivers and adds Menu+Select to switch the D-pad between digital and analog controls. Hardware validation is pending; G350 SYSTEM updates cannot be installed on it.
 
 Backup of the customized Slot frontend and firmware work for the RK3326 BATLEXP G350. The accepted stable baseline is **0.1.8**. **0.1.9.2** adds PSP/Dreamcast and repairs repeated Dreamcast launches. The owner confirmed that **0.1.9.3** substantially improves Dreamcast speed, with SoulCalibur almost full speed; sound still has dropouts. **0.1.9.4** targets those audio gaps with Dreamcast-specific buffering and pacing, corrects the PSP UMD shell and repairs PSP asset provisioning. Audible validation of 0.1.9.4 is pending on the handheld.
 
@@ -26,7 +28,7 @@ Download the 0.1.9.4 update ZIP from [Releases](https://github.com/nikunjsingh93
 
 **Hold Menu alone for one second to quit to Slot.** On PS1/SNES/N64/DC/PSP, X/Y alone are game buttons; **Menu + X saves**, and **Menu + Y loads**. Game Boy systems use the different shortcuts listed below. PSP/DC automatic boot into a running game is disabled to avoid crash loops; manually launch from the shelf. DC VMU saves are under `Slot/Saves/DC`, and PSP memory-stick saves under `Slot/Saves/PSP/MemoryStick/PSP/SAVEDATA`.
 
-For a fresh card, flash the supplied 0.1.3 base image, allow its initial partition setup to finish, then shut down and apply the latest matching SYSTEM pair. The base image alone is an older release; the update is required. Follow `docs/G350-0.1.3-UPDATE.md` for the G350 panel variants if applicable. This repository is for the G350, not Anbernic H700 devices.
+For a fresh G350 card, flash the supplied 0.1.3 base image, allow its initial partition setup to finish, then shut down and apply the latest matching SYSTEM pair. The base image alone is an older release; the update is required. Follow `docs/G350-0.1.3-UPDATE.md` for the G350 panel variants if applicable. RG35XX SP uses the separate image and instructions linked above.
 
 ## Controls and hotkeys
 

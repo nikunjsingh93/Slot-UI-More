@@ -1,0 +1,51 @@
+[
+  {
+    "number": 1,
+    "first": 73728,
+    "last": 204799,
+    "name": "special",
+    "bytes": 67108864
+  },
+  {
+    "number": 2,
+    "first": 204800,
+    "last": 270335,
+    "name": "boot-resource",
+    "bytes": 33554432
+  },
+  {
+    "number": 3,
+    "first": 270336,
+    "last": 303103,
+    "name": "env",
+    "bytes": 16777216
+  },
+  {
+    "number": 4,
+    "first": 303104,
+    "last": 434175,
+    "name": "boot",
+    "bytes": 67108864
+  },
+  {
+    "number": 5,
+    "first": 434176,
+    "last": 1482751,
+    "name": "rootfs",
+    "bytes": 536870912
+  },
+  {
+    "number": 6,
+    "first": 2531328,
+    "last": 2793471,
+    "name": "UDISK",
+    "bytes": 134217728
+  },
+  {
+    "number": 7,
+    "first": 2793472,
+    "last": 2926588,
+    "name": "primary",
+    "bytes": 68155904
+  }
+]

@@ -1,0 +1,38 @@
+#!/bin/sh
+# Runs after BaseOS has expanded/formatted TF1, before the first frontend exec.
+set -eu
+SD=${SLOT_INSTALL_ROOT:-/mnt/sdcard}
+PAYLOAD=${SLOT_INSTALL_PAYLOAD:-/usr/share/slot-sp/payload.tar.gz}
+VERSION=slot-rg35xxsp-0.2.0
+[ -f "$SD/System/.$VERSION" ] && exit 0
+if [ -f "$SD/System/slot" ] && [ ! -f "$SD/.slot-sp-installing" ]; then
+    echo 'slot-sp: existing frontend left in place'
+    exit 0
+fi
+: > "$SD/.slot-sp-installing"
+STAGE="$SD/.slot-sp-stage"
+mkdir -p "$STAGE" "$SD/System"
+tar -xzf "$PAYLOAD" -C "$STAGE"
+(cd "$STAGE" && sha256sum -c payload.sha256)
+cp -R "$STAGE/System/." "$SD/System/"
+# Verify the copied frontend before committing the installation marker.
+(cd "$SD" && sha256sum -c "$STAGE/system.sha256")
+for category in Games Labels Saves States; do
+    for platform in GB GBC GBA SNES PS1 N64 DC PSP; do
+        mkdir -p "$SD/$category/$platform"
+    done
+done
+mkdir -p "$SD/BIOS/dc" "$SD/BIOS/PPSSPP" "$SD/Config" "$SD/Wallpapers" "$SD/Tools"
+# Copy each missing PPSSPP file, avoiding BusyBox cp -n's directory skip.
+while IFS= read -r rel; do
+    [ -f "$SD/BIOS/PPSSPP/$rel" ] && continue
+    mkdir -p "$SD/BIOS/PPSSPP/$(dirname "$rel")"
+    cp "$SD/System/PPSSPP/$rel" "$SD/BIOS/PPSSPP/$rel"
+done < "$SD/System/ppsspp-assets.txt"
+[ -f "$SD/Tools/Slot-Auto-Artwork-Studio-v4.html" ] || cp "$STAGE/Tools/Slot-Auto-Artwork-Studio-v4.html" "$SD/Tools/"
+cp "$STAGE/RG35XXSP-START-HERE.txt" "$SD/RG35XXSP-START-HERE.txt"
+sync
+: > "$SD/System/.$VERSION"
+sync
+rm -f "$SD/.slot-sp-installing"
+echo 'slot-sp: all eight systems installed and verified'
