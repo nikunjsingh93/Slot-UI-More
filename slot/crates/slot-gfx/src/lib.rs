@@ -29,6 +29,6 @@ pub use headless_linux::HeadlessSurface;
 pub use host::HostSurface;
 pub use kmsdrm::KmsdrmSurface;
 pub use lcd3x::{lcd3x_mask, mask_texture_rgba8};
-pub use pipeline::{SCALE, SRC_H, SRC_W, WHOLE_TEXTURE};
+pub use pipeline::{GameShader, SCALE, SRC_H, SRC_W, WHOLE_TEXTURE};
 pub use power::{screen_brightness, screen_scale, screen_width};
 pub use surface::{blit_rect, blit_rect_fit, fit_rect, fit_scale, GfxError, Surface, OUT_H, OUT_W};

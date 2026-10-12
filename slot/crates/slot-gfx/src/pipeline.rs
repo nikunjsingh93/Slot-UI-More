@@ -10,6 +10,29 @@ pub const SRC_H: u32 = OUT_H / SCALE;
 
 pub const WHOLE_TEXTURE: [f32; 4] = [0.0, 0.0, 1.0, 1.0];
 
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Default)]
+#[repr(u8)]
+pub enum GameShader {
+    #[default]
+    Original = 0,
+    Sharp = 1,
+    Smooth = 2,
+    Lcd = 3,
+    Crt = 4,
+}
+
+impl GameShader {
+    pub fn from_id(id: u8) -> Self {
+        match id {
+            1 => Self::Sharp,
+            2 => Self::Smooth,
+            3 => Self::Lcd,
+            4 => Self::Crt,
+            _ => Self::Original,
+        }
+    }
+}
+
 pub struct GamePass {
     prog: gl::types::GLuint,
     game: gl::types::GLuint,
@@ -20,6 +43,10 @@ pub struct GamePass {
     power: f32,
     src: [f32; 4],
     dims: (u32, u32),
+    shader: GameShader,
+    u_shader: gl::types::GLint,
+    u_src: gl::types::GLint,
+    width: f32,
 }
 
 impl GamePass {
@@ -63,11 +90,23 @@ impl GamePass {
             power: 1.0,
             src: WHOLE_TEXTURE,
             dims: (SRC_W, SRC_H),
+            shader: GameShader::Original,
+            u_shader: crate::gl::uniform_location(prog, "u_shader"),
+            u_src: crate::gl::uniform_location(prog, "u_src"),
+            width: 1.0,
         })
     }
 
     pub fn set_power(&mut self, t: f32) {
         self.power = t.clamp(0.0, 1.0);
+    }
+
+    pub fn set_shader(&mut self, shader: GameShader) {
+        self.shader = shader;
+    }
+
+    pub fn set_width(&mut self, width: f32) {
+        self.width = width.clamp(0.1, 1.0);
     }
 
     pub fn set_source_rect(&mut self, rect: [f32; 4]) {
@@ -131,7 +170,10 @@ impl GamePass {
     }
 
     fn draw_source(&self, tex: gl::types::GLuint, quad: &Quad, src: [f32; 4]) {
-        let (x, mut y, w, mut h) = screen_rect(self.power);
+        let (mut x, mut y, mut w, mut h) = screen_rect(self.power);
+        let narrow = w * self.width;
+        x += (w - narrow) * 0.5;
+        w = narrow;
         if self.dims.0 == 480 && matches!(self.dims.1, 270 | 272) {
             let fitted = h * (4.0 / 3.0) / (480.0 / self.dims.1 as f32);
             y += (h - fitted) * 0.5;
@@ -140,23 +182,31 @@ impl GamePass {
         unsafe {
             gl::UseProgram(self.prog);
             gl::Uniform2f(
-                crate::gl::uniform_location(self.prog, "u_src"),
-                self.dims.0 as f32,
-                self.dims.1 as f32,
+                self.u_src,
+                self.dims.0 as f32 * if self.shader == GameShader::Original { 1.0 } else { src[2] },
+                self.dims.1 as f32 * if self.shader == GameShader::Original { 1.0 } else { src[3] },
             );
+            let shader = match self.shader {
+                GameShader::Original if self.dims == (SRC_W, SRC_H) => GameShader::Lcd,
+                GameShader::Original => GameShader::Sharp,
+                shader => shader,
+            };
             gl::Uniform1f(
-                crate::gl::uniform_location(self.prog, "u_lcd"),
-                if self.dims == (SRC_W, SRC_H) {
-                    1.0
-                } else {
-                    0.0
-                },
+                self.u_shader,
+                shader as u8 as f32,
             );
             gl::Uniform4f(self.u_rect, x, y, w, h);
             gl::Uniform4f(self.u_uv, src[0], src[1], src[2], src[3]);
             gl::Uniform1f(self.u_bright, screen_brightness(self.power));
             gl::ActiveTexture(gl::TEXTURE0);
             gl::BindTexture(gl::TEXTURE_2D, tex);
+            let filter = if matches!(shader, GameShader::Smooth | GameShader::Crt) {
+                gl::LINEAR
+            } else {
+                gl::NEAREST
+            };
+            gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, filter as i32);
+            gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, filter as i32);
             gl::ActiveTexture(gl::TEXTURE1);
             gl::BindTexture(gl::TEXTURE_2D, self.mask);
             gl::ActiveTexture(gl::TEXTURE0);

@@ -50,13 +50,28 @@ precision mediump float;
 uniform sampler2D u_game;
 uniform sampler2D u_mask;
 uniform vec2 u_src;
-uniform float u_lcd;
+uniform float u_shader;
 uniform vec4 u_uv;
 uniform float u_bright;
 varying vec2 v_uv;
 void main() {
     vec2 uv = u_uv.xy + v_uv * u_uv.zw;
-    vec3 rgb = texture2D(u_game, uv).rgb * mix(vec3(1.0),texture2D(u_mask, v_uv * u_src).rgb,u_lcd);
+    vec3 rgb = texture2D(u_game, uv).rgb;
+    if (u_shader == 3.0) {
+        rgb *= texture2D(u_mask, v_uv * u_src).rgb;
+    } else if (u_shader == 4.0) {
+        // Lightweight CRT: soft pixels, scanlines, phosphor stripes and edge falloff.
+        // A single game texture sample; no extra framebuffer or temporal effects.
+        float line = 0.88 + 0.12 * cos(6.2831853 * fract(v_uv.y * u_src.y));
+        float column = mod(floor(gl_FragCoord.x), 3.0);
+        vec3 phosphor = vec3(0.94);
+        if (column < 1.0) phosphor.r = 1.0;
+        else if (column < 2.0) phosphor.g = 1.0;
+        else phosphor.b = 1.0;
+        vec2 edge = v_uv * 2.0 - 1.0;
+        float vignette = 1.0 - 0.08 * dot(edge, edge);
+        rgb *= line * phosphor * vignette;
+    }
     FRAG_COLOR = vec4(rgb * u_bright, 1.0);
 }
 "#;

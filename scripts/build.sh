@@ -28,9 +28,10 @@ cp "$task_build/ppsspp-build/lib/ppsspp_libretro.so" "$task_build/root/usr/share
 strip --strip-unneeded "$task_build/root/usr/share/slot/flycast_libretro.so" "$task_build/root/usr/share/slot/ppsspp_libretro.so"
 mkdir -p "$task_build/root/usr/share/slot/PPSSPP"
 cp -a "$task_build/core-source/ppsspp/assets/." "$task_build/root/usr/share/slot/PPSSPP/"
+cp "$repo/docs/G350-0.1.10-SHADERS.txt" "$task_build/root/usr/share/slot/SHADERS.txt"
 cp "$repo/firmware/slot-start" "$task_build/root/usr/bin/slot-start"
 chmod 755 "$task_build/root/usr/bin/slot-start" "$task_build/root/usr/bin/slot-g350"
-printf '%s\n' '0.1.9.4-experimental' > "$task_build/root/usr/share/slot/VERSION"
+printf '%s\n' '0.1.10-experimental' > "$task_build/root/usr/share/slot/VERSION"
 for task_core in flycast ppsspp; do
     mkdir -p "$task_build/root/usr/share/slot/notices/$task_core"
     for task_notice in LICENSE LICENSE.TXT COPYING README.md; do

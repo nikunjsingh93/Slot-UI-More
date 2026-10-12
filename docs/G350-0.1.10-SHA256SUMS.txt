@@ -1,0 +1,2 @@
+fc0fe55a05701a59cafac09ddc7c6320e2af679b1093b42d3cca6fbbea54c3e8  slot-g350-0.1.10-shaders-scaling-update.zip
+1d4e4a68654161fa7658e1886e0908558eec4b4a853bb821fb5ccd8207755407  slot-g350-0.1.10-shaders-scaling-sources.zip

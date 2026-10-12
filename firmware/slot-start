@@ -6,7 +6,7 @@ export HOME=/storage
 export LD_LIBRARY_PATH=/usr/lib:/usr/lib/pulseaudio
 mkdir -p "$SLOT_ROOT/System" "$SLOT_ROOT/Config"
 exec >> "$SLOT_ROOT/slot.log" 2>&1
-echo "slot: G350 0.1.9.4 startup $(date)"
+echo "slot: G350 0.1.10 startup $(date)"
 trap 'result=$?; echo "slot: startup script exited=$result before frontend exec"' EXIT
 echo 'slot: provisioning folders and missing cores' 
 for platform in GBA GB GBC PS1 SNES N64 DC PSP; do
@@ -62,6 +62,9 @@ if [ -f "$n64_core" ]; then
 fi
 if [ ! -f "$SLOT_ROOT/README.txt" ]; then
     cp /usr/share/slot/README.txt "$SLOT_ROOT/README.txt"
+fi
+if [ ! -f "$SLOT_ROOT/SHADERS.txt" ]; then
+    cp /usr/share/slot/SHADERS.txt "$SLOT_ROOT/SHADERS.txt"
 fi
 if [ ! -f "$SLOT_ROOT/Config/input-trace" ]; then
     : # Optional user-created trace marker is left untouched.

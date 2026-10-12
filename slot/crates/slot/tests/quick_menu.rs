@@ -112,6 +112,7 @@ fn up_and_down_move_the_bar_and_wrap_at_the_ends() {
         QuickRow::FastForward,
         QuickRow::FastForwardSound,
         QuickRow::ColourCorrection,
+        QuickRow::Shader,
         QuickRow::Rumble,
         QuickRow::DateTime,
         QuickRow::About,
@@ -165,6 +166,7 @@ fn rumble_and_fast_forward_sound_flip_on_either_arrow_and_save() {
     assert_eq!(card(&d), (false, true));
     press(&mut a, Btn::Down);
     press(&mut a, Btn::Down);
+    press(&mut a, Btn::Down);
     press(&mut a, Btn::Right);
     assert_eq!(card(&d), (false, false));
     assert!(!a.rumble_enabled());
@@ -203,6 +205,25 @@ fn colour_correction_flips_on_either_arrow_and_saves() {
             Some(QuickValue::flag(want))
         );
     }
+}
+
+#[test]
+fn shader_cycles_in_both_directions_and_survives_reboot_without_changing_other_settings() {
+    let (d, mut a, _) = on_carousel();
+    let before = read_slot_state(d.path());
+    open_at(&mut a, QuickRow::Shader);
+    for want in [1, 2, 3, 4, 0] {
+        press(&mut a, Btn::Right);
+        assert_eq!(a.shader(), want);
+        assert_eq!(a.quick_value(QuickRow::Shader), Some(QuickValue::shader(want)));
+        let mut saved = read_slot_state(d.path());
+        assert_eq!(saved.shader, want);
+        saved.shader = before.shader;
+        assert_eq!(saved, before);
+    }
+    press(&mut a, Btn::Left);
+    let (rebooted, _) = app_booting_at(d.path(), CLOCK_IS_SET);
+    assert_eq!(rebooted.shader(), 4);
 }
 
 #[test]

@@ -1,0 +1,53 @@
+{
+  "version": "0.1.10-experimental",
+  "target": "BATLEXP G350 existing Slot installation",
+  "base": "0.1.9.4",
+  "system_sha256": "c4e4ecc702811cb9d145a24ec5bc0eef4fcb3d7822c690db5592b443a93a10d0",
+  "system_md5": "6ab7f8409275ecb7b9973520461a338f",
+  "system_size": 1123721216,
+  "archive_sha256": "fc0fe55a05701a59cafac09ddc7c6320e2af679b1093b42d3cca6fbbea54c3e8",
+  "archive_size": 1123721470,
+  "frontend_sha256": "d80cbff5ed27f1bb1eed1444bf16384d2331e627c8c3262843180050a4a3114b",
+  "core_sha256": {
+    "mgba_libretro.so": "962ab910d17db1298c6b41be1955b582d15e76b149c4d4ae3a7f2cb02ebc749b",
+    "parallel_n64_libretro.so": "6f06977c294b7e8ae336c3f57977a23448387d55a4618d18b3973a006a9ee628",
+    "ppsspp_libretro.so": "75b4972a0018addc3359b68b26136d5b75d9e7558bebbec6401b1421b1654969",
+    "flycast_libretro.so": "6d1bacd9ab8700d395f7147548d525deb7039456c722767bcc1b9e182380da0c",
+    "gpsp_libretro.so": "96a13edea672637ef5bf9705ac0b5887a4c6934937ffa163fc9560bec692ce12",
+    "snes9x2005_plus_libretro.so": "87ab323dc307ecf230e71d0c79c791ae850923f3225ce8547915b30748f4e79e",
+    "snes9x_libretro.so": "798f9862939fad25fd664b21a826f12c4d4f023ac6a091a2b55ebb88974f193f",
+    "pcsx_rearmed_libretro.so": "8eac8b03343943745e4bf1a2f97eb400b28631ad07b04405d86a342dcb5ad9af",
+    "mupen64plus_next_libretro.so": "4a258260f7dbb26057a6f17df19f1d27969bac14bd56fc20d7254b8de8f4ebd9"
+  },
+  "sources": {
+    "flycast": {
+      "repository": "https://github.com/flyinghead/flycast",
+      "tag": "v2.5",
+      "revision": "5f4eefab5852d1c832ad8ffdf514fef8c217f1ac",
+      "rendering": "GLES3; GLES2 build rejected after visual tennis-court test"
+    },
+    "ppsspp": {
+      "repository": "https://github.com/hrydgard/ppsspp",
+      "tag": "v1.20.4",
+      "revision": "fa50bb1976065c4f8b1b47af227d367fe9771555",
+      "patch": "Join emulation thread when unloading from paused/start-requested state"
+    }
+  },
+  "shader_presets": [
+    "Original",
+    "Sharp Pixels",
+    "Smooth",
+    "LCD",
+    "CRT"
+  ],
+  "shader_scope": "Global saved preference",
+  "gb_scaling": "L1 cycles Stretch/HeightFit; R1 returns Actual; saved per game",
+  "quit": "Hold Menu alone for one second",
+  "changes": [
+    "Saved Shader menu row; lightweight built-in game shaders",
+    "GB/GBC full-height aspect fit with symmetric side bars; L1 cycle and R1 reset",
+    "Every other existing file in original SYSTEM, including all emulators and drivers, verified unchanged"
+  ],
+  "validation": "47 frontend/control unit tests; 21 menu tests; 2 scaling tests; 14 original GPU pipeline tests plus strict GLES shader/panel pixel test; 20 store durability and 1 shader migration test; 9 UI tests; menu screenshot; actual KMS/DRM executable and BaseOS dependency checks; complete unchanged-file inventory; SquashFS frontend and core readbacks; ZIP CRC; SD write verification pending.",
+  "hardware_validation": "Pending owner handheld boot and display test; no hardware performance claim"
+}

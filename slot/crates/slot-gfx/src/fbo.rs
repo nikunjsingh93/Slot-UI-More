@@ -1,6 +1,6 @@
 use crate::draw::{Draw, Sprites, TexId};
 use crate::grade::blue_light_gain;
-use crate::pipeline::GamePass;
+use crate::pipeline::{GamePass, GameShader};
 use crate::quad::Quad;
 use crate::shaders::{BLIT_FRAG, BLIT_VERT};
 use crate::surface::{blit_rect, GfxError, Surface, OUT_H, OUT_W};
@@ -117,6 +117,14 @@ impl Compositor {
 
     pub fn set_blue_light(&mut self, step: u8) {
         self.gain = blue_light_gain(step);
+    }
+
+    pub fn set_game_shader(&mut self, shader: GameShader) {
+        self.game.set_shader(shader);
+    }
+
+    pub fn set_game_width(&mut self, width: f32) {
+        self.game.set_width(width);
     }
 
     pub fn set_screen_power(&mut self, t: f32) {

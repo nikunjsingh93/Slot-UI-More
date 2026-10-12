@@ -1,0 +1,1 @@
+PASS verified old fresh-image input and latest SYSTEM input; SYSTEM/MD5 image readbacks; FAT/ext4 checks; original bootloader and empty storage partition unchanged; first-boot resize marker retained; ZIP CRC/decompressed image SHA256. Exact SYSTEM is the previously validated G350 0.1.10 shader/scaling build. Fresh physical first boot remains pending.

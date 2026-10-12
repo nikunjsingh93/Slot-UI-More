@@ -1,4 +1,18 @@
-# Slot for Anbernic RG35XX SP 0.2.0
+# Slot for Anbernic RG35XX SP 0.2.2
+
+## Latest complete image
+
+Download **slot-rg35xxsp-0.2.2.img.zip** from
+[rg35xxsp-v0.2.2](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/rg35xxsp-v0.2.2).
+Extract the `.img` and flash a 16 GB or larger card. It contains the current
+frontend, all eight systems, shaders and GB/GBC scaling controls directly;
+the older 0.2.0 image and separate shader/aspect updates are not required.
+Read the release START-HERE. Finish first boot before adding games because
+the initial expansion formats the empty data partition. Keep TF2 empty.
+Flashing erases the card; back up games/labels/BIOS/saves/settings beforehand.
+Fresh packaging retains the model-specific official boot/kernel regions and
+passes filesystem, real BusyBox installer/retry and payload checks. Physical
+first boot of this new image is pending. Historical port notes follow.
 
 Experimental single-card H700 port of the accepted G350 0.1.9.4 frontend.
 Includes GB, GBC, GBA, SNES, PS1, N64, Dreamcast and PSP. Uses the official
@@ -75,3 +89,46 @@ do not establish audible quality, real game speed, hinge behavior or device boot
 Source references:
 [Slot](https://github.com/BrandonKowalski/slot),
 [BaseOS](https://github.com/pvaibhav/BaseOS).
+
+## Shader frontend update 0.2.1
+
+For an existing SP 0.2.0 card, the 0.2.1 frontend adds a saved, global **Shader**
+row to the shelf's Menu settings: Original, Sharp Pixels, Smooth, LCD and CRT.
+Hold Menu for one second to return from a game, tap Menu, select Shader with
+Up/Down, change it with Left/Right, and press B to return to the shelf.
+Original preserves the previous GB/GBC/GBA LCD mask and sharp console output.
+Smooth uses bilinear filtering. CRT adds lightweight scanlines, phosphor stripes
+and edge shading. Effects apply to games and snapshots; shelf artwork stays clear.
+These are built-in single-pass presets, without external shader-file support.
+Existing colour correction and all game/quit/save/load controls are preserved.
+
+See [the update instructions](SHADERS-0.2.1.txt) and
+[build manifest](shaders-0.2.1-manifest.json). No full reflash is needed;
+the update contains three System files and a guide, leaving the 0.2.0
+first-boot installation marker, cores and user data in place.
+
+To rebuild, first restore the SP 0.2.0 frontend using `frontend.patch` against
+shared source `e787972`, then apply `shaders-0.2.1.patch` with `patch -p1`.
+Run the same locked device-profile build described above. Copy its
+`target/device/slot` to `System/slot` on the existing card; keep the SP launcher.
+The shader source ZIP also contains the complete updated frontend and test logs.
+GLES rendering, settings migration and menu checks pass in the build container;
+panel appearance and speed still require checking on the handheld.
+
+## GB/GBC aspect-ratio update 0.2.2
+
+For an existing SP 0.2.1 card, the 0.2.2 frontend adds the same GB/GBC scaling
+controls as G350 0.1.10. L1 alternates full-screen stretch and full-height with
+the original 160:144 aspect ratio and centered black side bars. R1 restores the
+previous default view. The scaling preference is saved per game. Shaders, GBA
+shoulder buttons, console state controls, Menu-hold quit, the SP analog toggle
+and all emulator cores/drivers retain their existing behavior.
+
+See [the update guide](ASPECT-0.2.2.txt) and
+[build manifest](aspect-0.2.2-manifest.json). Apply `aspect-0.2.2.patch` with
+`patch -p1` to the complete SP 0.2.1 frontend and use the same locked device
+build command above. The source ZIP also includes the complete updated frontend.
+Install the matching frontend/launcher/manifest files on the existing card;
+keep the original 0.2.0 installation marker. No full reflash is required.
+Controls, saved preferences and GLES physical-panel pixel geometry pass tests;
+handheld boot/display confirmation follows installation.

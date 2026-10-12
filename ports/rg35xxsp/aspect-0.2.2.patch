@@ -1,0 +1,275 @@
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -1863,7 +1863,7 @@
+ 
+ [[package]]
+ name = "slot"
+-version = "0.2.1"
++version = "0.2.2"
+ dependencies = [
+  "cpal",
+  "gilrs",
+--- a/crates/slot/Cargo.toml
++++ b/crates/slot/Cargo.toml
+@@ -1,6 +1,6 @@
+ [package]
+ name = "slot"
+-version = "0.2.1"
++version = "0.2.2"
+ edition.workspace = true
+ rust-version.workspace = true
+ license.workspace = true
+--- a/crates/slot/src/app.rs
++++ b/crates/slot/src/app.rs
+@@ -774,6 +774,14 @@
+         video_mode::source_rect(self.platform, self.video_mode)
+     }
+ 
++    pub fn picture_fills_height(&self) -> bool {
++        video_mode::fills_height(self.platform, self.video_mode)
++    }
++
++    pub fn picture_width(&self) -> f32 {
++        video_mode::width_fraction(self.platform, self.video_mode)
++    }
++
+     fn slot_owns_the_shoulders(&self) -> bool {
+         matches!(self.phase, Phase::Playing { .. })
+             && matches!(self.platform, Platform::Gb | Platform::Gbc)
+@@ -1161,7 +1169,7 @@
+             Phase::Inserting { .. } if action == Action::Eject => self.eject(),
+             Phase::Playing { .. } => match action {
+                 Action::GbaDown(Btn::L1) if self.slot_owns_the_shoulders() => {
+-                    self.set_picture(VideoMode::Stretch)
++                    self.set_picture(self.video_mode.next_l1())
+                 }
+                 Action::GbaDown(Btn::R1) if self.slot_owns_the_shoulders() => {
+                     self.set_picture(VideoMode::Actual)
+--- a/crates/slot/src/frontend.rs
++++ b/crates/slot/src/frontend.rs
+@@ -292,7 +292,7 @@
+     pub fn compose(&mut self, compositor: &mut Compositor) {
+         compositor.set_fill_panel(
+             matches!(std::env::var("SLOT_DEVICE").as_deref(), Ok("g350" | "rg35xxsp"))
+-                && !self.session.game_visible(),
++                && (!self.session.game_visible() || self.session.app().picture_fills_height()),
+         );
+         compositor.set_ps1_display(
+             matches!(
+@@ -311,6 +311,7 @@
+         compositor.set_shake(self.session.app().screen_shake());
+         compositor.set_screen_power(self.session.app().screen_power());
+         compositor.set_game_source_rect(self.session.app().source_rect());
++        compositor.set_game_width(self.session.app().picture_width());
+         compositor.begin_frame();
+         if let Some(frame) = self.session.frame() {
+             compositor.upload_game(&frame);
+--- a/crates/slot/src/video_mode.rs
++++ b/crates/slot/src/video_mode.rs
+@@ -10,6 +10,7 @@
+     #[default]
+     Actual,
+     Stretch,
++    HeightFit,
+ }
+ 
+ impl VideoMode {
+@@ -17,6 +18,7 @@
+         match self {
+             VideoMode::Actual => "actual",
+             VideoMode::Stretch => "stretch",
++            VideoMode::HeightFit => "height-fit",
+         }
+     }
+ 
+@@ -24,8 +26,30 @@
+         match s.trim().to_ascii_lowercase().as_str() {
+             "actual" => Some(VideoMode::Actual),
+             "stretch" => Some(VideoMode::Stretch),
++            "height-fit" => Some(VideoMode::HeightFit),
+             _ => None,
+         }
++    }
++
++    pub fn next_l1(self) -> Self {
++        match self {
++            Self::Actual | Self::HeightFit => Self::Stretch,
++            Self::Stretch => Self::HeightFit,
++        }
++    }
++}
++
++pub fn fills_height(platform: Platform, mode: VideoMode) -> bool {
++    matches!(platform, Platform::Gb | Platform::Gbc) && mode != VideoMode::Actual
++}
++
++/// Width of the game within the handheld's 4:3 panel, independent of the 720x480 UI canvas.
++pub fn width_fraction(platform: Platform, mode: VideoMode) -> f32 {
++    if fills_height(platform, mode) && mode == VideoMode::HeightFit {
++        let (w, h) = platform.picture();
++        (w as f32 / h as f32 / (4.0 / 3.0)).min(1.0)
++    } else {
++        1.0
+     }
+ }
+ 
+--- /dev/null
++++ b/crates/slot/tests/gb_scaling.rs
+@@ -0,0 +1,57 @@
++mod common;
++use slot::app::Phase;
++use slot::video_mode::{fills_height, source_rect, video_mode_for, width_fraction, write_video_mode, VideoMode};
++use slot_gfx::WHOLE_TEXTURE;
++use slot_input::{Action, Btn};
++use slot_store::Platform;
++
++#[test]
++fn l1_cycles_full_screen_and_aspect_fit_r1_resets_and_each_cart_keeps_its_choice() {
++    for platform in [Platform::Gb, Platform::Gbc] {
++        let d = common::tmp_root_with_gb_carts(&["First", "Second"]);
++        let mut a = common::app_playing_in(d.path(), "First");
++        a.set_platform(platform);
++        assert!(matches!(a.phase(), Phase::Playing { .. }));
++        for mode in [VideoMode::Stretch, VideoMode::HeightFit, VideoMode::Stretch, VideoMode::HeightFit] {
++            a.apply(Action::GbaDown(Btn::L1));
++            a.apply(Action::GbaUp(Btn::L1));
++            assert_eq!(video_mode_for(d.path(), "First"), mode);
++            assert_eq!(video_mode_for(d.path(), "Second"), VideoMode::Actual);
++            assert!(a.picture_fills_height());
++            assert_eq!(a.picture_width(), width_fraction(platform, mode));
++            assert_eq!(a.source_rect(), source_rect(platform, mode));
++        }
++        a.apply(Action::GbaDown(Btn::R1));
++        a.apply(Action::GbaUp(Btn::R1));
++        assert_eq!(video_mode_for(d.path(), "First"), VideoMode::Actual);
++        assert!(!a.picture_fills_height());
++        assert_eq!(a.picture_width(), 1.0);
++        assert_eq!(a.source_rect(), WHOLE_TEXTURE);
++        // GBA shoulders remain game buttons, so they cannot change picture scaling.
++        a.set_platform(Platform::Gba);
++        a.apply(Action::GbaDown(Btn::L1));
++        assert_eq!(a.source_rect(), WHOLE_TEXTURE);
++        assert!(!a.picture_fills_height());
++        assert!(!a.taken_buttons().contains(&Btn::L1));
++    }
++}
++
++#[test]
++fn aspect_fit_uses_the_physical_panel_and_old_preferences_remain_compatible() {
++    let d = tempfile::tempdir().unwrap();
++    for mode in [VideoMode::Actual, VideoMode::Stretch, VideoMode::HeightFit] {
++        write_video_mode(d.path(), "Game", mode).unwrap();
++        assert_eq!(video_mode_for(d.path(), "Game"), mode);
++    }
++    assert_eq!(VideoMode::parse("actual"), Some(VideoMode::Actual));
++    assert_eq!(VideoMode::parse("stretch"), Some(VideoMode::Stretch));
++    for p in [Platform::Gb, Platform::Gbc] {
++        let width = width_fraction(p, VideoMode::HeightFit) * 640.0;
++        assert!((width / 480.0 - 160.0 / 144.0).abs() < 0.00001);
++        assert!((width - 533.3333).abs() < 0.001);
++    }
++    for p in [Platform::Gba, Platform::Ps1, Platform::Snes, Platform::N64, Platform::Dreamcast, Platform::Psp] {
++        assert!(!fills_height(p, VideoMode::HeightFit));
++        assert_eq!(width_fraction(p, VideoMode::HeightFit), 1.0);
++    }
++}
+--- a/crates/slot-gfx/src/fbo.rs
++++ b/crates/slot-gfx/src/fbo.rs
+@@ -123,6 +123,10 @@
+         self.game.set_shader(shader);
+     }
+ 
++    pub fn set_game_width(&mut self, width: f32) {
++        self.game.set_width(width);
++    }
++
+     pub fn set_screen_power(&mut self, t: f32) {
+         self.game.set_power(t);
+     }
+--- a/crates/slot-gfx/src/pipeline.rs
++++ b/crates/slot-gfx/src/pipeline.rs
+@@ -46,6 +46,7 @@
+     shader: GameShader,
+     u_shader: gl::types::GLint,
+     u_src: gl::types::GLint,
++    width: f32,
+ }
+ 
+ impl GamePass {
+@@ -92,6 +93,7 @@
+             shader: GameShader::Original,
+             u_shader: crate::gl::uniform_location(prog, "u_shader"),
+             u_src: crate::gl::uniform_location(prog, "u_src"),
++            width: 1.0,
+         })
+     }
+ 
+@@ -101,6 +103,10 @@
+ 
+     pub fn set_shader(&mut self, shader: GameShader) {
+         self.shader = shader;
++    }
++
++    pub fn set_width(&mut self, width: f32) {
++        self.width = width.clamp(0.1, 1.0);
+     }
+ 
+     pub fn set_source_rect(&mut self, rect: [f32; 4]) {
+@@ -164,7 +170,10 @@
+     }
+ 
+     fn draw_source(&self, tex: gl::types::GLuint, quad: &Quad, src: [f32; 4]) {
+-        let (x, mut y, w, mut h) = screen_rect(self.power);
++        let (mut x, mut y, mut w, mut h) = screen_rect(self.power);
++        let narrow = w * self.width;
++        x += (w - narrow) * 0.5;
++        w = narrow;
+         if self.dims.0 == 480 && matches!(self.dims.1, 270 | 272) {
+             let fitted = h * (4.0 / 3.0) / (480.0 / self.dims.1 as f32);
+             y += (h - fitted) * 0.5;
+--- a/crates/slot-gfx/tests/shader_modes.rs
++++ b/crates/slot-gfx/tests/shader_modes.rs
+@@ -51,4 +51,43 @@
+         }
+     }
+     assert_eq!(unsafe { gl::GetError() }, gl::NO_ERROR);
++
++    // A cropped GB picture at full height: 600 logical columns become 533/534
++    // physical columns on the 640x480 SP, preserving the 160:144 aspect ratio.
++    c.upload_game(&flat);
++    c.set_game_source_rect([40.0 / 240.0, 8.0 / 160.0, 160.0 / 240.0, 144.0 / 160.0]);
++    c.set_game_width(5.0 / 6.0);
++    let fitted = render(&mut c, GameShader::Sharp);
++    for y in [0, 240, 479] {
++        for x in 0..720 {
++            assert_eq!(pixel(&fitted, x, y), if (60..660).contains(&x) { [128; 3] } else { [0; 3] });
++        }
++    }
++    c.set_fill_panel(true);
++    c.end_frame((640, 480));
++    let mut panel = vec![0u8; 640 * 480 * 4];
++    unsafe {
++        gl::BindFramebuffer(gl::FRAMEBUFFER, 0);
++        gl::ReadPixels(0, 0, 640, 480, gl::RGBA, gl::UNSIGNED_BYTE, panel.as_mut_ptr() as *mut _);
++    }
++    for y in [0, 240, 479] {
++        let row = &panel[y * 640 * 4..(y + 1) * 640 * 4];
++        let lit: Vec<_> = row.chunks_exact(4).enumerate().filter(|(_, p)| p[0] > 0).map(|(x, _)| x).collect();
++        assert!((533..=534).contains(&lit.len()), "incorrect physical GB width: {}", lit.len());
++        let left = lit[0];
++        let right = 639 - lit[lit.len() - 1];
++        assert!(left.abs_diff(right) <= 1, "picture is not centered");
++    }
++    // The first L1 mode fills the entire physical panel.
++    c.set_game_width(1.0);
++    let stretched = render(&mut c, GameShader::Sharp);
++    assert!(stretched.chunks_exact(4).all(|p| p[..3] == [128; 3]));
++    // R1 restores the existing presentation rectangle and padded source.
++    c.set_fill_panel(false);
++    c.set_game_source_rect([0.0, 0.0, 1.0, 1.0]);
++    render(&mut c, GameShader::Original);
++    c.end_frame((640, 480));
++    let mut viewport = [0; 4];
++    unsafe { gl::GetIntegerv(gl::VIEWPORT, viewport.as_mut_ptr()); }
++    assert_eq!(viewport, [0, 26, 640, 427]);
+ }

@@ -1,0 +1,6 @@
+85bc52c8bd9f4a84f61dd689a068737402abcae3c529b97294e86588c3e9c17a  slot-rgsp-0.3.0.img
+f7f4aef6bb762d47c883c77cb74eddd8e24b0011a3788c7ac036e96dd549ef1f  slot-rgsp-0.3.0.img.zip
+11b5b3d3d7dd0f8bb683c2f92ba774320fd3461afc14c57b2922e2c722cd169f  slot-rgsp-0.3.0-sources.zip
+db82091f0e8a51a4af69bd9557eda50827075ac4f5cd2f111d6bfce52ab2015b  slot-rgsp-0.3.0-START-HERE.txt
+8cab5e5e7874db558a17b05716386b8b64d51787bb389e4828f99f21f53d9219  slot-rgsp-0.3.0-fresh-manifest.json
+cfb7066cbc6869a90da1c28108505bcd2369e2a1d0c9d86651bf1ffb236f16ad  slot-rgsp-0.3.0-VALIDATION.txt

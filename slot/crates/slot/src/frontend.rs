@@ -291,7 +291,8 @@ impl Frontend {
 
     pub fn compose(&mut self, compositor: &mut Compositor) {
         compositor.set_fill_panel(
-            std::env::var("SLOT_DEVICE").as_deref() == Ok("g350") && !self.session.game_visible(),
+            std::env::var("SLOT_DEVICE").as_deref() == Ok("g350")
+                && (!self.session.game_visible() || self.session.app().picture_fills_height()),
         );
         compositor.set_ps1_display(
             matches!(
@@ -306,9 +307,11 @@ impl Frontend {
             ) && self.session.game_visible(),
         );
         compositor.set_blue_light(self.session.app().blue_light());
+        compositor.set_game_shader(slot_gfx::GameShader::from_id(self.session.app().shader()));
         compositor.set_shake(self.session.app().screen_shake());
         compositor.set_screen_power(self.session.app().screen_power());
         compositor.set_game_source_rect(self.session.app().source_rect());
+        compositor.set_game_width(self.session.app().picture_width());
         compositor.begin_frame();
         if let Some(frame) = self.session.frame() {
             compositor.upload_game(&frame);

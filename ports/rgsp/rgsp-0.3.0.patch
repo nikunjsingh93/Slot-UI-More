@@ -1,0 +1,139 @@
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -1863,7 +1863,7 @@
+ 
+ [[package]]
+ name = "slot"
+-version = "0.2.2"
++version = "0.3.0"
+ dependencies = [
+  "cpal",
+  "gilrs",
+--- a/crates/slot/Cargo.toml
++++ b/crates/slot/Cargo.toml
+@@ -1,6 +1,6 @@
+ [package]
+ name = "slot"
+-version = "0.2.2"
++version = "0.3.0"
+ edition.workspace = true
+ rust-version.workspace = true
+ license.workspace = true
+--- a/crates/slot/src/frontend.rs
++++ b/crates/slot/src/frontend.rs
+@@ -291,7 +291,7 @@
+ 
+     pub fn compose(&mut self, compositor: &mut Compositor) {
+         compositor.set_fill_panel(
+-            matches!(std::env::var("SLOT_DEVICE").as_deref(), Ok("g350" | "rg35xxsp"))
++            matches!(std::env::var("SLOT_DEVICE").as_deref(), Ok("g350" | "rg35xxsp" | "rgsp"))
+                 && (!self.session.game_visible() || self.session.app().picture_fills_height()),
+         );
+         compositor.set_ps1_display(
+--- a/crates/slot/src/session.rs
++++ b/crates/slot/src/session.rs
+@@ -98,7 +98,7 @@
+             driven: false,
+             ps1_menu: false,
+             ps1_chord: false,
+-            stickless: std::env::var("SLOT_DEVICE").as_deref() == Ok("rg35xxsp"),
++            stickless: matches!(std::env::var("SLOT_DEVICE").as_deref(), Ok("rg35xxsp" | "rgsp")),
+             dpad_analog: false,
+         }
+     }
+--- a/crates/slot/src/video_mode.rs
++++ b/crates/slot/src/video_mode.rs
+@@ -43,11 +43,18 @@
+     matches!(platform, Platform::Gb | Platform::Gbc) && mode != VideoMode::Actual
+ }
+ 
+-/// Width of the game within the handheld's 4:3 panel, independent of the 720x480 UI canvas.
++/// Width within the physical panel: RG SP is 3:2, RG35XX SP/G350 are 4:3.
+ pub fn width_fraction(platform: Platform, mode: VideoMode) -> f32 {
++    let rgsp = std::env::var("SLOT_DEVICE").as_deref() == Ok("rgsp");
++    let panel_aspect = if rgsp { 3.0 / 2.0 } else { 4.0 / 3.0 };
++    if rgsp && matches!(platform, Platform::Ps1 | Platform::Snes | Platform::N64 | Platform::Dreamcast | Platform::Psp) {
++        // Console presentation was authored for 4:3. PSP already letterboxes
++        // within that rectangle, so preserve its 480:272 ratio as well.
++        return (4.0 / 3.0) / panel_aspect;
++    }
+     if fills_height(platform, mode) && mode == VideoMode::HeightFit {
+         let (w, h) = platform.picture();
+-        (w as f32 / h as f32 / (4.0 / 3.0)).min(1.0)
++        (w as f32 / h as f32 / panel_aspect).min(1.0)
+     } else {
+         1.0
+     }
+--- /dev/null
++++ b/crates/slot/tests/rgsp_panel.rs
+@@ -0,0 +1,55 @@
++#![cfg(target_os = "linux")]
++use slot::frontend::Frontend;
++use slot::video_mode::{width_fraction, VideoMode};
++use slot_gfx::{Compositor, HeadlessSurface, GameShader};
++use slot_power::SimPlatform;
++use slot_store::Platform;
++
++#[test]
++fn rgsp_native_panel_and_game_aspects_are_preserved() {
++    std::env::set_var("SLOT_DEVICE", "rgsp");
++    let d = tempfile::tempdir().unwrap();
++    slot::root::ensure(d.path());
++    for stem in ["First", "Second"] {
++        std::fs::write(d.path().join(format!("Games/PS1/{stem}.chd")), [0; 32]).unwrap();
++    }
++    slot_store::write_slot_state(d.path(), &slot_store::SlotState { clock_set: true, ..Default::default() }).unwrap();
++    let surface = HeadlessSurface::new().unwrap();
++    let mut c = Compositor::new(&surface).unwrap();
++    let mut ui = Frontend::boot(Box::new(SimPlatform::at(d.path().to_path_buf())));
++    ui.upload_faces(&mut c);
++    ui.render(&mut c, (720, 480));
++    let mut viewport = [0i32; 4];
++    unsafe { gl::GetIntegerv(gl::VIEWPORT, viewport.as_mut_ptr()); }
++    assert_eq!(viewport, [0, 0, 720, 480]);
++    // The shelf's power-on animation starts with its game rectangle closed.
++    // Use a fresh compositor to measure the fully powered game presentation.
++    drop(c);
++    let mut c = Compositor::new(&surface).unwrap();
++    c.set_game_shader(GameShader::Sharp);
++    c.set_fill_panel(true);
++    let cases = [
++        (Platform::Gb, VideoMode::HeightFit, 240, 160, 533, 480),
++        (Platform::Gbc, VideoMode::Stretch, 240, 160, 720, 480),
++        (Platform::Ps1, VideoMode::Actual, 640, 480, 640, 480),
++        (Platform::Snes, VideoMode::Actual, 320, 240, 640, 480),
++        (Platform::N64, VideoMode::Actual, 320, 240, 640, 480),
++        (Platform::Dreamcast, VideoMode::Actual, 320, 240, 640, 480),
++        (Platform::Psp, VideoMode::Actual, 480, 272, 640, 363),
++    ];
++    for (p, mode, w, h, expected_w, expected_h) in cases {
++        c.upload_game(&vec![128; w * h * 4]);
++        c.set_game_width(width_fraction(p, mode));
++        c.begin_frame(); c.draw_game();
++        let f = c.read_frame();
++        let row = &f[240 * 720 * 4..241 * 720 * 4];
++        let cols: Vec<_> = row.chunks_exact(4).enumerate().filter(|(_, px)| px[0] > 0).map(|(x, _)| x).collect();
++        let rows: Vec<_> = (0..480).filter(|y| f[(y * 720 + 360) * 4] > 0).collect();
++        assert!(cols.len().abs_diff(expected_w) <= 1, "{p:?}: width {}", cols.len());
++        assert!(rows.len().abs_diff(expected_h) <= 1, "{p:?}: height {}", rows.len());
++        assert!(cols[0].abs_diff(719 - cols[cols.len()-1]) <= 1);
++        assert!(rows[0].abs_diff(479 - rows[rows.len()-1]) <= 1);
++    }
++    assert_eq!(unsafe { gl::GetError() }, gl::NO_ERROR);
++    std::env::remove_var("SLOT_DEVICE");
++}
+--- a/crates/slot-gfx/src/fbdev.rs
++++ b/crates/slot-gfx/src/fbdev.rs
+@@ -152,7 +152,11 @@
+             .and_then(panel_mode)
+             .or_else(|| attr("modes").as_deref().and_then(panel_mode))
+             .or_else(visible_size)
+-            .or_else(|| (std::env::var("SLOT_DEVICE").as_deref() == Ok("rg35xxsp")).then_some((640, 480)))
++            .or_else(|| match std::env::var("SLOT_DEVICE").as_deref() {
++                Ok("rg35xxsp") => Some((640, 480)),
++                Ok("rgsp") => Some((720, 480)),
++                _ => None,
++            })
+             .or_else(|| attr("virtual_size").as_deref().and_then(panel_size))
+             .unwrap_or(FALLBACK_PANEL);
+         FbdevSurface::open(hint)

@@ -1,0 +1,36 @@
+Slot RG35XX SP 0.2.1 - Shader update
+
+For an existing Slot RG35XX SP 0.2.0 card only. No reflash needed.
+Extract this update ZIP at the BASEOS card root and replace the three
+matching System files. Safely eject the card before putting it in the SP.
+The original installer marker stays in place to prevent a first-boot reinstall.
+Games, artwork, BIOS, saves, states, configuration and emulator cores are preserved.
+
+HOW TO CHANGE THE SHADER
+1. While playing, hold Menu alone for one second to return to Slot's shelf.
+2. On the shelf, TAP Menu to open settings.
+3. Press Up/Down to select Shader, then Left/Right to choose the effect.
+4. Press B or tap Menu to close settings, then launch a game.
+
+Original     Existing appearance: LCD for GB/GBC/GBA; sharp console output.
+Sharp Pixels Crisp nearest-neighbour pixels, with no LCD mask or scanlines.
+Smooth       Bilinear filtering softens the edges between source pixels.
+LCD          RGB subpixel grid and mild scanlines, suitable for handheld games.
+CRT          Soft pixels, scanlines, light phosphor stripes and shaded edges.
+
+This is one global setting for all systems, saved automatically across boots.
+It applies to gameplay and game snapshots, not Slot's menus or cartridge artwork.
+Colour Correction and blue-light filtering remain separate settings.
+Select+Y still toggles colour correction. Menu+X/Y still saves/loads console states.
+Menu+Select still toggles analog controls on N64/DC/PSP.
+Hold Menu alone for one second still returns to Slot.
+
+These are built-in, single-pass effects; external RetroArch shader files
+and multi-pass presets are not supported. CRT uses no bloom or curvature.
+Build, settings migration, menu rendering, and GLES pixel tests pass.
+Actual panel appearance/performance must be checked on the handheld.
+
+ROLLBACK
+Replace System/slot, System/launch_frontend.sh and System/slot-sp-build.json
+with the previous 0.2.0 copies, then safely eject and restart.
+The old frontend safely ignores the new shader preference.

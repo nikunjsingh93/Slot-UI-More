@@ -1,0 +1,1557 @@
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -1863,7 +1863,7 @@
+ 
+ [[package]]
+ name = "slot"
+-version = "0.1.0"
++version = "0.1.10"
+ dependencies = [
+  "cpal",
+  "gilrs",
+--- a/crates/slot/Cargo.toml
++++ b/crates/slot/Cargo.toml
+@@ -1,30 +1,30 @@
+-[package]
+-name = "slot"
+-version = "0.1.0"
+-edition.workspace = true
+-rust-version.workspace = true
+-license.workspace = true
+-
+-[features]
+-default = ["host"]
+-host = ["dep:winit", "dep:cpal", "dep:gilrs", "slot-gfx/host"]
+-device = ["slot-gfx/device"]
+-
+-[dependencies]
+-slot-gfx = { path = "../slot-gfx", default-features = false }
+-slot-input = { path = "../slot-input" }
+-slot-power = { path = "../slot-power" }
+-slot-retro = { path = "../slot-retro" }
+-slot-store = { path = "../slot-store" }
+-slot-ui = { path = "../slot-ui" }
+-winit = { workspace = true, optional = true }
+-cpal = { workspace = true, optional = true }
+-gilrs = { workspace = true, optional = true }
+-libloading = { workspace = true }
+-lz4_flex = { workspace = true }
+-png = { workspace = true }
+-
+-[dev-dependencies]
+-gl = "0.14"
+-slot-gfx = { path = "../slot-gfx", default-features = false, features = ["test-support"] }
+-tempfile = { workspace = true }
++[package]
++name = "slot"
++version = "0.1.10"
++edition.workspace = true
++rust-version.workspace = true
++license.workspace = true
++
++[features]
++default = ["host"]
++host = ["dep:winit", "dep:cpal", "dep:gilrs", "slot-gfx/host"]
++device = ["slot-gfx/device"]
++
++[dependencies]
++slot-gfx = { path = "../slot-gfx", default-features = false }
++slot-input = { path = "../slot-input" }
++slot-power = { path = "../slot-power" }
++slot-retro = { path = "../slot-retro" }
++slot-store = { path = "../slot-store" }
++slot-ui = { path = "../slot-ui" }
++winit = { workspace = true, optional = true }
++cpal = { workspace = true, optional = true }
++gilrs = { workspace = true, optional = true }
++libloading = { workspace = true }
++lz4_flex = { workspace = true }
++png = { workspace = true }
++
++[dev-dependencies]
++gl = "0.14"
++slot-gfx = { path = "../slot-gfx", default-features = false, features = ["test-support"] }
++tempfile = { workspace = true }
+--- a/crates/slot/src/app.rs
++++ b/crates/slot/src/app.rs
+@@ -641,10 +641,13 @@
+             QuickRow::FastForward => QuickValue::speed(self.state.ff_speed),
+             QuickRow::FastForwardSound => Some(QuickValue::flag(self.state.ff_sound)),
+             QuickRow::ColourCorrection => Some(QuickValue::flag(self.state.colour_correction)),
++            QuickRow::Shader => Some(QuickValue::shader(self.state.shader)),
+             QuickRow::Rumble => Some(QuickValue::flag(self.state.rumble)),
+             QuickRow::DateTime | QuickRow::About => None,
+         }
+     }
++
++    pub fn shader(&self) -> u8 { self.state.shader }
+ 
+     pub fn set_quick_menu_faces(&mut self, faces: QuickMenuFaces) {
+         self.quick_menu_faces = Some(faces);
+@@ -767,6 +770,14 @@
+ 
+     pub fn source_rect(&self) -> [f32; 4] {
+         video_mode::source_rect(self.platform, self.video_mode)
++    }
++
++    pub fn picture_fills_height(&self) -> bool {
++        video_mode::fills_height(self.platform, self.video_mode)
++    }
++
++    pub fn picture_width(&self) -> f32 {
++        video_mode::width_fraction(self.platform, self.video_mode)
+     }
+ 
+     fn slot_owns_the_shoulders(&self) -> bool {
+@@ -1156,7 +1167,7 @@
+             Phase::Inserting { .. } if action == Action::Eject => self.eject(),
+             Phase::Playing { .. } => match action {
+                 Action::GbaDown(Btn::L1) if self.slot_owns_the_shoulders() => {
+-                    self.set_picture(VideoMode::Stretch)
++                    self.set_picture(self.video_mode.next_l1())
+                 }
+                 Action::GbaDown(Btn::R1) if self.slot_owns_the_shoulders() => {
+                     self.set_picture(VideoMode::Actual)
+@@ -1220,6 +1231,7 @@
+             QuickRow::FastForward
+             | QuickRow::FastForwardSound
+             | QuickRow::ColourCorrection
++            | QuickRow::Shader
+             | QuickRow::Rumble => {}
+         }
+     }
+@@ -1240,6 +1252,7 @@
+                 self.colour_pending = Some(s.colour_correction);
+             }
+             QuickRow::Rumble => s.rumble = !s.rumble,
++            QuickRow::Shader => s.shader = (s.shader + if right { 1 } else { 4 }) % 5,
+             QuickRow::DateTime | QuickRow::About => return,
+         }
+         self.persist();
+--- a/crates/slot/src/frontend.rs
++++ b/crates/slot/src/frontend.rs
+@@ -291,7 +291,8 @@
+ 
+     pub fn compose(&mut self, compositor: &mut Compositor) {
+         compositor.set_fill_panel(
+-            std::env::var("SLOT_DEVICE").as_deref() == Ok("g350") && !self.session.game_visible(),
++            std::env::var("SLOT_DEVICE").as_deref() == Ok("g350")
++                && (!self.session.game_visible() || self.session.app().picture_fills_height()),
+         );
+         compositor.set_ps1_display(
+             matches!(
+@@ -306,9 +307,11 @@
+             ) && self.session.game_visible(),
+         );
+         compositor.set_blue_light(self.session.app().blue_light());
++        compositor.set_game_shader(slot_gfx::GameShader::from_id(self.session.app().shader()));
+         compositor.set_shake(self.session.app().screen_shake());
+         compositor.set_screen_power(self.session.app().screen_power());
+         compositor.set_game_source_rect(self.session.app().source_rect());
++        compositor.set_game_width(self.session.app().picture_width());
+         compositor.begin_frame();
+         if let Some(frame) = self.session.frame() {
+             compositor.upload_game(&frame);
+--- a/crates/slot/src/video_mode.rs
++++ b/crates/slot/src/video_mode.rs
+@@ -10,6 +10,7 @@
+     #[default]
+     Actual,
+     Stretch,
++    HeightFit,
+ }
+ 
+ impl VideoMode {
+@@ -17,6 +18,7 @@
+         match self {
+             VideoMode::Actual => "actual",
+             VideoMode::Stretch => "stretch",
++            VideoMode::HeightFit => "height-fit",
+         }
+     }
+ 
+@@ -24,8 +26,30 @@
+         match s.trim().to_ascii_lowercase().as_str() {
+             "actual" => Some(VideoMode::Actual),
+             "stretch" => Some(VideoMode::Stretch),
++            "height-fit" => Some(VideoMode::HeightFit),
+             _ => None,
+         }
++    }
++
++    pub fn next_l1(self) -> Self {
++        match self {
++            Self::Actual | Self::HeightFit => Self::Stretch,
++            Self::Stretch => Self::HeightFit,
++        }
++    }
++}
++
++pub fn fills_height(platform: Platform, mode: VideoMode) -> bool {
++    matches!(platform, Platform::Gb | Platform::Gbc) && mode != VideoMode::Actual
++}
++
++/// Width of the game within the G350's 4:3 panel, independent of the 720x480 UI canvas.
++pub fn width_fraction(platform: Platform, mode: VideoMode) -> f32 {
++    if fills_height(platform, mode) && mode == VideoMode::HeightFit {
++        let (w, h) = platform.picture();
++        (w as f32 / h as f32 / (4.0 / 3.0)).min(1.0)
++    } else {
++        1.0
+     }
+ }
+ 
+--- /dev/null
++++ b/crates/slot/tests/gb_scaling.rs
+@@ -0,0 +1,57 @@
++mod common;
++use slot::app::Phase;
++use slot::video_mode::{fills_height, source_rect, video_mode_for, width_fraction, write_video_mode, VideoMode};
++use slot_gfx::WHOLE_TEXTURE;
++use slot_input::{Action, Btn};
++use slot_store::Platform;
++
++#[test]
++fn l1_cycles_full_screen_and_aspect_fit_r1_resets_and_each_cart_keeps_its_choice() {
++    for platform in [Platform::Gb, Platform::Gbc] {
++        let d = common::tmp_root_with_gb_carts(&["First", "Second"]);
++        let mut a = common::app_playing_in(d.path(), "First");
++        a.set_platform(platform);
++        assert!(matches!(a.phase(), Phase::Playing { .. }));
++        for mode in [VideoMode::Stretch, VideoMode::HeightFit, VideoMode::Stretch, VideoMode::HeightFit] {
++            a.apply(Action::GbaDown(Btn::L1));
++            a.apply(Action::GbaUp(Btn::L1));
++            assert_eq!(video_mode_for(d.path(), "First"), mode);
++            assert_eq!(video_mode_for(d.path(), "Second"), VideoMode::Actual);
++            assert!(a.picture_fills_height());
++            assert_eq!(a.picture_width(), width_fraction(platform, mode));
++            assert_eq!(a.source_rect(), source_rect(platform, mode));
++        }
++        a.apply(Action::GbaDown(Btn::R1));
++        a.apply(Action::GbaUp(Btn::R1));
++        assert_eq!(video_mode_for(d.path(), "First"), VideoMode::Actual);
++        assert!(!a.picture_fills_height());
++        assert_eq!(a.picture_width(), 1.0);
++        assert_eq!(a.source_rect(), WHOLE_TEXTURE);
++        // GBA shoulders remain game buttons, so they cannot change picture scaling.
++        a.set_platform(Platform::Gba);
++        a.apply(Action::GbaDown(Btn::L1));
++        assert_eq!(a.source_rect(), WHOLE_TEXTURE);
++        assert!(!a.picture_fills_height());
++        assert!(!a.taken_buttons().contains(&Btn::L1));
++    }
++}
++
++#[test]
++fn aspect_fit_uses_the_physical_panel_and_old_preferences_remain_compatible() {
++    let d = tempfile::tempdir().unwrap();
++    for mode in [VideoMode::Actual, VideoMode::Stretch, VideoMode::HeightFit] {
++        write_video_mode(d.path(), "Game", mode).unwrap();
++        assert_eq!(video_mode_for(d.path(), "Game"), mode);
++    }
++    assert_eq!(VideoMode::parse("actual"), Some(VideoMode::Actual));
++    assert_eq!(VideoMode::parse("stretch"), Some(VideoMode::Stretch));
++    for p in [Platform::Gb, Platform::Gbc] {
++        let width = width_fraction(p, VideoMode::HeightFit) * 640.0;
++        assert!((width / 480.0 - 160.0 / 144.0).abs() < 0.00001);
++        assert!((width - 533.3333).abs() < 0.001);
++    }
++    for p in [Platform::Gba, Platform::Ps1, Platform::Snes, Platform::N64, Platform::Dreamcast, Platform::Psp] {
++        assert!(!fills_height(p, VideoMode::HeightFit));
++        assert_eq!(width_fraction(p, VideoMode::HeightFit), 1.0);
++    }
++}
+--- a/crates/slot/tests/quick_menu.rs
++++ b/crates/slot/tests/quick_menu.rs
+@@ -112,6 +112,7 @@
+         QuickRow::FastForward,
+         QuickRow::FastForwardSound,
+         QuickRow::ColourCorrection,
++        QuickRow::Shader,
+         QuickRow::Rumble,
+         QuickRow::DateTime,
+         QuickRow::About,
+@@ -165,6 +166,7 @@
+     assert_eq!(card(&d), (false, true));
+     press(&mut a, Btn::Down);
+     press(&mut a, Btn::Down);
++    press(&mut a, Btn::Down);
+     press(&mut a, Btn::Right);
+     assert_eq!(card(&d), (false, false));
+     assert!(!a.rumble_enabled());
+@@ -206,6 +208,25 @@
+ }
+ 
+ #[test]
++fn shader_cycles_in_both_directions_and_survives_reboot_without_changing_other_settings() {
++    let (d, mut a, _) = on_carousel();
++    let before = read_slot_state(d.path());
++    open_at(&mut a, QuickRow::Shader);
++    for want in [1, 2, 3, 4, 0] {
++        press(&mut a, Btn::Right);
++        assert_eq!(a.shader(), want);
++        assert_eq!(a.quick_value(QuickRow::Shader), Some(QuickValue::shader(want)));
++        let mut saved = read_slot_state(d.path());
++        assert_eq!(saved.shader, want);
++        saved.shader = before.shader;
++        assert_eq!(saved, before);
++    }
++    press(&mut a, Btn::Left);
++    let (rebooted, _) = app_booting_at(d.path(), CLOCK_IS_SET);
++    assert_eq!(rebooted.shader(), 4);
++}
++
++#[test]
+ fn colour_correction_leaves_the_settings_around_it_alone() {
+     let (d, mut a, _) = on_carousel();
+     open_at(&mut a, QuickRow::ColourCorrection);
+--- /dev/null
++++ b/crates/slot/tests/shader_menu.rs
+@@ -0,0 +1,55 @@
++#![cfg(target_os = "linux")]
++use slot::frontend::Frontend;
++use slot_gfx::{Compositor, HeadlessSurface, OUT_H, OUT_W};
++use slot_input::{Btn, InputSource, Millis, RawEvent};
++use slot_power::SimPlatform;
++use slot_ui::{QuickRow, QUICK_PITCH, QUICK_TOP};
++
++struct Input(Vec<RawEvent>);
++impl InputSource for Input {
++    fn poll(&mut self, _: Millis) -> Vec<RawEvent> { std::mem::take(&mut self.0) }
++}
++fn tap(f: &mut Frontend, key: Btn, clock: &mut Millis) {
++    for event in [RawEvent::Down(key), RawEvent::Up(key)] {
++        *clock += 100;
++        f.advance_at(&mut Input(vec![event]), *clock, 0.1);
++    }
++}
++
++#[test]
++fn shader_settings_fit_the_sp_menu_and_render_each_choice() {
++    std::env::set_var("SLOT_DEVICE", "g350");
++    let d = tempfile::tempdir().unwrap();
++    slot::root::ensure(d.path());
++    for stem in ["First", "Second"] {
++        std::fs::write(d.path().join(format!("Games/GBA/{stem}.gba")), [0; 256]).unwrap();
++    }
++    slot_store::write_slot_state(d.path(), &slot_store::SlotState { clock_set: true, ..Default::default() }).unwrap();
++    let surface = HeadlessSurface::new().unwrap();
++    let mut c = Compositor::new(&surface).unwrap();
++    let mut f = Frontend::boot(Box::new(SimPlatform::at(d.path().to_path_buf())));
++    f.upload_faces(&mut c);
++    let mut clock = 1000;
++    tap(&mut f, Btn::Menu, &mut clock);
++    for _ in 0..QuickRow::Shader.index() { tap(&mut f, Btn::Down, &mut clock); }
++    assert_eq!(f.app().quick_menu(), Some(QuickRow::Shader));
++    assert!(QUICK_TOP >= 0.0);
++    assert!(QUICK_TOP + QUICK_PITCH * QuickRow::ALL.len() as f32 <= 427.0);
++    for shader in 0..5 {
++        assert_eq!(f.app().shader(), shader);
++        f.render(&mut c, (640, 480));
++        let frame = c.read_frame();
++        let mut viewport = [0; 4];
++        unsafe { gl::GetIntegerv(gl::VIEWPORT, viewport.as_mut_ptr()); }
++        assert_eq!(viewport, [0, 0, 640, 480]);
++        if let Ok(dir) = std::env::var("SCRATCH_PNG_DIR") {
++            let file = std::fs::File::create(format!("{dir}/g350-shader-menu-{shader}.png")).unwrap();
++            let mut e = png::Encoder::new(file, OUT_W, OUT_H);
++            e.set_color(png::ColorType::Rgba);
++            e.set_depth(png::BitDepth::Eight);
++            e.write_header().unwrap().write_image_data(&frame).unwrap();
++        }
++        tap(&mut f, Btn::Right, &mut clock);
++    }
++    std::env::remove_var("SLOT_DEVICE");
++}
+--- a/crates/slot-gfx/src/fbo.rs
++++ b/crates/slot-gfx/src/fbo.rs
+@@ -1,6 +1,6 @@
+ use crate::draw::{Draw, Sprites, TexId};
+ use crate::grade::blue_light_gain;
+-use crate::pipeline::GamePass;
++use crate::pipeline::{GamePass, GameShader};
+ use crate::quad::Quad;
+ use crate::shaders::{BLIT_FRAG, BLIT_VERT};
+ use crate::surface::{blit_rect, GfxError, Surface, OUT_H, OUT_W};
+@@ -119,6 +119,14 @@
+         self.gain = blue_light_gain(step);
+     }
+ 
++    pub fn set_game_shader(&mut self, shader: GameShader) {
++        self.game.set_shader(shader);
++    }
++
++    pub fn set_game_width(&mut self, width: f32) {
++        self.game.set_width(width);
++    }
++
+     pub fn set_screen_power(&mut self, t: f32) {
+         self.game.set_power(t);
+     }
+--- a/crates/slot-gfx/src/lib.rs
++++ b/crates/slot-gfx/src/lib.rs
+@@ -29,6 +29,6 @@
+ pub use host::HostSurface;
+ pub use kmsdrm::KmsdrmSurface;
+ pub use lcd3x::{lcd3x_mask, mask_texture_rgba8};
+-pub use pipeline::{SCALE, SRC_H, SRC_W, WHOLE_TEXTURE};
++pub use pipeline::{GameShader, SCALE, SRC_H, SRC_W, WHOLE_TEXTURE};
+ pub use power::{screen_brightness, screen_scale, screen_width};
+ pub use surface::{blit_rect, blit_rect_fit, fit_rect, fit_scale, GfxError, Surface, OUT_H, OUT_W};
+--- a/crates/slot-gfx/src/pipeline.rs
++++ b/crates/slot-gfx/src/pipeline.rs
+@@ -9,6 +9,29 @@
+ pub const SRC_H: u32 = OUT_H / SCALE;
+ 
+ pub const WHOLE_TEXTURE: [f32; 4] = [0.0, 0.0, 1.0, 1.0];
++
++#[derive(Copy, Clone, Debug, PartialEq, Eq, Default)]
++#[repr(u8)]
++pub enum GameShader {
++    #[default]
++    Original = 0,
++    Sharp = 1,
++    Smooth = 2,
++    Lcd = 3,
++    Crt = 4,
++}
++
++impl GameShader {
++    pub fn from_id(id: u8) -> Self {
++        match id {
++            1 => Self::Sharp,
++            2 => Self::Smooth,
++            3 => Self::Lcd,
++            4 => Self::Crt,
++            _ => Self::Original,
++        }
++    }
++}
+ 
+ pub struct GamePass {
+     prog: gl::types::GLuint,
+@@ -20,6 +43,10 @@
+     power: f32,
+     src: [f32; 4],
+     dims: (u32, u32),
++    shader: GameShader,
++    u_shader: gl::types::GLint,
++    u_src: gl::types::GLint,
++    width: f32,
+ }
+ 
+ impl GamePass {
+@@ -63,11 +90,23 @@
+             power: 1.0,
+             src: WHOLE_TEXTURE,
+             dims: (SRC_W, SRC_H),
++            shader: GameShader::Original,
++            u_shader: crate::gl::uniform_location(prog, "u_shader"),
++            u_src: crate::gl::uniform_location(prog, "u_src"),
++            width: 1.0,
+         })
+     }
+ 
+     pub fn set_power(&mut self, t: f32) {
+         self.power = t.clamp(0.0, 1.0);
++    }
++
++    pub fn set_shader(&mut self, shader: GameShader) {
++        self.shader = shader;
++    }
++
++    pub fn set_width(&mut self, width: f32) {
++        self.width = width.clamp(0.1, 1.0);
+     }
+ 
+     pub fn set_source_rect(&mut self, rect: [f32; 4]) {
+@@ -131,7 +170,10 @@
+     }
+ 
+     fn draw_source(&self, tex: gl::types::GLuint, quad: &Quad, src: [f32; 4]) {
+-        let (x, mut y, w, mut h) = screen_rect(self.power);
++        let (mut x, mut y, mut w, mut h) = screen_rect(self.power);
++        let narrow = w * self.width;
++        x += (w - narrow) * 0.5;
++        w = narrow;
+         if self.dims.0 == 480 && matches!(self.dims.1, 270 | 272) {
+             let fitted = h * (4.0 / 3.0) / (480.0 / self.dims.1 as f32);
+             y += (h - fitted) * 0.5;
+@@ -140,23 +182,31 @@
+         unsafe {
+             gl::UseProgram(self.prog);
+             gl::Uniform2f(
+-                crate::gl::uniform_location(self.prog, "u_src"),
+-                self.dims.0 as f32,
+-                self.dims.1 as f32,
+-            );
++                self.u_src,
++                self.dims.0 as f32 * if self.shader == GameShader::Original { 1.0 } else { src[2] },
++                self.dims.1 as f32 * if self.shader == GameShader::Original { 1.0 } else { src[3] },
++            );
++            let shader = match self.shader {
++                GameShader::Original if self.dims == (SRC_W, SRC_H) => GameShader::Lcd,
++                GameShader::Original => GameShader::Sharp,
++                shader => shader,
++            };
+             gl::Uniform1f(
+-                crate::gl::uniform_location(self.prog, "u_lcd"),
+-                if self.dims == (SRC_W, SRC_H) {
+-                    1.0
+-                } else {
+-                    0.0
+-                },
++                self.u_shader,
++                shader as u8 as f32,
+             );
+             gl::Uniform4f(self.u_rect, x, y, w, h);
+             gl::Uniform4f(self.u_uv, src[0], src[1], src[2], src[3]);
+             gl::Uniform1f(self.u_bright, screen_brightness(self.power));
+             gl::ActiveTexture(gl::TEXTURE0);
+             gl::BindTexture(gl::TEXTURE_2D, tex);
++            let filter = if matches!(shader, GameShader::Smooth | GameShader::Crt) {
++                gl::LINEAR
++            } else {
++                gl::NEAREST
++            };
++            gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, filter as i32);
++            gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, filter as i32);
+             gl::ActiveTexture(gl::TEXTURE1);
+             gl::BindTexture(gl::TEXTURE_2D, self.mask);
+             gl::ActiveTexture(gl::TEXTURE0);
+--- a/crates/slot-gfx/src/shaders.rs
++++ b/crates/slot-gfx/src/shaders.rs
+@@ -50,13 +50,28 @@
+ uniform sampler2D u_game;
+ uniform sampler2D u_mask;
+ uniform vec2 u_src;
+-uniform float u_lcd;
++uniform float u_shader;
+ uniform vec4 u_uv;
+ uniform float u_bright;
+ varying vec2 v_uv;
+ void main() {
+     vec2 uv = u_uv.xy + v_uv * u_uv.zw;
+-    vec3 rgb = texture2D(u_game, uv).rgb * mix(vec3(1.0),texture2D(u_mask, v_uv * u_src).rgb,u_lcd);
++    vec3 rgb = texture2D(u_game, uv).rgb;
++    if (u_shader == 3.0) {
++        rgb *= texture2D(u_mask, v_uv * u_src).rgb;
++    } else if (u_shader == 4.0) {
++        // Lightweight CRT: soft pixels, scanlines, phosphor stripes and edge falloff.
++        // A single game texture sample; no extra framebuffer or temporal effects.
++        float line = 0.88 + 0.12 * cos(6.2831853 * fract(v_uv.y * u_src.y));
++        float column = mod(floor(gl_FragCoord.x), 3.0);
++        vec3 phosphor = vec3(0.94);
++        if (column < 1.0) phosphor.r = 1.0;
++        else if (column < 2.0) phosphor.g = 1.0;
++        else phosphor.b = 1.0;
++        vec2 edge = v_uv * 2.0 - 1.0;
++        float vignette = 1.0 - 0.08 * dot(edge, edge);
++        rgb *= line * phosphor * vignette;
++    }
+     FRAG_COLOR = vec4(rgb * u_bright, 1.0);
+ }
+ "#;
+--- /dev/null
++++ b/crates/slot-gfx/tests/shader_modes.rs
+@@ -0,0 +1,93 @@
++#![cfg(all(target_os = "linux", feature = "test-support"))]
++use slot_gfx::{Compositor, GameShader, HeadlessSurface, OUT_W, SRC_H, SRC_W};
++
++fn pixel(frame: &[u8], x: usize, y: usize) -> [u8; 3] {
++    let at = (y * OUT_W as usize + x) * 4;
++    [frame[at], frame[at + 1], frame[at + 2]]
++}
++
++#[test]
++fn all_presets_render_in_gles_and_switch_without_leaking_filter_state() {
++    // Deliberately fail if EGL or shader compilation is unavailable; no skipped GPU check.
++    let surface = HeadlessSurface::new().unwrap();
++    let mut c = Compositor::new(&surface).unwrap();
++    let flat = vec![128; (SRC_W * SRC_H * 4) as usize];
++    c.upload_game(&flat);
++    let render = |c: &mut Compositor, mode| {
++        c.set_game_shader(mode);
++        c.begin_frame();
++        c.draw_game();
++        c.read_frame()
++    };
++    let original = render(&mut c, GameShader::Original);
++    let lcd = render(&mut c, GameShader::Lcd);
++    assert_eq!(original, lcd, "original GBA LCD appearance changed");
++    let sharp = render(&mut c, GameShader::Sharp);
++    assert!(sharp.chunks_exact(4).all(|p| p[..3] == [128; 3]));
++    let crt = render(&mut c, GameShader::Crt);
++    assert_ne!(crt, lcd);
++    assert_ne!(pixel(&crt, 360, 240), pixel(&crt, 360, 241));
++    assert!(pixel(&crt, 360, 240)[0] > pixel(&crt, 0, 0)[0]);
++    let mut checker = vec![0; (SRC_W * SRC_H * 4) as usize];
++    for y in 0..SRC_H as usize {
++        for x in 0..SRC_W as usize {
++            let value = if (x + y) % 2 == 0 { 0 } else { 255 };
++            checker[(y * SRC_W as usize + x) * 4..][..4].fill(value);
++        }
++    }
++    c.upload_game(&checker);
++    let sharp_before = render(&mut c, GameShader::Sharp);
++    assert!(sharp_before.chunks_exact(4).all(|p| p[0] == 0 || p[0] == 255));
++    let smooth = render(&mut c, GameShader::Smooth);
++    assert!(smooth.chunks_exact(4).any(|p| p[0] > 20 && p[0] < 235));
++    assert_eq!(render(&mut c, GameShader::Sharp), sharp_before);
++    // Old console default stays unfiltered; forced LCD/CRT also work on console frames.
++    for (w, h) in [(640, 480), (320, 240), (480, 272)] {
++        c.upload_game(&vec![128; w * h * 4]);
++        assert_eq!(render(&mut c, GameShader::Original), render(&mut c, GameShader::Sharp));
++        for mode in [GameShader::Smooth, GameShader::Lcd, GameShader::Crt] {
++            let frame = render(&mut c, mode);
++            assert!(frame.chunks_exact(4).any(|p| p[0] != 0));
++        }
++    }
++    assert_eq!(unsafe { gl::GetError() }, gl::NO_ERROR);
++
++    // A cropped GB picture at full height: 600 logical columns become 533/534
++    // physical columns on the 640x480 G350, preserving the 160:144 aspect ratio.
++    c.upload_game(&flat);
++    c.set_game_source_rect([40.0 / 240.0, 8.0 / 160.0, 160.0 / 240.0, 144.0 / 160.0]);
++    c.set_game_width(5.0 / 6.0);
++    let fitted = render(&mut c, GameShader::Sharp);
++    for y in [0, 240, 479] {
++        for x in 0..720 {
++            assert_eq!(pixel(&fitted, x, y), if (60..660).contains(&x) { [128; 3] } else { [0; 3] });
++        }
++    }
++    c.set_fill_panel(true);
++    c.end_frame((640, 480));
++    let mut panel = vec![0u8; 640 * 480 * 4];
++    unsafe {
++        gl::BindFramebuffer(gl::FRAMEBUFFER, 0);
++        gl::ReadPixels(0, 0, 640, 480, gl::RGBA, gl::UNSIGNED_BYTE, panel.as_mut_ptr() as *mut _);
++    }
++    for y in [0, 240, 479] {
++        let row = &panel[y * 640 * 4..(y + 1) * 640 * 4];
++        let lit: Vec<_> = row.chunks_exact(4).enumerate().filter(|(_, p)| p[0] > 0).map(|(x, _)| x).collect();
++        assert!((533..=534).contains(&lit.len()), "incorrect physical GB width: {}", lit.len());
++        let left = lit[0];
++        let right = 639 - lit[lit.len() - 1];
++        assert!(left.abs_diff(right) <= 1, "picture is not centered");
++    }
++    // The first L1 mode fills the entire physical panel.
++    c.set_game_width(1.0);
++    let stretched = render(&mut c, GameShader::Sharp);
++    assert!(stretched.chunks_exact(4).all(|p| p[..3] == [128; 3]));
++    // R1 restores the existing presentation rectangle and padded source.
++    c.set_fill_panel(false);
++    c.set_game_source_rect([0.0, 0.0, 1.0, 1.0]);
++    render(&mut c, GameShader::Original);
++    c.end_frame((640, 480));
++    let mut viewport = [0; 4];
++    unsafe { gl::GetIntegerv(gl::VIEWPORT, viewport.as_mut_ptr()); }
++    assert_eq!(viewport, [0, 26, 640, 427]);
++}
+--- a/crates/slot-store/src/slot_state.rs
++++ b/crates/slot-store/src/slot_state.rs
+@@ -30,6 +30,8 @@
+     pub ff_speed: u8,
+     pub ff_sound: bool,
+     pub colour_correction: bool,
++    /// 0 Original, 1 Sharp Pixels, 2 Smooth, 3 LCD, 4 CRT.
++    pub shader: u8,
+ }
+ 
+ impl Default for SlotState {
+@@ -49,6 +51,7 @@
+             ff_speed: FF_SPEED_DEFAULT,
+             ff_sound: false,
+             colour_correction: false,
++            shader: 0,
+         }
+     }
+ }
+@@ -67,7 +70,7 @@
+ 
+ pub fn write_slot_state(root: &Path, s: &SlotState) -> std::io::Result<()> {
+     let text = format!(
+-        "cart={}\ncart_platform={}\nbrightness={}\nblue_light={}\nvolume={}\nvolume_hp={}\nmuted={}\nmuted_hp={}\nclock_set={}\nutc_offset_min={}\nrumble={}\nff_speed={}\nff_sound={}\ncolour_correction={}\n",
++        "cart={}\ncart_platform={}\nbrightness={}\nblue_light={}\nvolume={}\nvolume_hp={}\nmuted={}\nmuted_hp={}\nclock_set={}\nutc_offset_min={}\nrumble={}\nff_speed={}\nff_sound={}\ncolour_correction={}\nshader={}\n",
+         s.cart.as_deref().unwrap_or(""),
+         s.cart_platform.map_or(String::new(), platform_key),
+         s.brightness,
+@@ -81,7 +84,8 @@
+         s.rumble as u8,
+         s.ff_speed,
+         s.ff_sound as u8,
+-        s.colour_correction as u8
++        s.colour_correction as u8,
++        s.shader
+     );
+     atomic_write(&state_path(root), text.as_bytes())
+ }
+@@ -101,6 +105,7 @@
+     let mut ff_speed = None;
+     let mut ff_sound = None;
+     let mut colour_correction = None;
++    let mut shader = None;
+     for line in text.lines().filter(|l| !l.is_empty()) {
+         let Some((key, value)) = line.split_once('=') else {
+             continue;
+@@ -120,6 +125,7 @@
+             "ff_speed" => ff_speed = ff_speed_value(value),
+             "ff_sound" => ff_sound = flag(value),
+             "colour_correction" => colour_correction = flag(value),
++            "shader" => shader = level(value, 4),
+             _ => {}
+         }
+     }
+@@ -140,6 +146,7 @@
+         ff_speed: ff_speed.unwrap_or(fallback.ff_speed),
+         ff_sound: ff_sound.unwrap_or(fallback.ff_sound),
+         colour_correction: colour_correction.unwrap_or(fallback.colour_correction),
++        shader: shader.unwrap_or(fallback.shader),
+     })
+ }
+ 
+--- a/crates/slot-store/tests/durability.rs
++++ b/crates/slot-store/tests/durability.rs
+@@ -1,359 +1,360 @@
+-mod common;
+-
+-use common::tmp_root;
+-use slot_store::{
+-    atomic_write, read_slot_state, write_slot_state, Platform, SlotState, FF_SPEEDS,
+-    FF_SPEED_DEFAULT,
+-};
+-use tempfile::tempdir;
+-
+-#[test]
+-fn atomic_write_leaves_no_partial_file_and_no_temp_behind() {
+-    let d = tempdir().unwrap();
+-    let p = d.path().join("x.bin");
+-    atomic_write(&p, b"first").unwrap();
+-    atomic_write(&p, &vec![7u8; 4_000_000]).unwrap();
+-    assert_eq!(std::fs::read(&p).unwrap().len(), 4_000_000);
+-    let strays: Vec<_> = std::fs::read_dir(d.path())
+-        .unwrap()
+-        .filter_map(|e| e.ok())
+-        .filter(|e| e.file_name() != "x.bin")
+-        .collect();
+-    assert!(strays.is_empty(), "temp files left behind: {strays:?}");
+-}
+-
+-#[test]
+-fn a_name_the_card_accepts_is_a_name_that_can_be_written() {
+-    let d = tempdir().unwrap();
+-    for len in [8usize, 100, 200, 239, 240, 245, 250, 251] {
+-        let p = d.path().join(format!("{}.sav", "a".repeat(len)));
+-        if std::fs::write(&p, b"control").is_err() {
+-            continue;
+-        }
+-        atomic_write(&p, b"save")
+-            .unwrap_or_else(|e| panic!("{len} character name: {e}, and a plain write took it"));
+-        assert_eq!(std::fs::read(&p).unwrap(), b"save");
+-    }
+-}
+-
+-#[test]
+-fn a_long_multibyte_name_is_written_rather_than_panicking() {
+-    let d = tempdir().unwrap();
+-    for pad in 0..3 {
+-        let p = d
+-            .path()
+-            .join(format!("{}{}.sav", "x".repeat(pad), "ポ".repeat(82)));
+-        if std::fs::write(&p, b"control").is_err() {
+-            continue;
+-        }
+-        atomic_write(&p, b"save")
+-            .unwrap_or_else(|e| panic!("a Japanese cart name, pad {pad}: {e}"));
+-        assert_eq!(std::fs::read(&p).unwrap(), b"save");
+-    }
+-}
+-
+-#[test]
+-fn corrupt_slot_state_reads_as_default_rather_than_panicking() {
+-    let d = tmp_root();
+-    std::fs::write(d.path().join("Config/slot.state"), b"\x00\xff not json").unwrap();
+-    assert_eq!(read_slot_state(d.path()), SlotState::default());
+-}
+-
+-#[test]
+-fn slot_state_round_trips_including_a_stem_with_an_equals_sign() {
+-    let d = tmp_root();
+-    let s = SlotState {
+-        cart: Some("Cheats = On".into()),
+-        brightness: 3,
+-        blue_light: 9,
+-        volume: 71,
+-        muted: true,
+-        clock_set: true,
+-        utc_offset_min: 0,
+-        ..SlotState::default()
+-    };
+-    write_slot_state(d.path(), &s).unwrap();
+-    assert_eq!(read_slot_state(d.path()), s);
+-}
+-
+-#[test]
+-fn a_slot_state_missing_a_key_reads_as_default_not_half_populated() {
+-    let d = tmp_root();
+-    std::fs::write(
+-        d.path().join("Config/slot.state"),
+-        "cart=Emerald\nbrightness=3\nblue_light=1\n",
+-    )
+-    .unwrap();
+-    assert_eq!(read_slot_state(d.path()), SlotState::default());
+-}
+-
+-#[test]
+-fn an_out_of_range_level_reads_as_default() {
+-    let d = tmp_root();
+-    for body in [
+-        "cart=\nbrightness=10\nblue_light=1\nvolume=50\n",
+-        "cart=\nbrightness=3\nblue_light=10\nvolume=50\n",
+-        "cart=\nbrightness=3\nblue_light=1\nvolume=101\n",
+-    ] {
+-        std::fs::write(d.path().join("Config/slot.state"), body).unwrap();
+-        assert_eq!(
+-            read_slot_state(d.path()),
+-            SlotState::default(),
+-            "accepted {body:?}"
+-        );
+-    }
+-}
+-
+-#[test]
+-fn a_first_boot_is_neither_dark_nor_silent() {
+-    let d = tmp_root();
+-    let s = read_slot_state(d.path());
+-    assert!(s.cart.is_none());
+-    assert!(s.brightness > 0, "boots with the backlight off");
+-    assert!(s.volume > 0, "boots muted");
+-}
+-
+-#[test]
+-fn slot_state_round_trips_a_negative_utc_offset() {
+-    let d = tmp_root();
+-    let s = SlotState {
+-        cart: None,
+-        brightness: 5,
+-        blue_light: 0,
+-        volume: 60,
+-        muted: false,
+-        clock_set: true,
+-        utc_offset_min: -450,
+-        ..SlotState::default()
+-    };
+-    write_slot_state(d.path(), &s).unwrap();
+-    assert_eq!(read_slot_state(d.path()).utc_offset_min, -450);
+-}
+-
+-#[test]
+-fn a_line_the_reader_does_not_know_is_skipped() {
+-    let d = tmp_root();
+-    std::fs::write(
+-        d.path().join("Config/slot.state"),
+-        "cart=Emerald\nbrightness=3\nfrom_a_later_build=7\nblue_light=1\nvolume=40\nmuted=1\n\
+-         no equals sign at all\nclock_set=1\nutc_offset_min=-300\n",
+-    )
+-    .unwrap();
+-    let s = read_slot_state(d.path());
+-    assert_eq!(
+-        s.cart.as_deref(),
+-        Some("Emerald"),
+-        "the file was thrown away"
+-    );
+-    assert_eq!(
+-        (
+-            s.brightness,
+-            s.blue_light,
+-            s.volume,
+-            s.muted,
+-            s.clock_set,
+-            s.utc_offset_min
+-        ),
+-        (3, 1, 40, true, true, -300)
+-    );
+-}
+-
+-#[test]
+-fn a_first_boot_rumbles_and_fast_forwards_silently_at_the_default() {
+-    let s = SlotState::default();
+-    assert!(s.rumble, "boots with the motor off");
+-    assert_eq!(s.ff_speed, FF_SPEED_DEFAULT);
+-    assert!(!s.ff_sound, "boots with fast forward audible");
+-    assert!(!s.colour_correction, "boots with the picture tinted");
+-}
+-
+-#[test]
+-fn a_card_from_before_the_settings_keeps_all_its_values() {
+-    let d = tmp_root();
+-    std::fs::write(
+-        d.path().join("Config/slot.state"),
+-        "cart=Emerald\nbrightness=3\nblue_light=1\nvolume=40\nmuted=1\nclock_set=1\nutc_offset_min=-300\n",
+-    )
+-    .unwrap();
+-    assert_eq!(
+-        read_slot_state(d.path()),
+-        SlotState {
+-            cart: Some("Emerald".into()),
+-            cart_platform: None,
+-            brightness: 3,
+-            blue_light: 1,
+-            volume: 40,
+-            volume_hp: 40,
+-            muted: true,
+-            muted_hp: true,
+-            clock_set: true,
+-            utc_offset_min: -300,
+-            rumble: true,
+-            ff_speed: FF_SPEED_DEFAULT,
+-            ff_sound: false,
+-            colour_correction: false,
+-        }
+-    );
+-}
+-
+-#[test]
+-fn the_quick_menu_settings_round_trip_as_their_own_lines() {
+-    let d = tmp_root();
+-    let s = SlotState {
+-        clock_set: true,
+-        rumble: false,
+-        ff_speed: 2,
+-        ff_sound: true,
+-        colour_correction: true,
+-        ..SlotState::default()
+-    };
+-    write_slot_state(d.path(), &s).unwrap();
+-    assert_eq!(read_slot_state(d.path()), s);
+-    let text = std::fs::read_to_string(d.path().join("Config/slot.state")).unwrap();
+-    for line in [
+-        "rumble=0",
+-        "ff_speed=2",
+-        "ff_sound=1",
+-        "colour_correction=1",
+-    ] {
+-        assert!(text.lines().any(|l| l == line), "no {line} in {text:?}");
+-    }
+-}
+-
+-#[test]
+-fn every_speed_the_row_offers_round_trips_as_its_own_number() {
+-    for speed in FF_SPEEDS {
+-        let d = tmp_root();
+-        let s = SlotState {
+-            clock_set: true,
+-            ff_speed: speed,
+-            ..SlotState::default()
+-        };
+-        write_slot_state(d.path(), &s).unwrap();
+-        assert_eq!(read_slot_state(d.path()), s, "{speed}x did not come back");
+-        let text = std::fs::read_to_string(d.path().join("Config/slot.state")).unwrap();
+-        let want = format!("ff_speed={speed}");
+-        assert!(text.lines().any(|l| l == want), "no {want} in {text:?}");
+-    }
+-}
+-
+-#[test]
+-fn an_older_build_reads_the_new_speed_as_its_own_default() {
+-    for speed in FF_SPEEDS.iter().filter(|&&n| n > 4) {
+-        assert!(
+-            !(2..=4).contains(speed),
+-            "{speed}x is inside the range an older build accepts, so it would read as a speed"
+-        );
+-    }
+-    assert_eq!(SlotState::default().ff_speed, FF_SPEED_DEFAULT);
+-    assert!(
+-        FF_SPEEDS.contains(&FF_SPEED_DEFAULT),
+-        "the default is not one of the speeds the row offers"
+-    );
+-}
+-
+-#[test]
+-fn an_out_of_range_setting_falls_back_to_its_default() {
+-    let d = tmp_root();
+-    let known = "cart=Emerald\nbrightness=3\nblue_light=1\nvolume=40\nmuted=0\nclock_set=1\nutc_offset_min=0\n";
+-    for bad in [
+-        "rumble=2\nff_speed=5\nff_sound=9\n",
+-        "rumble=\nff_speed=1\nff_sound=on\n",
+-        "rumble=-1\nff_speed=0\nff_sound=-1\n",
+-        "ff_speed=x\n",
+-        "colour_correction=2\n",
+-        "colour_correction=\n",
+-        "colour_correction=Auto\n",
+-        "ff_speed=5\n",
+-        "ff_speed=7\n",
+-        "ff_speed=8\n",
+-        "ff_speed=255\n",
+-    ] {
+-        std::fs::write(d.path().join("Config/slot.state"), format!("{known}{bad}")).unwrap();
+-        let s = read_slot_state(d.path());
+-        assert_eq!(
+-            (s.rumble, s.ff_speed, s.ff_sound, s.colour_correction),
+-            (true, FF_SPEED_DEFAULT, false, false),
+-            "accepted {bad:?}"
+-        );
+-        assert_eq!(
+-            (s.cart.as_deref(), s.brightness, s.volume, s.clock_set),
+-            (Some("Emerald"), 3, 40, true),
+-            "{bad:?} took the rest of the card with it"
+-        );
+-    }
+-}
+-
+-#[test]
+-fn every_platform_round_trips_as_its_own_line() {
+-    for platform in Platform::ALL {
+-        let d = tmp_root();
+-        let s = SlotState {
+-            cart: Some("Tetris".into()),
+-            cart_platform: Some(platform),
+-            clock_set: true,
+-            ..SlotState::default()
+-        };
+-        write_slot_state(d.path(), &s).unwrap();
+-        assert_eq!(
+-            read_slot_state(d.path()),
+-            s,
+-            "{platform:?} did not come back"
+-        );
+-        let text = std::fs::read_to_string(d.path().join("Config/slot.state")).unwrap();
+-        let want = format!("cart_platform={}", platform.dir_name().to_lowercase());
+-        assert!(text.lines().any(|l| l == want), "no {want} in {text:?}");
+-    }
+-}
+-
+-#[test]
+-fn an_empty_slot_writes_an_empty_platform() {
+-    let d = tmp_root();
+-    let s = SlotState {
+-        clock_set: true,
+-        ..SlotState::default()
+-    };
+-    write_slot_state(d.path(), &s).unwrap();
+-    let text = std::fs::read_to_string(d.path().join("Config/slot.state")).unwrap();
+-    assert!(
+-        text.lines().any(|l| l == "cart_platform="),
+-        "no empty cart_platform line in {text:?}"
+-    );
+-    assert_eq!(read_slot_state(d.path()).cart_platform, None);
+-}
+-
+-#[test]
+-fn an_unreadable_platform_reads_as_a_card_that_never_said() {
+-    let d = tmp_root();
+-    let known = "cart=Tetris\nbrightness=3\nblue_light=1\nvolume=40\nmuted=0\nclock_set=1\nutc_offset_min=0\n";
+-    for (line, want) in [
+-        ("cart_platform=\n", None),
+-        ("cart_platform=nes\n", None),
+-        ("cart_platform=gameboy\n", None),
+-        ("cart_platform=0\n", None),
+-        ("cart_platform=nds\n", None),
+-        ("cart_platform=GBA\n", Some(Platform::Gba)),
+-        ("cart_platform=Gbc\n", Some(Platform::Gbc)),
+-    ] {
+-        std::fs::write(d.path().join("Config/slot.state"), format!("{known}{line}")).unwrap();
+-        let s = read_slot_state(d.path());
+-        assert_eq!(s.cart_platform, want, "read {line:?} wrong");
+-        assert_eq!(
+-            (s.cart.as_deref(), s.brightness, s.volume, s.clock_set),
+-            (Some("Tetris"), 3, 40, true),
+-            "{line:?} took the rest of the card with it"
+-        );
+-    }
+-}
+-
+-#[test]
+-fn an_offset_outside_the_range_of_real_zones_reads_as_default() {
+-    let d = tmp_root();
+-    for body in [
+-        "cart=\nbrightness=5\nblue_light=0\nvolume=60\nmuted=0\nclock_set=1\nutc_offset_min=900\n",
+-        "cart=\nbrightness=5\nblue_light=0\nvolume=60\nmuted=0\nclock_set=1\nutc_offset_min=-780\n",
+-    ] {
+-        std::fs::write(d.path().join("Config/slot.state"), body).unwrap();
+-        assert_eq!(read_slot_state(d.path()), SlotState::default(), "{body}");
+-    }
+-}
++mod common;
++
++use common::tmp_root;
++use slot_store::{
++    atomic_write, read_slot_state, write_slot_state, Platform, SlotState, FF_SPEEDS,
++    FF_SPEED_DEFAULT,
++};
++use tempfile::tempdir;
++
++#[test]
++fn atomic_write_leaves_no_partial_file_and_no_temp_behind() {
++    let d = tempdir().unwrap();
++    let p = d.path().join("x.bin");
++    atomic_write(&p, b"first").unwrap();
++    atomic_write(&p, &vec![7u8; 4_000_000]).unwrap();
++    assert_eq!(std::fs::read(&p).unwrap().len(), 4_000_000);
++    let strays: Vec<_> = std::fs::read_dir(d.path())
++        .unwrap()
++        .filter_map(|e| e.ok())
++        .filter(|e| e.file_name() != "x.bin")
++        .collect();
++    assert!(strays.is_empty(), "temp files left behind: {strays:?}");
++}
++
++#[test]
++fn a_name_the_card_accepts_is_a_name_that_can_be_written() {
++    let d = tempdir().unwrap();
++    for len in [8usize, 100, 200, 239, 240, 245, 250, 251] {
++        let p = d.path().join(format!("{}.sav", "a".repeat(len)));
++        if std::fs::write(&p, b"control").is_err() {
++            continue;
++        }
++        atomic_write(&p, b"save")
++            .unwrap_or_else(|e| panic!("{len} character name: {e}, and a plain write took it"));
++        assert_eq!(std::fs::read(&p).unwrap(), b"save");
++    }
++}
++
++#[test]
++fn a_long_multibyte_name_is_written_rather_than_panicking() {
++    let d = tempdir().unwrap();
++    for pad in 0..3 {
++        let p = d
++            .path()
++            .join(format!("{}{}.sav", "x".repeat(pad), "ポ".repeat(82)));
++        if std::fs::write(&p, b"control").is_err() {
++            continue;
++        }
++        atomic_write(&p, b"save")
++            .unwrap_or_else(|e| panic!("a Japanese cart name, pad {pad}: {e}"));
++        assert_eq!(std::fs::read(&p).unwrap(), b"save");
++    }
++}
++
++#[test]
++fn corrupt_slot_state_reads_as_default_rather_than_panicking() {
++    let d = tmp_root();
++    std::fs::write(d.path().join("Config/slot.state"), b"\x00\xff not json").unwrap();
++    assert_eq!(read_slot_state(d.path()), SlotState::default());
++}
++
++#[test]
++fn slot_state_round_trips_including_a_stem_with_an_equals_sign() {
++    let d = tmp_root();
++    let s = SlotState {
++        cart: Some("Cheats = On".into()),
++        brightness: 3,
++        blue_light: 9,
++        volume: 71,
++        muted: true,
++        clock_set: true,
++        utc_offset_min: 0,
++        ..SlotState::default()
++    };
++    write_slot_state(d.path(), &s).unwrap();
++    assert_eq!(read_slot_state(d.path()), s);
++}
++
++#[test]
++fn a_slot_state_missing_a_key_reads_as_default_not_half_populated() {
++    let d = tmp_root();
++    std::fs::write(
++        d.path().join("Config/slot.state"),
++        "cart=Emerald\nbrightness=3\nblue_light=1\n",
++    )
++    .unwrap();
++    assert_eq!(read_slot_state(d.path()), SlotState::default());
++}
++
++#[test]
++fn an_out_of_range_level_reads_as_default() {
++    let d = tmp_root();
++    for body in [
++        "cart=\nbrightness=10\nblue_light=1\nvolume=50\n",
++        "cart=\nbrightness=3\nblue_light=10\nvolume=50\n",
++        "cart=\nbrightness=3\nblue_light=1\nvolume=101\n",
++    ] {
++        std::fs::write(d.path().join("Config/slot.state"), body).unwrap();
++        assert_eq!(
++            read_slot_state(d.path()),
++            SlotState::default(),
++            "accepted {body:?}"
++        );
++    }
++}
++
++#[test]
++fn a_first_boot_is_neither_dark_nor_silent() {
++    let d = tmp_root();
++    let s = read_slot_state(d.path());
++    assert!(s.cart.is_none());
++    assert!(s.brightness > 0, "boots with the backlight off");
++    assert!(s.volume > 0, "boots muted");
++}
++
++#[test]
++fn slot_state_round_trips_a_negative_utc_offset() {
++    let d = tmp_root();
++    let s = SlotState {
++        cart: None,
++        brightness: 5,
++        blue_light: 0,
++        volume: 60,
++        muted: false,
++        clock_set: true,
++        utc_offset_min: -450,
++        ..SlotState::default()
++    };
++    write_slot_state(d.path(), &s).unwrap();
++    assert_eq!(read_slot_state(d.path()).utc_offset_min, -450);
++}
++
++#[test]
++fn a_line_the_reader_does_not_know_is_skipped() {
++    let d = tmp_root();
++    std::fs::write(
++        d.path().join("Config/slot.state"),
++        "cart=Emerald\nbrightness=3\nfrom_a_later_build=7\nblue_light=1\nvolume=40\nmuted=1\n\
++         no equals sign at all\nclock_set=1\nutc_offset_min=-300\n",
++    )
++    .unwrap();
++    let s = read_slot_state(d.path());
++    assert_eq!(
++        s.cart.as_deref(),
++        Some("Emerald"),
++        "the file was thrown away"
++    );
++    assert_eq!(
++        (
++            s.brightness,
++            s.blue_light,
++            s.volume,
++            s.muted,
++            s.clock_set,
++            s.utc_offset_min
++        ),
++        (3, 1, 40, true, true, -300)
++    );
++}
++
++#[test]
++fn a_first_boot_rumbles_and_fast_forwards_silently_at_the_default() {
++    let s = SlotState::default();
++    assert!(s.rumble, "boots with the motor off");
++    assert_eq!(s.ff_speed, FF_SPEED_DEFAULT);
++    assert!(!s.ff_sound, "boots with fast forward audible");
++    assert!(!s.colour_correction, "boots with the picture tinted");
++}
++
++#[test]
++fn a_card_from_before_the_settings_keeps_all_its_values() {
++    let d = tmp_root();
++    std::fs::write(
++        d.path().join("Config/slot.state"),
++        "cart=Emerald\nbrightness=3\nblue_light=1\nvolume=40\nmuted=1\nclock_set=1\nutc_offset_min=-300\n",
++    )
++    .unwrap();
++    assert_eq!(
++        read_slot_state(d.path()),
++        SlotState {
++            cart: Some("Emerald".into()),
++            cart_platform: None,
++            brightness: 3,
++            blue_light: 1,
++            volume: 40,
++            volume_hp: 40,
++            muted: true,
++            muted_hp: true,
++            clock_set: true,
++            utc_offset_min: -300,
++            rumble: true,
++            ff_speed: FF_SPEED_DEFAULT,
++            ff_sound: false,
++            colour_correction: false,
++            shader: 0,
++        }
++    );
++}
++
++#[test]
++fn the_quick_menu_settings_round_trip_as_their_own_lines() {
++    let d = tmp_root();
++    let s = SlotState {
++        clock_set: true,
++        rumble: false,
++        ff_speed: 2,
++        ff_sound: true,
++        colour_correction: true,
++        ..SlotState::default()
++    };
++    write_slot_state(d.path(), &s).unwrap();
++    assert_eq!(read_slot_state(d.path()), s);
++    let text = std::fs::read_to_string(d.path().join("Config/slot.state")).unwrap();
++    for line in [
++        "rumble=0",
++        "ff_speed=2",
++        "ff_sound=1",
++        "colour_correction=1",
++    ] {
++        assert!(text.lines().any(|l| l == line), "no {line} in {text:?}");
++    }
++}
++
++#[test]
++fn every_speed_the_row_offers_round_trips_as_its_own_number() {
++    for speed in FF_SPEEDS {
++        let d = tmp_root();
++        let s = SlotState {
++            clock_set: true,
++            ff_speed: speed,
++            ..SlotState::default()
++        };
++        write_slot_state(d.path(), &s).unwrap();
++        assert_eq!(read_slot_state(d.path()), s, "{speed}x did not come back");
++        let text = std::fs::read_to_string(d.path().join("Config/slot.state")).unwrap();
++        let want = format!("ff_speed={speed}");
++        assert!(text.lines().any(|l| l == want), "no {want} in {text:?}");
++    }
++}
++
++#[test]
++fn an_older_build_reads_the_new_speed_as_its_own_default() {
++    for speed in FF_SPEEDS.iter().filter(|&&n| n > 4) {
++        assert!(
++            !(2..=4).contains(speed),
++            "{speed}x is inside the range an older build accepts, so it would read as a speed"
++        );
++    }
++    assert_eq!(SlotState::default().ff_speed, FF_SPEED_DEFAULT);
++    assert!(
++        FF_SPEEDS.contains(&FF_SPEED_DEFAULT),
++        "the default is not one of the speeds the row offers"
++    );
++}
++
++#[test]
++fn an_out_of_range_setting_falls_back_to_its_default() {
++    let d = tmp_root();
++    let known = "cart=Emerald\nbrightness=3\nblue_light=1\nvolume=40\nmuted=0\nclock_set=1\nutc_offset_min=0\n";
++    for bad in [
++        "rumble=2\nff_speed=5\nff_sound=9\n",
++        "rumble=\nff_speed=1\nff_sound=on\n",
++        "rumble=-1\nff_speed=0\nff_sound=-1\n",
++        "ff_speed=x\n",
++        "colour_correction=2\n",
++        "colour_correction=\n",
++        "colour_correction=Auto\n",
++        "ff_speed=5\n",
++        "ff_speed=7\n",
++        "ff_speed=8\n",
++        "ff_speed=255\n",
++    ] {
++        std::fs::write(d.path().join("Config/slot.state"), format!("{known}{bad}")).unwrap();
++        let s = read_slot_state(d.path());
++        assert_eq!(
++            (s.rumble, s.ff_speed, s.ff_sound, s.colour_correction),
++            (true, FF_SPEED_DEFAULT, false, false),
++            "accepted {bad:?}"
++        );
++        assert_eq!(
++            (s.cart.as_deref(), s.brightness, s.volume, s.clock_set),
++            (Some("Emerald"), 3, 40, true),
++            "{bad:?} took the rest of the card with it"
++        );
++    }
++}
++
++#[test]
++fn every_platform_round_trips_as_its_own_line() {
++    for platform in Platform::ALL {
++        let d = tmp_root();
++        let s = SlotState {
++            cart: Some("Tetris".into()),
++            cart_platform: Some(platform),
++            clock_set: true,
++            ..SlotState::default()
++        };
++        write_slot_state(d.path(), &s).unwrap();
++        assert_eq!(
++            read_slot_state(d.path()),
++            s,
++            "{platform:?} did not come back"
++        );
++        let text = std::fs::read_to_string(d.path().join("Config/slot.state")).unwrap();
++        let want = format!("cart_platform={}", platform.dir_name().to_lowercase());
++        assert!(text.lines().any(|l| l == want), "no {want} in {text:?}");
++    }
++}
++
++#[test]
++fn an_empty_slot_writes_an_empty_platform() {
++    let d = tmp_root();
++    let s = SlotState {
++        clock_set: true,
++        ..SlotState::default()
++    };
++    write_slot_state(d.path(), &s).unwrap();
++    let text = std::fs::read_to_string(d.path().join("Config/slot.state")).unwrap();
++    assert!(
++        text.lines().any(|l| l == "cart_platform="),
++        "no empty cart_platform line in {text:?}"
++    );
++    assert_eq!(read_slot_state(d.path()).cart_platform, None);
++}
++
++#[test]
++fn an_unreadable_platform_reads_as_a_card_that_never_said() {
++    let d = tmp_root();
++    let known = "cart=Tetris\nbrightness=3\nblue_light=1\nvolume=40\nmuted=0\nclock_set=1\nutc_offset_min=0\n";
++    for (line, want) in [
++        ("cart_platform=\n", None),
++        ("cart_platform=nes\n", None),
++        ("cart_platform=gameboy\n", None),
++        ("cart_platform=0\n", None),
++        ("cart_platform=nds\n", None),
++        ("cart_platform=GBA\n", Some(Platform::Gba)),
++        ("cart_platform=Gbc\n", Some(Platform::Gbc)),
++    ] {
++        std::fs::write(d.path().join("Config/slot.state"), format!("{known}{line}")).unwrap();
++        let s = read_slot_state(d.path());
++        assert_eq!(s.cart_platform, want, "read {line:?} wrong");
++        assert_eq!(
++            (s.cart.as_deref(), s.brightness, s.volume, s.clock_set),
++            (Some("Tetris"), 3, 40, true),
++            "{line:?} took the rest of the card with it"
++        );
++    }
++}
++
++#[test]
++fn an_offset_outside_the_range_of_real_zones_reads_as_default() {
++    let d = tmp_root();
++    for body in [
++        "cart=\nbrightness=5\nblue_light=0\nvolume=60\nmuted=0\nclock_set=1\nutc_offset_min=900\n",
++        "cart=\nbrightness=5\nblue_light=0\nvolume=60\nmuted=0\nclock_set=1\nutc_offset_min=-780\n",
++    ] {
++        std::fs::write(d.path().join("Config/slot.state"), body).unwrap();
++        assert_eq!(read_slot_state(d.path()), SlotState::default(), "{body}");
++    }
++}
+--- /dev/null
++++ b/crates/slot-store/tests/shaders.rs
+@@ -0,0 +1,21 @@
++use slot_store::{read_slot_state, write_slot_state, SlotState};
++
++#[test]
++fn old_and_invalid_shader_settings_preserve_all_other_preferences() {
++    let d = tempfile::tempdir().unwrap();
++    std::fs::create_dir_all(d.path().join("Config")).unwrap();
++    let old = "cart=\ncart_platform=\nbrightness=8\nblue_light=3\nvolume=35\nmuted=0\nclock_set=1\nutc_offset_min=-240\ncolour_correction=1\n";
++    for extra in ["", "shader=99\n", "shader=bad\n"] {
++        std::fs::write(d.path().join("Config/slot.state"), format!("{old}{extra}")).unwrap();
++        let state = read_slot_state(d.path());
++        assert_eq!(state.shader, 0);
++        assert_eq!((state.brightness, state.blue_light, state.volume), (8, 3, 35));
++        assert!(state.clock_set && state.colour_correction);
++        assert_eq!(state.utc_offset_min, -240);
++    }
++    for shader in 0..=4 {
++        let state = SlotState { shader, ..read_slot_state(d.path()) };
++        write_slot_state(d.path(), &state).unwrap();
++        assert_eq!(read_slot_state(d.path()), state);
++    }
++}
+--- a/crates/slot-ui/src/quick_menu.rs
++++ b/crates/slot-ui/src/quick_menu.rs
+@@ -9,16 +9,18 @@
+     FastForward,
+     FastForwardSound,
+     ColourCorrection,
++    Shader,
+     Rumble,
+     DateTime,
+     About,
+ }
+ 
+ impl QuickRow {
+-    pub const ALL: [QuickRow; 6] = [
++    pub const ALL: [QuickRow; 7] = [
+         QuickRow::FastForward,
+         QuickRow::FastForwardSound,
+         QuickRow::ColourCorrection,
++        QuickRow::Shader,
+         QuickRow::Rumble,
+         QuickRow::DateTime,
+         QuickRow::About,
+@@ -33,6 +35,7 @@
+             QuickRow::FastForward => "Fast Forward",
+             QuickRow::FastForwardSound => "Fast Forward Sound",
+             QuickRow::ColourCorrection => "Colour Correction",
++            QuickRow::Shader => "Shader",
+             QuickRow::Rumble => "Rumble",
+             QuickRow::DateTime => "Date & Time",
+             QuickRow::About => "About",
+@@ -61,16 +64,26 @@
+     Speed6,
+     On,
+     Off,
++    ShaderOriginal,
++    ShaderSharp,
++    ShaderSmooth,
++    ShaderLcd,
++    ShaderCrt,
+ }
+ 
+ impl QuickValue {
+-    pub const ALL: [QuickValue; 6] = [
++    pub const ALL: [QuickValue; 11] = [
+         QuickValue::Speed2,
+         QuickValue::Speed3,
+         QuickValue::Speed4,
+         QuickValue::Speed6,
+         QuickValue::On,
+         QuickValue::Off,
++        QuickValue::ShaderOriginal,
++        QuickValue::ShaderSharp,
++        QuickValue::ShaderSmooth,
++        QuickValue::ShaderLcd,
++        QuickValue::ShaderCrt,
+     ];
+ 
+     pub fn index(self) -> usize {
+@@ -85,6 +98,21 @@
+             QuickValue::Speed6 => "6×",
+             QuickValue::On => "On",
+             QuickValue::Off => "Off",
++            QuickValue::ShaderOriginal => "Original",
++            QuickValue::ShaderSharp => "Sharp Pixels",
++            QuickValue::ShaderSmooth => "Smooth",
++            QuickValue::ShaderLcd => "LCD",
++            QuickValue::ShaderCrt => "CRT",
++        }
++    }
++
++    pub fn shader(id: u8) -> QuickValue {
++        match id {
++            1 => QuickValue::ShaderSharp,
++            2 => QuickValue::ShaderSmooth,
++            3 => QuickValue::ShaderLcd,
++            4 => QuickValue::ShaderCrt,
++            _ => QuickValue::ShaderOriginal,
+         }
+     }
+ 
+--- a/crates/slot-ui/tests/quick_menu.rs
++++ b/crates/slot-ui/tests/quick_menu.rs
+@@ -84,6 +84,7 @@
+             "Fast Forward",
+             "Fast Forward Sound",
+             "Colour Correction",
++            "Shader",
+             "Rumble",
+             "Date & Time",
+             "About"
+@@ -97,7 +98,7 @@
+ fn the_values_read_as_the_menu_prints_them() {
+     assert_eq!(
+         QuickValue::ALL.map(QuickValue::text),
+-        ["2×", "3×", "4×", "6×", "On", "Off"]
++        ["2×", "3×", "4×", "6×", "On", "Off", "Original", "Sharp Pixels", "Smooth", "LCD", "CRT"]
+     );
+     assert_eq!(QuickValue::flag(true), QuickValue::On);
+     assert_eq!(QuickValue::flag(false), QuickValue::Off);

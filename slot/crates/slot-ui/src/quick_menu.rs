@@ -9,16 +9,18 @@ pub enum QuickRow {
     FastForward,
     FastForwardSound,
     ColourCorrection,
+    Shader,
     Rumble,
     DateTime,
     About,
 }
 
 impl QuickRow {
-    pub const ALL: [QuickRow; 6] = [
+    pub const ALL: [QuickRow; 7] = [
         QuickRow::FastForward,
         QuickRow::FastForwardSound,
         QuickRow::ColourCorrection,
+        QuickRow::Shader,
         QuickRow::Rumble,
         QuickRow::DateTime,
         QuickRow::About,
@@ -33,6 +35,7 @@ impl QuickRow {
             QuickRow::FastForward => "Fast Forward",
             QuickRow::FastForwardSound => "Fast Forward Sound",
             QuickRow::ColourCorrection => "Colour Correction",
+            QuickRow::Shader => "Shader",
             QuickRow::Rumble => "Rumble",
             QuickRow::DateTime => "Date & Time",
             QuickRow::About => "About",
@@ -61,16 +64,26 @@ pub enum QuickValue {
     Speed6,
     On,
     Off,
+    ShaderOriginal,
+    ShaderSharp,
+    ShaderSmooth,
+    ShaderLcd,
+    ShaderCrt,
 }
 
 impl QuickValue {
-    pub const ALL: [QuickValue; 6] = [
+    pub const ALL: [QuickValue; 11] = [
         QuickValue::Speed2,
         QuickValue::Speed3,
         QuickValue::Speed4,
         QuickValue::Speed6,
         QuickValue::On,
         QuickValue::Off,
+        QuickValue::ShaderOriginal,
+        QuickValue::ShaderSharp,
+        QuickValue::ShaderSmooth,
+        QuickValue::ShaderLcd,
+        QuickValue::ShaderCrt,
     ];
 
     pub fn index(self) -> usize {
@@ -85,6 +98,21 @@ impl QuickValue {
             QuickValue::Speed6 => "6×",
             QuickValue::On => "On",
             QuickValue::Off => "Off",
+            QuickValue::ShaderOriginal => "Original",
+            QuickValue::ShaderSharp => "Sharp Pixels",
+            QuickValue::ShaderSmooth => "Smooth",
+            QuickValue::ShaderLcd => "LCD",
+            QuickValue::ShaderCrt => "CRT",
+        }
+    }
+
+    pub fn shader(id: u8) -> QuickValue {
+        match id {
+            1 => QuickValue::ShaderSharp,
+            2 => QuickValue::ShaderSmooth,
+            3 => QuickValue::ShaderLcd,
+            4 => QuickValue::ShaderCrt,
+            _ => QuickValue::ShaderOriginal,
         }
     }
 

@@ -1,0 +1,14 @@
+[
+  {
+    "path": "rgsp-boot-region.bin",
+    "offset": 8192,
+    "size": 222289920,
+    "sha256": "bdd5d64c669c00cde8adda3f5a3d8beb018acff8671fa567184da70627b6f341"
+  },
+  {
+    "path": "rootfs-rgsp.ext4",
+    "offset": 222298112,
+    "size": 536870912,
+    "sha256": "c623d634423c7f0275ebb70c3d8a997fcd7dc93343caf4a922ed5d8fae0e05ec"
+  }
+]

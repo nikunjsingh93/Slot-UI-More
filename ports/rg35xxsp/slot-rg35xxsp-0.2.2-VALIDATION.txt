@@ -1,0 +1,3 @@
+Anbernic RG35XX SP 0.2.2
+PASS official base archive SHA256; target identity; rootfs e2fsck; all added-file readbacks; real BusyBox installer and interrupted/corrupt install checks; exact frontend/nine cores/189 assets; GPT consistency; all non-rootfs regions byte-identical to official image; ZIP CRC and decompressed image SHA256.
+Previously validated frontend rendering/control tests remain applicable because the installed executable is byte-identical. Physical boot of this fresh image is pending.

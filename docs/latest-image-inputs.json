@@ -1,0 +1,22 @@
+{
+  "g350": {
+    "version": "0.1.10",
+    "base": {"path": "/outputs/slot-g350-ps1-snes-n64-0.1.3-experimental.img.zip", "sha256": "0dbce54cb940d3d1ee6cbb05767ce57cf80de76148a52acb9927d32f94ebc869"},
+    "update": {"path": "/outputs/slot-g350-0.1.10-shaders-scaling-update.zip", "sha256": "fc0fe55a05701a59cafac09ddc7c6320e2af679b1093b42d3cca6fbbea54c3e8"},
+    "system_manifest": "/outputs/G350-0.1.10-manifest.json"
+  },
+  "rg35xxsp": {
+    "version": "0.2.2", "display_name": "Anbernic RG35XX SP", "guide_name": "RG35XXSP-START-HERE.txt",
+    "base": {"path": "/work/rg35xxsp-v0100/baseos-rg35xxsp-1.3.0.img.zip", "sha256": "263e2fd6e7df1d177f3de4d79acb75c7b222c4ad17c78ec2cf858e87f0c89738"},
+    "payload_base": "/work/rg35xxsp-v0100/payload", "frontend_payload": "/work/rg35xxsp-aspect/update",
+    "installer_template": "/work/rg35xxsp-v0100/slot-sp-install",
+    "libgomp": {"path": "/work/latest-releases/libgomp.so.1", "sha256": "d199903e13e452411c815135b2dc447754189c3a5fa56ce49eebf5695824f0ad"}
+  },
+  "rgsp": {
+    "version": "0.3.0", "display_name": "Anbernic RG SP", "guide_name": "RGSP-START-HERE.txt",
+    "base": {"path": "/work/rgsp-migration/baseos-rgsp-1.3.0.img.zip", "sha256": "39b184867c6628a39d0b197d70b06c07eb74fed2f3d54a1b27e372bac562df12"},
+    "payload_base": "/work/rg35xxsp-v0100/payload", "frontend_payload": "/work/rgsp-migration/update",
+    "installer_template": "/work/rg35xxsp-v0100/slot-sp-install",
+    "libgomp": {"path": "/work/latest-releases/libgomp.so.1", "sha256": "d199903e13e452411c815135b2dc447754189c3a5fa56ce49eebf5695824f0ad"}
+  }
+}

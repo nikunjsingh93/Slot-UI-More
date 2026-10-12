@@ -10,6 +10,7 @@ pub enum VideoMode {
     #[default]
     Actual,
     Stretch,
+    HeightFit,
 }
 
 impl VideoMode {
@@ -17,6 +18,7 @@ impl VideoMode {
         match self {
             VideoMode::Actual => "actual",
             VideoMode::Stretch => "stretch",
+            VideoMode::HeightFit => "height-fit",
         }
     }
 
@@ -24,8 +26,30 @@ impl VideoMode {
         match s.trim().to_ascii_lowercase().as_str() {
             "actual" => Some(VideoMode::Actual),
             "stretch" => Some(VideoMode::Stretch),
+            "height-fit" => Some(VideoMode::HeightFit),
             _ => None,
         }
+    }
+
+    pub fn next_l1(self) -> Self {
+        match self {
+            Self::Actual | Self::HeightFit => Self::Stretch,
+            Self::Stretch => Self::HeightFit,
+        }
+    }
+}
+
+pub fn fills_height(platform: Platform, mode: VideoMode) -> bool {
+    matches!(platform, Platform::Gb | Platform::Gbc) && mode != VideoMode::Actual
+}
+
+/// Width of the game within the G350's 4:3 panel, independent of the 720x480 UI canvas.
+pub fn width_fraction(platform: Platform, mode: VideoMode) -> f32 {
+    if fills_height(platform, mode) && mode == VideoMode::HeightFit {
+        let (w, h) = platform.picture();
+        (w as f32 / h as f32 / (4.0 / 3.0)).min(1.0)
+    } else {
+        1.0
     }
 }
 

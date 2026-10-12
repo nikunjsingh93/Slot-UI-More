@@ -1,0 +1,34 @@
+Slot RG35XX SP 0.2.2 - GB/GBC aspect-ratio update
+
+For an existing Slot RG35XX SP 0.2.1 card. No reflash is needed.
+Extract the update ZIP at the BASEOS card root, replace its three matching
+System files and the Tools guide, then safely eject and boot the handheld.
+Keep the original System/.slot-rg35xxsp-0.2.0 installation marker.
+
+GB/GBC CONTROLS WHILE PLAYING
+L1 from the default view: stretch to fill the whole 640x480 screen.
+L1 again: fill the screen height while preserving the 160:144 picture ratio,
+          with equal black side bars (about 533 pixels wide at 480 pixels high).
+Further L1 presses alternate these two enlarged modes.
+R1 from either mode: restore the old centered default view.
+The scaling choice is remembered per game in Config/video_mode.ini.
+GBA's L/R buttons keep their normal game functions.
+
+SHADERS
+Return to Slot by holding Menu alone for one second.
+Tap Menu, select Shader with Up/Down, change it with Left/Right and close with B.
+Original, Sharp Pixels, Smooth, LCD and CRT remain available; saved globally.
+Colour correction is a separate setting (Select+Y while playing).
+
+Menu+X saves and Menu+Y loads console states.
+Menu+Select still switches D-pad/analog control on N64/DC/PSP.
+Hold Menu alone for one second still quits games to Slot.
+Existing cores, drivers, BIOS, games, artwork, saves and configuration are preserved.
+
+ROLLBACK
+Replace System/slot, System/launch_frontend.sh and System/slot-sp-build.json
+with the previous SP 0.2.1 copies; restore the previous Tools guide if desired.
+The old frontend ignores the new height-fit preference and uses its default view.
+
+Controls, preference persistence, existing shaders and GLES panel geometry pass
+container tests. Actual handheld boot and display testing must follow installation.

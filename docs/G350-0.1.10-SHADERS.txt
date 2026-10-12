@@ -1,0 +1,40 @@
+Slot G350 0.1.10 - Shaders and GB/GBC scaling
+
+SHADERS
+Hold Menu alone for one second to return to Slot's shelf.
+Tap Menu, select Shader with Up/Down, and choose with Left/Right.
+Press B or tap Menu to close settings, then launch a game.
+
+Original     Previous appearance: LCD for GB/GBC/GBA; sharp console output.
+Sharp Pixels Crisp nearest-neighbour pixels without the LCD mask/scanlines.
+Smooth       Bilinear filtering softens source-pixel edges.
+LCD          RGB subpixel grid with mild scanlines.
+CRT          Soft pixels, scanlines, phosphor stripes and lightly shaded edges.
+
+The shader is one global setting for all systems, saved across boots.
+It changes gameplay and game snapshots, leaving Slot's menus/artwork clear.
+Colour correction and blue-light filtering remain separate controls.
+These are built-in single-pass presets, without external shader files.
+
+GB/GBC PICTURE SIZE WHILE PLAYING
+L1 from the default view: stretch to fill the whole 640x480 screen.
+L1 again: fill the full height while preserving the 160:144 picture ratio.
+          This gives a roughly 533-pixel-wide picture with equal black side bars.
+Further L1 presses alternate these two enlarged modes.
+R1 from either mode: restore the previous default centered view.
+Scaling is remembered separately for each game in Config/video_mode.ini.
+
+GBA keeps its own L/R game controls. SNES, PS1, N64, DC and PSP controls
+and the one-second Menu-hold quit shortcut retain their previous behavior.
+Menu+X saves and Menu+Y loads console states, as before.
+
+INSTALLATION / ROLLBACK
+For an existing BATLEXP G350 Slot card, replace both SYSTEM and SYSTEM.md5
+on PAN4ELC with the matching update pair, then safely eject and boot.
+Do not put the G350 SYSTEM pair on an RG35XX SP card.
+Games, artwork, saves, BIOS and configuration under GAMES/Slot are preserved.
+For rollback, replace both files with the verified 0.1.9.4 update pair.
+
+Build, controls, preference migration, GLES shaders and physical-panel geometry
+pass container tests. Actual handheld boot/display verification is still required.
+No emulator core or driver changes are included in this update.

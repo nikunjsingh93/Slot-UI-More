@@ -641,10 +641,13 @@ impl App {
             QuickRow::FastForward => QuickValue::speed(self.state.ff_speed),
             QuickRow::FastForwardSound => Some(QuickValue::flag(self.state.ff_sound)),
             QuickRow::ColourCorrection => Some(QuickValue::flag(self.state.colour_correction)),
+            QuickRow::Shader => Some(QuickValue::shader(self.state.shader)),
             QuickRow::Rumble => Some(QuickValue::flag(self.state.rumble)),
             QuickRow::DateTime | QuickRow::About => None,
         }
     }
+
+    pub fn shader(&self) -> u8 { self.state.shader }
 
     pub fn set_quick_menu_faces(&mut self, faces: QuickMenuFaces) {
         self.quick_menu_faces = Some(faces);
@@ -767,6 +770,14 @@ impl App {
 
     pub fn source_rect(&self) -> [f32; 4] {
         video_mode::source_rect(self.platform, self.video_mode)
+    }
+
+    pub fn picture_fills_height(&self) -> bool {
+        video_mode::fills_height(self.platform, self.video_mode)
+    }
+
+    pub fn picture_width(&self) -> f32 {
+        video_mode::width_fraction(self.platform, self.video_mode)
     }
 
     fn slot_owns_the_shoulders(&self) -> bool {
@@ -1156,7 +1167,7 @@ impl App {
             Phase::Inserting { .. } if action == Action::Eject => self.eject(),
             Phase::Playing { .. } => match action {
                 Action::GbaDown(Btn::L1) if self.slot_owns_the_shoulders() => {
-                    self.set_picture(VideoMode::Stretch)
+                    self.set_picture(self.video_mode.next_l1())
                 }
                 Action::GbaDown(Btn::R1) if self.slot_owns_the_shoulders() => {
                     self.set_picture(VideoMode::Actual)
@@ -1220,6 +1231,7 @@ impl App {
             QuickRow::FastForward
             | QuickRow::FastForwardSound
             | QuickRow::ColourCorrection
+            | QuickRow::Shader
             | QuickRow::Rumble => {}
         }
     }
@@ -1240,6 +1252,7 @@ impl App {
                 self.colour_pending = Some(s.colour_correction);
             }
             QuickRow::Rumble => s.rumble = !s.rumble,
+            QuickRow::Shader => s.shader = (s.shader + if right { 1 } else { 4 }) % 5,
             QuickRow::DateTime | QuickRow::About => return,
         }
         self.persist();
