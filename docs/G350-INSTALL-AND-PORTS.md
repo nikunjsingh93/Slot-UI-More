@@ -120,7 +120,7 @@ Use the same capitalization, spaces and punctuation. Enable filename extensions 
 
 For Ports, PS1 and Dreamcast, a square image with the disc print centered (512 × 512 is suitable) works well. Slot clips Ports artwork to a circle and draws the hub; use disc-face artwork rather than a photographed case if you want that appearance. A missing Ports label uses the generic disc. PSP uses a UMD shell; SNES/N64 use cartridge shells.
 
-For automatic SNES/PS1/N64/DC/PSP artwork, open `studio/Slot-Auto-Artwork-Studio-v4.html` in Chrome/Edge, choose the Slot folder, scan/download art and save. Read [the studio guide](../studio/README.md). GB/GBC/GBA use [Cart Studio](https://studio.slot-cfw.fyi/). Current automatic Studio support does not include Ports: add their PNGs manually. Downloading artwork does not grant redistribution rights; commercial scans are excluded from the sharing package.
+For automatic GB/GBC/GBA/SNES/PS1/N64/DC/PSP artwork, open `studio/Slot-Auto-Artwork-Studio-v5.html` in Chrome/Edge, choose the Slot folder, let artwork download and save all ready labels together. Read [the studio guide](../studio/README.md). Existing labels from Cart Studio are preserved unless replacement is enabled; you do not need a separate app for Game Boy artwork. Current automatic Studio support does not include Ports: add their PNGs manually. Downloading artwork does not grant redistribution rights; commercial scans are excluded from the sharing package.
 
 ## Controls and troubleshooting
 

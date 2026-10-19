@@ -65,7 +65,7 @@ Use launcher names containing ASCII letters/numbers, spaces, dots, underscores, 
 
 ## Artwork Studio
 
-Open `studio/Slot-Auto-Artwork-Studio-v4.html` in Chrome or Edge. Choose the Slot folder, download artwork and save the labels. Existing labels are preserved unless replacement is enabled. Dreamcast uses `Games/DC`; PSP uses `Games/PSP`. GBA/GB/GBC use the original [Cart Studio](https://studio.slot-cfw.fyi/). See the studio guide for scan adjustments and fallbacks. Artwork downloaded for personal use is not a license to redistribute it.
+Open [Artwork Studio v5](studio/Slot-Auto-Artwork-Studio-v5.html) in Chrome or Edge, or download its standalone HTML/ZIP from any current device release. **One app handles GB, GBC, GBA, SNES, PS1, N64, Dreamcast and PSP.** Choose the Slot folder (or BASEOS on the H700 devices), let it fetch cartridge/disc artwork, then save all ready labels together. Existing labels, including ones from Cart Studio, are preserved unless replacement is enabled. You can also export a Labels ZIP. No firmware update is needed. See the [studio guide](studio/README.md) for paths, scan adjustments and fallbacks. Artwork downloaded for personal use is not a license to redistribute it.
 
 ## Controls and hotkeys
 
