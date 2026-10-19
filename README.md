@@ -6,6 +6,22 @@ A controller-friendly frontend with cartridge/disc shelves, save-state previews,
 
 **The latest complete images include native Ports and a bundled PortMaster manager**, round CDs, a gray SLOT splash on black, and in-game volume buttons that inherit Slot's saved speaker/headphone levels. The owner has confirmed GTA SA and NFS U2 launch and play; NFS U2 remains demanding and runs slowly. Compatibility and speed vary by port.
 
+## Screenshots
+
+All eight emulated systems and the native Ports shelf, shown with cartridge/disc labels. These are captures from Slot's actual shelf renderer on its 720 × 480 reference canvas, using original fictional demo artwork. They show the frontend rather than gameplay; physical panel layouts vary by model. Your own PNG labels replace the demo prints. See [how to add labels](#adding-ports-and-disc-labels).
+
+| Game Boy · GB | Game Boy Color · GBC | Game Boy Advance · GBA |
+|:---:|:---:|:---:|
+| ![Game Boy shelf with labeled cartridges](docs/screenshots/gb.png) | ![Game Boy Color shelf with labeled clear cartridges](docs/screenshots/gbc.png) | ![Game Boy Advance shelf with labeled cartridges](docs/screenshots/gba.png) |
+
+| Super Nintendo · SNES | PlayStation · PS1 | Nintendo 64 · N64 |
+|:---:|:---:|:---:|
+| ![Super Nintendo shelf with labeled cartridges](docs/screenshots/snes.png) | ![PlayStation shelf with labeled round CDs](docs/screenshots/ps1.png) | ![Nintendo 64 shelf with labeled cartridges](docs/screenshots/n64.png) |
+
+| Dreamcast · DC | PlayStation Portable · PSP | Native games · Ports |
+|:---:|:---:|:---:|
+| ![Dreamcast shelf with labeled round discs](docs/screenshots/dc.png) | ![PSP shelf with labeled UMD shells](docs/screenshots/psp.png) | ![Native Ports shelf with labeled round discs](docs/screenshots/ports.png) |
+
 ## Downloads and installation
 
 | Device | Fresh installation | Guide / optional system files |
