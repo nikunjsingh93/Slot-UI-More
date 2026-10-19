@@ -2,6 +2,8 @@
 
 A controller-friendly frontend with cartridge/disc shelves, save-state previews, shaders and long-press Menu to return home. This is an independent adaptation of [Slot](https://slot-cfw.fyi/), not an official Slot, PAN4ELEC or PortMaster release.
 
+**Based on [Slot by Brandon Kowalski](https://github.com/BrandonKowalski/slot).** Credit for the original frontend and its visual foundation belongs to the upstream project and its contributors, including Markus for the skeuomorphic artwork credited upstream. See [credits and attribution](CREDITS.md).
+
 **Release 1.1.15 uses the same version across G350, RG SP and RG35XX SP.** It repackages the verified firmware without changing disk image bytes; internal frontend build numbers remain 0.1.14, 0.3.1 and 0.2.3 respectively. Only these three current release pages are retained.
 
 **The latest complete images include native Ports and a bundled PortMaster manager**, round CDs, a gray SLOT splash on black, and in-game volume buttons that inherit Slot's saved speaker/headphone levels. The owner has confirmed GTA SA and NFS U2 launch and play; NFS U2 remains demanding and runs slowly. Compatibility and speed vary by port.
@@ -165,6 +167,8 @@ For the ARM64 Bullseye build environment, core source downloads and the current 
 The G350 0.1.13 baseline passed frontend/disc geometry tests, Menu/volume process tests, real ALSA PCM gain tests with a mocked hardware mixer, script/dependency checks, archive integrity and uncached SD read-back. All 50 save files, both working private game runtimes and Slot settings were unchanged during the owner's update. The owner reports the current setup works well; NFS speed remains limited. This is not a guarantee that every G350 revision, emulator or downloaded port works. Historical release notes remain under `docs/`.
 
 ## Sharing, licenses and credits
+
+Original Slot: **[Brandon Kowalski and contributors](https://github.com/BrandonKowalski/slot)**. This repository adds its own device adaptations, emulator/Ports integration and combined Artwork Studio. It is independently maintained and is not endorsed by the upstream authors. [CREDITS.md](CREDITS.md) records the source baseline and third-party attribution.
 
 The Slot code is GPL-3.0; retain [LICENSE](LICENSE), upstream notices and source. PortMaster GUI is separately developed by [PortsMaster](https://github.com/PortsMaster/PortMaster-GUI) under its [MIT license](https://github.com/PortsMaster/PortMaster-GUI/blob/main/LICENSE); included utilities and individual games have their own licenses. Emulator and OS components have separate terms, including GPL, MPL and component-specific restrictions. The root GPL license does not relicense those components or commercial games/artwork.
 
