@@ -6,10 +6,10 @@ export HOME=/storage
 export LD_LIBRARY_PATH=/usr/lib:/usr/lib/pulseaudio
 mkdir -p "$SLOT_ROOT/System" "$SLOT_ROOT/Config"
 exec >> "$SLOT_ROOT/slot.log" 2>&1
-echo "slot: G350 0.1.10 startup $(date)"
+echo "slot: G350 0.1.13 Ports startup $(date)"
 trap 'result=$?; echo "slot: startup script exited=$result before frontend exec"' EXIT
 echo 'slot: provisioning folders and missing cores' 
-for platform in GBA GB GBC PS1 SNES N64 DC PSP; do
+for platform in GBA GB GBC PS1 SNES N64 DC PSP PORTS; do
     for folder in Games Labels Saves States; do
         mkdir -p "$SLOT_ROOT/$folder/$platform"
     done
@@ -112,6 +112,26 @@ for policy in /sys/devices/system/cpu/cpufreq/policy* /sys/class/devfreq/*gpu* /
         fi
     done
 done
+if ! cmp -s /usr/bin/slot-port-runner.sh "$SLOT_ROOT/System/slot-port-runner.sh"; then
+    cp /usr/bin/slot-port-runner.sh "$SLOT_ROOT/System/slot-port-runner.sh.tmp"
+    mv "$SLOT_ROOT/System/slot-port-runner.sh.tmp" "$SLOT_ROOT/System/slot-port-runner.sh"
+fi
+if ! cmp -s /usr/lib/slot-no-grab.so "$SLOT_ROOT/System/slot-no-grab.so"; then
+    cp /usr/lib/slot-no-grab.so "$SLOT_ROOT/System/slot-no-grab.so.tmp"
+    mv "$SLOT_ROOT/System/slot-no-grab.so.tmp" "$SLOT_ROOT/System/slot-no-grab.so"
+fi
 echo "slot: launching frontend"
 cd "$SLOT_ROOT"
-exec /usr/bin/slot-g350
+/usr/bin/python3 /usr/bin/slot-refresh-ports.py "$SLOT_ROOT"
+while :; do
+    set +e
+    /usr/bin/slot-g350
+    result=$?
+    set -e
+    if [ "$result" -ne 85 ] || [ ! -s "$SLOT_ROOT/Config/port.request" ]; then exit "$result"; fi
+    port_id=$(cat "$SLOT_ROOT/Config/port.request")
+    rm -f "$SLOT_ROOT/Config/port.request"
+    /usr/bin/slot-portwatch /bin/bash "$SLOT_ROOT/System/slot-port-runner.sh" "$port_id" "$SLOT_ROOT" >> "$SLOT_ROOT/Config/ports.log" 2>&1 || echo "slot: port exit=$?"
+    /usr/bin/python3 /usr/bin/slot-refresh-ports.py "$SLOT_ROOT"
+    sleep 0.2
+done

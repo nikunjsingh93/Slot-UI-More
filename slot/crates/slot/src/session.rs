@@ -457,6 +457,16 @@ impl Session {
         else {
             return;
         };
+        if platform == Platform::Ports {
+            if let Err(error) = crate::ports::request(&self.root, &rom) {
+                eprintln!("slot: port launch: {error}");
+                self.app.on_core_failed();
+                return;
+            }
+            // The parent launcher runs the port after this process exits,
+            // releasing DRM master, EGL and ALSA before the game starts.
+            std::process::exit(85);
+        }
         let core = slot_store::core_for_platform(&self.root, stem, platform);
         self.ps1_menu = false;
         self.ps1_chord = false;

@@ -102,7 +102,8 @@ pub fn scan(root: &Path) -> Result<Vec<Cart>, StoreError> {
                 | Platform::Snes
                 | Platform::N64
                 | Platform::Dreamcast
-                | Platform::Psp => (stem.to_string(), String::new()),
+                | Platform::Psp
+                | Platform::Ports => (stem.to_string(), String::new()),
                 _ => (crate::gb::title(&rom).unwrap_or_default(), String::new()),
             };
             carts.push(Cart {

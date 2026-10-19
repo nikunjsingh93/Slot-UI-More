@@ -478,11 +478,11 @@ impl App {
                 if self.seated_cart().is_some_and(|c| {
                     matches!(
                         c.platform,
-                        Platform::N64 | Platform::Dreamcast | Platform::Psp
+                        Platform::N64 | Platform::Dreamcast | Platform::Psp | Platform::Ports
                     )
                 }) || matches!(
                     self.shelves[at].0,
-                    Platform::N64 | Platform::Dreamcast | Platform::Psp
+                    Platform::N64 | Platform::Dreamcast | Platform::Psp | Platform::Ports
                 ) {
                     // A native core crash must never be relaunched on every
                     // service restart or power-on. N64 is launched manually.
@@ -844,7 +844,7 @@ impl App {
     pub fn may_rewind(&self) -> bool {
         !matches!(
             self.platform,
-            Platform::Ps1 | Platform::Snes | Platform::N64 | Platform::Dreamcast | Platform::Psp
+            Platform::Ps1 | Platform::Snes | Platform::N64 | Platform::Dreamcast | Platform::Psp | Platform::Ports
         ) && !self.link_active()
     }
 

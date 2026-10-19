@@ -92,7 +92,8 @@ pub fn gb_shell_of(cart: &Cart) -> Option<GbShell> {
         | Platform::Snes
         | Platform::N64
         | Platform::Dreamcast
-        | Platform::Psp => None,
+        | Platform::Psp
+        | Platform::Ports => None,
         Platform::Gb | Platform::Gbc => Some(match cart.shell.map(|c| c.outline) {
             Some(Outline::Notched) => GbShell::Notched,
             Some(Outline::Rounded) => GbShell::Rounded,
@@ -158,7 +159,7 @@ const GB_SEATED_H: u32 = 259;
 
 pub fn seated_box(platform: Platform) -> (u32, u32) {
     match platform {
-        Platform::Ps1 | Platform::Dreamcast => (312, 312),
+        Platform::Ps1 | Platform::Dreamcast | Platform::Ports => (312, 312),
         Platform::Psp => (312, 328),
         Platform::Snes => (240, 147),
         Platform::N64 => (240, 155),
@@ -174,7 +175,7 @@ pub fn cart_box(platform: Platform) -> (u32, u32) {
     if platform == Platform::Snes {
         return (360, 220);
     }
-    if matches!(platform, Platform::Ps1 | Platform::Dreamcast) {
+    if matches!(platform, Platform::Ps1 | Platform::Dreamcast | Platform::Ports) {
         return (312, 312);
     }
     if platform == Platform::Psp {
@@ -186,7 +187,8 @@ pub fn cart_box(platform: Platform) -> (u32, u32) {
         | Platform::Snes
         | Platform::N64
         | Platform::Dreamcast
-        | Platform::Psp => Shape::Gba,
+        | Platform::Psp
+        | Platform::Ports => Shape::Gba,
         Platform::Gb | Platform::Gbc => Shape::Gb(GbShell::Notched),
     });
     (s.w, s.h)
@@ -215,7 +217,7 @@ pub fn cart_face(cart: &Cart) -> CartFace {
     if cart.platform == Platform::Snes {
         return snes_face(cart);
     }
-    if matches!(cart.platform, Platform::Ps1 | Platform::Dreamcast) {
+    if matches!(cart.platform, Platform::Ps1 | Platform::Dreamcast | Platform::Ports) {
         return disc_face(cart);
     }
     if cart.platform == Platform::Psp {
@@ -551,7 +553,7 @@ fn disc_face(cart: &Cart) -> CartFace {
     let base = label_colour(&title);
     let artwork = cart.label.as_deref().and_then(|p| art::cover(p, w, w));
     // The studio marks original disc scans with a transparent spindle hole.
-    let scanned_disc = artwork
+    let scanned_disc = cart.platform == Platform::Ports || artwork
         .as_ref()
         .is_some_and(|a| a[3] < 8 && a[((156 * w + 156) * 4 + 3) as usize] < 8);
     let mut print = vec![0u8; 220 * 54 * 4];

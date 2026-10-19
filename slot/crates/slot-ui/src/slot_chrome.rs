@@ -137,7 +137,7 @@ impl SlotChrome<'_> {
     }
 
     pub fn draw(&self, out: &mut Vec<Draw>) {
-        if self.cart.platform == slot_store::Platform::Ps1 {
+        if matches!(self.cart.platform, slot_store::Platform::Ps1 | slot_store::Platform::Ports) {
             self.draw_disc(out);
             return;
         }

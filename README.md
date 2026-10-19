@@ -1,55 +1,55 @@
 # Slot UI for BATLEXP G350, RG SP and RG35XX SP
 
-Each current release includes a complete **fresh-install `.img.zip`**, source archive, instructions, manifest and SHA256 checksums. Extract the `.img` and flash it to the model shown below. The latest frontend, shaders and all eight systems—GB/GBC/GBA/SNES/PS1/N64/Dreamcast/PSP—are already included; no older image or follow-up update is needed.
+A controller-friendly frontend with cartridge/disc shelves, save-state previews, shaders and long-press Menu to return home. This is an independent adaptation of [Slot](https://slot-cfw.fyi/), not an official Slot, PAN4ELEC or PortMaster release.
 
-| Device | Latest version and download | Game folder after first boot |
+**G350 0.1.13 adds native Ports and PortMaster integration**, round CDs, a gray SLOT splash on black, and in-game volume buttons that inherit Slot's saved speaker/headphone levels. The owner has confirmed GTA SA and NFS U2 launch and play; NFS U2 remains demanding and runs slowly. Compatibility and speed vary by port.
+
+## Downloads and installation
+
+| Device | Fresh installation | Latest update / guide |
 |---|---|---|
-| BATLEXP G350 | [0.1.10](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/v0.1.10) | `GAMES/Slot/Games` |
-| Anbernic RG35XX SP | [0.2.2](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/rg35xxsp-v0.2.2) | `BASEOS/Games` |
-| Anbernic RG SP | [0.3.0](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/rgsp-v0.3.0) | `BASEOS/Games` |
+| BATLEXP G350 | [0.1.10 flashable base](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/v0.1.10), then install 0.1.13 | [0.1.13 Ports update](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/v0.1.13) · [step-by-step G350 guide](docs/G350-INSTALL-AND-PORTS.md) |
+| Anbernic RG35XX SP | [0.2.2 complete image](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/rg35xxsp-v0.2.2) | [RG35XX SP instructions](ports/rg35xxsp/README.md) |
+| Anbernic RG SP | [0.3.0 complete image](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/rgsp-v0.3.0) | [RG SP instructions](ports/rgsp/README.md) |
 
-The RG SP and RG35XX SP are different models with separate boot images. G350 SYSTEM updates cannot be installed on either. Read the release's **START-HERE** before flashing: back up the card, use TF1/OS, keep TF2 empty initially, and let first-boot expansion finish before copying games. Flashing erases the target card. These new fresh images pass filesystem, payload, installer and checksum checks; physical first boot still needs validation. Existing firmware updates remain available for working cards. The repository is private, so sign in to download.
+**Use only the image for your exact model.** The G350 Ports integration is not included in the Anbernic builds. Flashing a fresh image erases the target card. Updating an existing G350 uses SYSTEM + SYSTEM.md5 and, for the 0.1.13 boot artwork, KERNEL + KERNEL.md5. No card reflash is required for an update. Keep games, labels and saves backed up before changing firmware.
 
-The H700 ports retain Menu-hold quit, save/load chords, shaders and D-pad/analog switching. See [RG35XX SP source/instructions](ports/rg35xxsp/README.md) and [RG SP source/instructions](ports/rgsp/README.md). RG SP uses its native 720×480 panel, round disc art and aspect-preserving console/GB display geometry. On either stickless handheld, **Menu+Select** switches D-pad digital/analog control for N64/DC/PSP; N64 starts analog. This maps full-deflection directions rather than providing analog precision.
+The repository is currently private; invited users must sign in to download. Changing visibility is a separate action. No games, proprietary BIOS, APKs/OBBs, private game-linked executables, save files or commercial disc scans are supplied in the 0.1.13 sharing package. The package is an update, not a complete flashable image. Original emulator core binaries are retained from the accepted G350 base.
 
-Backup of the customized Slot frontend and firmware work for the RK3326 BATLEXP G350. The accepted stable baseline is **0.1.8**. **0.1.9.2** adds PSP/Dreamcast and repairs repeated Dreamcast launches. The owner confirmed that **0.1.9.3** substantially improves Dreamcast speed, with SoulCalibur almost full speed; sound still has dropouts. **0.1.9.4** targets those audio gaps with Dreamcast-specific buffering and pacing, corrects the PSP UMD shell and repairs PSP asset provisioning. Audible validation of 0.1.9.4 is pending on the handheld.
+## Quick start on G350
 
-**G350 0.1.10** adds a Shader setting (Original, Sharp Pixels, Smooth, LCD, CRT)
-and a full-height GB/GBC view that preserves the picture's aspect ratio. While
-playing GB/GBC, L1 cycles between full-screen stretch and full-height with side
-bars; R1 restores the old centered default. The scale is saved per game and the
-shader is saved globally. See [the update guide](docs/G350-0.1.10-SHADERS.txt).
-Existing drivers, emulator cores, game/state formats and quit controls are preserved.
+1. Install the correct G350 base/update using the [installation guide](docs/G350-INSTALL-AND-PORTS.md).
+2. Copy your own games to `GAMES/Slot/Games/<SYSTEM>/` (the folder table is in the guide).
+3. For native ports, install PortMaster separately into `GAMES/ports/PortMaster/`, then install games and supply any required files from your own copies. PortMaster itself is already published by its upstream authors; this repository supplies the Slot integration.
+4. Put labels in `GAMES/Slot/Labels/<SYSTEM>/`, with the exact game filename stem and `.png`. For example, `Games/PS1/My Game.chd` uses `Labels/PS1/My Game.png`.
+5. Safely eject, boot, switch shelves with L1/R1 and press A to play. Hold the centre M/Menu button alone for one second to return to Slot.
 
-Dreamcast's faster renderer, state format and relaunch repair are preserved. PSP worked well; its gameplay settings and the accepted SNES/N64/PS1 settings are unchanged. The Dreamcast buffer adds about 93 ms of target audio latency and cannot compensate for sustained emulation below real time. Do not install the superseded 0.1.9 desktop-build update.
+## Adding ports and disc labels
 
-## Backed up here
+Installed top-level `.sh` launchers under `GAMES/ports/` are imported into the Ports shelf at startup and after returning from a port. Game data stays in each port's own folder. `Slot/Games/PORTS/*.port` contains small launch descriptors, not PC game files.
 
-- `slot/`: complete customized Rust frontend, input/audio/rendering code and tests.
-- `patches/`: core patches, pinned core revisions and submodule inventories.
-- `firmware/slot-start`: final boot/provisioning script, including the checksum-specific Flycast upgrade.
-- `studio/`: current Artwork Studio v4 for SNES/PS1/N64/DC/PSP, plus editable source and a portable build script. GBA/GB/GBC use the original Cart Studio.
-- `docs/`: release instructions, checksums, validation and stable-base record.
-- `scripts/`: portable build/packaging scripts and the actual-executable startup check.
-- GitHub Releases: matching SYSTEM update pairs, complete corresponding source archives, and a fresh-install base image. Large binaries live in Releases rather than Git history.
+```text
+GAMES/
+  ports/
+    My Game.sh
+    mygame/
+      ...port runtime and your required data...
+  Slot/
+    Games/PORTS/My Game.port      (created automatically)
+    Labels/PORTS/My Game.png     (optional disc print)
+```
 
-No games, private game-test media, saves or proprietary BIOS files are included. The repository remains private; download release assets while signed in.
+Use launcher names containing ASCII letters/numbers, spaces, dots, underscores, hyphens or parentheses. Use the same spelling and capitalization for the PNG. A square PNG (for example 512 × 512) with the disc face centered works well; Slot clips it to a round CD and draws its hub. Missing labels use the generic disc. Restart Slot/the handheld after copying artwork. The current Artwork Studio covers SNES/PS1/N64/DC/PSP; custom Ports labels are added manually.
 
-## Artwork studio
+**Native port controls:** hold Menu alone for one second to quit. Volume +/− changes the current speaker/headphone level; holding repeats; both together toggle mute. Use the game's own save menu. Emulator save states, double-Menu state browsing and Slot shaders do not apply to native ports. Some third-party launch scripts can override audio/input settings and need adaptation.
 
-Open `studio/Slot-Auto-Artwork-Studio-v4.html` in Chrome or Edge. Choose the Slot folder, let original cartridge/disc artwork download, then save ready labels. Dreamcast reads `Games/DC`; PSP reads `Games/PSP`. Existing labels are preserved unless replacement is enabled. Logos and covers provide fallbacks when scans are missing. See the studio guide for formats and scan adjustments. Rebuild it with `python studio/source/build.py`; no external Python packages are needed. Only the current HTML, guide and necessary source files are kept here; local screenshots, test media, caches and duplicate ZIPs are excluded.
+## Artwork Studio
 
-## Using the update
-
-Download the matching latest update ZIP from [Releases](https://github.com/nikunjsingh93/slot-ui-g350/releases). With the handheld off, replace **both** SYSTEM and SYSTEM.md5 on PAN4ELC. Safely eject and boot. Games live under `GAMES/Slot/Games`: `DC`, `PSP`, `N64`, `SNES`, `PS1`, `GBA`, `GB`, `GBC`. Keep a GDI's track files beside its GDI.
-
-**Hold Menu alone for one second to quit to Slot.** On PS1/SNES/N64/DC/PSP, X/Y alone are game buttons; **Menu + X saves**, and **Menu + Y loads**. Game Boy systems use the different shortcuts listed below. PSP/DC automatic boot into a running game is disabled to avoid crash loops; manually launch from the shelf. DC VMU saves are under `Slot/Saves/DC`, and PSP memory-stick saves under `Slot/Saves/PSP/MemoryStick/PSP/SAVEDATA`.
-
-For a fresh G350 card, flash **slot-g350-0.1.10.img.zip** from the latest release after extracting its `.img`. It already contains the latest SYSTEM pair. The old 0.1.3 image remains historical and requires an update if used. The latest image preserves the dedicated G350 base's boot/panel files and initial resize setup. RG35XX SP and RG SP use their own images and START-HERE instructions linked above.
+Open `studio/Slot-Auto-Artwork-Studio-v4.html` in Chrome or Edge. Choose the Slot folder, download artwork and save the labels. Existing labels are preserved unless replacement is enabled. Dreamcast uses `Games/DC`; PSP uses `Games/PSP`. GBA/GB/GBC use the original [Cart Studio](https://studio.slot-cfw.fyi/). See the studio guide for scan adjustments and fallbacks. Artwork downloaded for personal use is not a license to redistribute it.
 
 ## Controls and hotkeys
 
-These are the current G350 0.1.10 controls, checked against the input/session code. **Menu** means the handheld's centre **M** button; L1/R1 are the first shoulder buttons and L2/R2 the second pair. For a combination, hold the first button, tap the second, then release both. A long hold of Menu **alone** quits the game.
+These are the emulator controls retained in G350 0.1.13, checked against the input/session code. **Menu** means the handheld's centre **M** button; L1/R1 are the first shoulder buttons and L2/R2 the second pair. For a combination, hold the first button, tap the second, then release both. A long hold of Menu **alone** quits the game.
 
 ### Save and load by system
 
@@ -68,7 +68,7 @@ For Game Boy **Select** combinations, press the second button promptly, within a
 
 Save states are emulator snapshots, separate from a game's normal memory-card/VMU/memory-stick saves. Loading restores the saved moment. Use the browser below to choose an older state; the quick load shortcut chooses the newest saved state. Normal game saves remain managed through each game's own save menu.
 
-### Common controls while playing
+### Common controls while playing emulators
 
 | Button / action | Result |
 |---|---|
@@ -82,7 +82,7 @@ Save states are emulator snapshots, separate from a game's normal memory-card/VM
 
 For PS1 disc switching, launch the game's `.m3u` playlist with all discs listed, then use Menu + R2 when the game requests the next disc. A single-disc file has no next disc. PSP and Dreamcast do not have this disc-switch shortcut.
 
-### Saved-state picture browser (all systems)
+### Saved-state picture browser (emulated systems)
 
 Double-tap Menu during gameplay to open it. Gameplay pauses while the browser is open.
 
@@ -126,28 +126,24 @@ Load-state, rewind and fast-forward are unavailable during an active link-play s
 
 In settings, Up/Down selects a row, Left/Right changes its value, and A opens the selected item. The volume and Power controls above also work on the shelf. The Shader row selects Original, Sharp Pixels, Smooth, LCD or CRT; it is global and saved automatically. GB/GBC scaling is saved per game. The 0.1.10 SYSTEM update is required for these new options; no full reflash is needed.
 
-## Rebuild on another laptop
 
-Install Git, [GitHub CLI](https://cli.github.com/) and Docker Desktop with Linux containers. Enable ARM64 emulation (Docker Desktop normally provides it). Clone this private repository and sign into GitHub CLI:
+## Source, building and validation
 
-```powershell
-git clone https://github.com/nikunjsingh93/slot-ui-g350.git
-cd slot-ui-g350
-gh auth login
-gh release download v0.1.8 --repo nikunjsingh93/slot-ui-g350 --pattern "slot-g350-0.1.8-parallel-n64-update.zip" --dir backups
-gh release download v0.1.9.2 --repo nikunjsingh93/slot-ui-g350 --pattern "slot-g350-0.1.9.2-sources.zip" --dir backups
-docker build --platform linux/arm64 -t slot-g350-builder .
-docker run --rm --platform linux/arm64 -v "${PWD}:/repo" slot-g350-builder sh scripts/build.sh
-```
+- `slot/`: customized Rust frontend, renderer, input/audio code and tests.
+- `firmware/ports/`: native launcher, Menu/volume supervisor, input-sharing helper, installation and splash tools.
+- `firmware/slot-start`: G350 boot/provisioning and port process lifecycle.
+- `studio/`: artwork tool and editable source.
+- `ports/rg35xxsp/`, `ports/rgsp/`: separate Anbernic adaptations.
+- `patches/`, `scripts/`, `docs/`: pinned core sources, build recipes, provenance and validation.
 
-The script verifies the downloaded archives, extracts the preserved 0.1.8 SYSTEM, rebuilds the current frontend/Flycast/PPSSPP, retains the other known working cores, provisions PSP assets, and produces a matching update ZIP in `dist/`. It writes image files only, never a physical disk. Allow substantial disk space and time, particularly for PPSSPP and ARM64 emulation.
+For the ARM64 Bullseye build environment, core source downloads and the current Ports overlay recipe, see [building](docs/G350-BUILD.md). The NFS matching-executable recipe is in [firmware/ports/nfs](firmware/ports/nfs/README.md); generated guest code and its resulting executable must remain private.
 
-The source archives contain the pinned upstream core sources/submodules, retained older core source and patches, and upstream OS provenance. The small pinned zstd build recipes omitted by the historical source export are restored from `patches/source-restore` before configuring the cores. The Flycast Linux repair is supplied as a patch against the archived v2.5 source; PPSSPP's thread-stop repair is already present in its source archive. The older cores can be rebuilt using the archived recipes, but this latest build intentionally preserves their verified binaries from the stable SYSTEM. The firmware build does not include games or run game probes automatically. For local regression tests, supply your own legally obtained copies.
+The 0.1.13 update passed frontend/disc geometry tests, Menu/volume process tests, real ALSA PCM gain tests with a mocked hardware mixer, script/dependency checks, archive integrity and uncached SD read-back. All 50 save files, both working private game runtimes and Slot settings were unchanged during the owner's update. The owner reports the current setup works well; NFS speed remains limited. This is not a guarantee that every G350 revision, emulator or downloaded port works. Historical release notes remain under `docs/`.
 
-The original ARM64 builder used Debian 11 (glibc 2.31), CMake 3.18.4 and the project's Rust 1.96 toolchain. Building against newer host glibc can produce binaries the firmware cannot load; use the supplied ARM64 Bullseye build container.
+## Sharing, licenses and credits
 
-## Validation and licensing
+The Slot code is GPL-3.0; retain [LICENSE](LICENSE), upstream notices and source. PortMaster GUI is separately developed by [PortsMaster](https://github.com/PortsMaster/PortMaster-GUI) under its [MIT license](https://github.com/PortsMaster/PortMaster-GUI/blob/main/LICENSE); included utilities and individual games have their own licenses. Emulator and OS components have separate terms, including GPL, MPL and component-specific restrictions. The root GPL license does not relicense those components or commercial games/artwork.
 
-The repeated core test reproduced the original DC → PSP → DC failure, then passed six mixed sessions and Dreamcast state restore after the patch. Tests also covered generated stereo audio, gameplay video, context teardown, full Slot Menu-hold exit, packaged KMS/DRM entrypoint, dependency resolution, archive CRC/SHA256/MD5 and SD read-back. Container timings do not establish G350 frame rates. See `docs/` for precise evidence and limitations.
+You can share the original/modification source under the applicable licenses. When distributing binaries, provide the complete corresponding source and build/install material required by the relevant licenses alongside them; a link to a newer upstream branch alone is not a substitute for the source used. Preserve the older source assets referenced in [the sharing notes](docs/SHARING.md). Before making all firmware releases public, review their contents, component license conditions and corresponding-source coverage. The current review is not a complete legal clearance of every historical firmware dependency. See [GNU's distribution guidance](https://www.gnu.org/licenses/gpl-faq.html#SourceAndBinaryOnDifferentSites).
 
-Slot is GPL-3.0; preserve its LICENSE and upstream attribution. Core licenses vary (Flycast/PPSSPP are GPL; mGBA is MPL). Retain the notices and corresponding source archives when redistributing firmware. The inherited PAN4ELEC/AmberELEC OS remains under its component licenses; its provenance and upstream source links are in the source archives and documentation. This is an independent device adaptation of [Slot](https://slot-cfw.fyi/), not an official Slot or PAN4ELEC release.
+Users provide their own legally obtained game files and any required BIOS. Never upload ROMs, SPEED2.EXE, generated NFS guest code/game-linked executables, GTA APKs/OBBs/libraries, saves or commercial artwork scans. The personal update containing disc scans is kept local; the sharing package excludes them.

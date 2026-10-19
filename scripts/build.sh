@@ -31,7 +31,9 @@ cp -a "$task_build/core-source/ppsspp/assets/." "$task_build/root/usr/share/slot
 cp "$repo/docs/G350-0.1.10-SHADERS.txt" "$task_build/root/usr/share/slot/SHADERS.txt"
 cp "$repo/firmware/slot-start" "$task_build/root/usr/bin/slot-start"
 chmod 755 "$task_build/root/usr/bin/slot-start" "$task_build/root/usr/bin/slot-g350"
-printf '%s\n' '0.1.10-experimental' > "$task_build/root/usr/share/slot/VERSION"
+gcc -O2 -Wall -Wextra "$repo/firmware/ports/portwatch.c" -o "$task_build/slot-portwatch" -lasound -lm
+gcc -O2 -Wall -Wextra -shared -fPIC "$repo/firmware/ports/slot-no-grab.c" -o "$task_build/slot-no-grab.so" -ldl
+python3 "$repo/firmware/ports/patch_system.py" "$task_build/root" "$task_build/slot/target/device/slot" "$task_build/slot-portwatch" "$task_build/slot-no-grab.so"
 for task_core in flycast ppsspp; do
     mkdir -p "$task_build/root/usr/share/slot/notices/$task_core"
     for task_notice in LICENSE LICENSE.TXT COPYING README.md; do

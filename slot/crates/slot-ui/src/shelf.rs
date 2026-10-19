@@ -252,7 +252,7 @@ impl Shelf {
 
     pub fn draw(&self, shake: f32, out: &mut Vec<Draw>) {
         self.draw_row(None, shake, 0.0, 1.0, out);
-        if self.platform == slot_store::Platform::Ps1 {
+        if matches!(self.platform, slot_store::Platform::Ps1 | slot_store::Platform::Ports) {
             crate::slot_chrome::draw_disc_drive(1.0, out);
         } else {
             draw_empty_slot(out);
@@ -299,6 +299,7 @@ impl Shelf {
                         | slot_store::Platform::N64
                         | slot_store::Platform::Dreamcast
                         | slot_store::Platform::Psp
+                        | slot_store::Platform::Ports
                 )
             {
                 let backing = match self.shells.get(i).copied().flatten() {

@@ -24,3 +24,14 @@
 slot.state
 slot.log
 private-diagnostics/
+# Native-port game inputs and downloaded executables stay local.
+*.apk
+*.obb
+*.exe
+*.EXE
+**/gamedata/
+nfsu2*.aarch64
+**/recomp/gen/
+libGTASA.so
+libSCAnd.so
+libOpenAL64.so

@@ -4,6 +4,19 @@ use common::tmp_root;
 use slot_store::{scan, Platform};
 use tempfile::TempDir;
 
+#[test]
+fn native_port_descriptor_uses_filename_and_pairs_its_label() {
+    let d = tmp_root();
+    std::fs::create_dir_all(d.path().join("Games/PORTS")).unwrap();
+    std::fs::write(d.path().join("Games/PORTS/Grand Theft Auto San Andreas.port"), "gtasa\n").unwrap();
+    write_png(&d, "PORTS/Grand Theft Auto San Andreas.png");
+    let carts = scan(d.path()).unwrap();
+    assert_eq!(carts.len(), 1);
+    assert_eq!(carts[0].platform, Platform::Ports);
+    assert_eq!(carts[0].title, "Grand Theft Auto San Andreas");
+    assert!(carts[0].label.is_some());
+}
+
 fn write_rom(d: &TempDir, rel: &str, title: &str) {
     let mut rom = vec![0u8; 0x100];
     rom[0xa0..0xa0 + title.len()].copy_from_slice(title.as_bytes());

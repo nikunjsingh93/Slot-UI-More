@@ -89,6 +89,7 @@ impl Core {
             Platform::N64 => Core::ParallelN64,
             Platform::Dreamcast => Core::Flycast,
             Platform::Psp => Core::Ppsspp,
+            Platform::Ports => Core::Mgba, // External launcher; no core is opened.
         }
     }
 }

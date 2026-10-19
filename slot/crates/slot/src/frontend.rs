@@ -123,6 +123,7 @@ impl Frontend {
                     slot_store::Platform::Ps1
                         | slot_store::Platform::Dreamcast
                         | slot_store::Platform::Psp
+                        | slot_store::Platform::Ports
                 ) {
                     self.disc_faces.push(tex);
                 }
