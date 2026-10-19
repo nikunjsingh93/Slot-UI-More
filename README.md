@@ -2,27 +2,29 @@
 
 A controller-friendly frontend with cartridge/disc shelves, save-state previews, shaders and long-press Menu to return home. This is an independent adaptation of [Slot](https://slot-cfw.fyi/), not an official Slot, PAN4ELEC or PortMaster release.
 
-**G350 0.1.13 adds native Ports and PortMaster integration**, round CDs, a gray SLOT splash on black, and in-game volume buttons that inherit Slot's saved speaker/headphone levels. The owner has confirmed GTA SA and NFS U2 launch and play; NFS U2 remains demanding and runs slowly. Compatibility and speed vary by port.
+**The latest complete images include native Ports and a bundled PortMaster manager**, round CDs, a gray SLOT splash on black, and in-game volume buttons that inherit Slot's saved speaker/headphone levels. The owner has confirmed GTA SA and NFS U2 launch and play; NFS U2 remains demanding and runs slowly. Compatibility and speed vary by port.
 
 ## Downloads and installation
 
 | Device | Fresh installation | Latest update / guide |
 |---|---|---|
-| BATLEXP G350 | [0.1.10 flashable base](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/v0.1.10), then install 0.1.13 | [0.1.13 Ports update](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/v0.1.13) · [step-by-step G350 guide](docs/G350-INSTALL-AND-PORTS.md) |
-| Anbernic RG35XX SP | [0.2.2 complete image](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/rg35xxsp-v0.2.2) | [RG35XX SP instructions](ports/rg35xxsp/README.md) |
-| Anbernic RG SP | [0.3.0 complete image](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/rgsp-v0.3.0) | [RG SP instructions](ports/rgsp/README.md) |
+| BATLEXP G350 | [0.1.14 complete image](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/v0.1.14) | [0.1.14 update](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/v0.1.14) · [step-by-step G350 guide](docs/G350-INSTALL-AND-PORTS.md) |
+| Anbernic RG35XX SP | [0.2.3 complete image](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/rg35xxsp-v0.2.3) | [RG35XX SP instructions](ports/rg35xxsp/README.md) |
+| Anbernic RG SP | [0.3.1 complete image](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/rgsp-v0.3.1) | [RG SP instructions](ports/rgsp/README.md) |
 
-**Use only the image for your exact model.** The G350 Ports integration is not included in the Anbernic builds. Flashing a fresh image erases the target card. Updating an existing G350 uses SYSTEM + SYSTEM.md5 and, for the 0.1.13 boot artwork, KERNEL + KERNEL.md5. No card reflash is required for an update. Keep games, labels and saves backed up before changing firmware.
+**Use only the image for your exact model.** Each model has its own native-port launcher/runtime. H700 native Ports are experimental and await physical testing. Flashing a fresh image erases the target card. Updating an existing G350 uses SYSTEM + SYSTEM.md5 and, for the 0.1.13 boot artwork, KERNEL + KERNEL.md5. No card reflash is required for an update. Keep games, labels and saves backed up before changing firmware.
 
-The repository is currently private; invited users must sign in to download. Changing visibility is a separate action. No games, proprietary BIOS, APKs/OBBs, private game-linked executables, save files or commercial disc scans are supplied in the 0.1.13 sharing package. The package is an update, not a complete flashable image. Original emulator core binaries are retained from the accepted G350 base.
+The repository is currently private; invited users must sign in to download. Changing visibility is a separate action. No games, proprietary BIOS, APKs/OBBs, private game-linked executables, save files or commercial disc scans are supplied in the latest sharing packages. Each fresh `.img.zip` contains the current firmware and manager setup; no earlier image or follow-up update is needed. Update ZIPs are also available for existing cards. Original emulator core binaries are retained from the accepted G350 base.
 
 ## Quick start on G350
 
-1. Install the correct G350 base/update using the [installation guide](docs/G350-INSTALL-AND-PORTS.md).
+1. Flash the complete G350 image, or update your existing card, following the [installation guide](docs/G350-INSTALL-AND-PORTS.md).
 2. Copy your own games to `GAMES/Slot/Games/<SYSTEM>/` (the folder table is in the guide).
-3. For native ports, install PortMaster separately into `GAMES/ports/PortMaster/`, then install games and supply any required files from your own copies. PortMaster itself is already published by its upstream authors; this repository supplies the Slot integration.
+3. For native ports, open the bundled PortMaster from the Ports shelf, install games and supply any required files from your own copies. G350 installs the manager automatically on its first boot and preserves existing installs. PortMaster itself is already published by its upstream authors; this repository supplies the Slot integration.
 4. Put labels in `GAMES/Slot/Labels/<SYSTEM>/`, with the exact game filename stem and `.png`. For example, `Games/PS1/My Game.chd` uses `Labels/PS1/My Game.png`.
 5. Safely eject, boot, switch shelves with L1/R1 and press A to play. Hold the centre M/Menu button alone for one second to return to Slot.
+
+For RG SP / RG35XX SP, follow [the H700 Ports guide](ports/h700/README.md). It uses different paths and a pinned H700-compatible manager; do not copy the G350 runtime onto it.
 
 ## Adding ports and disc labels
 
@@ -49,7 +51,7 @@ Open `studio/Slot-Auto-Artwork-Studio-v4.html` in Chrome or Edge. Choose the Slo
 
 ## Controls and hotkeys
 
-These are the emulator controls retained in G350 0.1.13, checked against the input/session code. **Menu** means the handheld's centre **M** button; L1/R1 are the first shoulder buttons and L2/R2 the second pair. For a combination, hold the first button, tap the second, then release both. A long hold of Menu **alone** quits the game.
+These are the emulator controls retained in G350 0.1.14, checked against the input/session code. **Menu** means the handheld's centre **M** button; L1/R1 are the first shoulder buttons and L2/R2 the second pair. For a combination, hold the first button, tap the second, then release both. A long hold of Menu **alone** quits the game.
 
 ### Save and load by system
 
@@ -138,7 +140,7 @@ In settings, Up/Down selects a row, Left/Right changes its value, and A opens th
 
 For the ARM64 Bullseye build environment, core source downloads and the current Ports overlay recipe, see [building](docs/G350-BUILD.md). The NFS matching-executable recipe is in [firmware/ports/nfs](firmware/ports/nfs/README.md); generated guest code and its resulting executable must remain private.
 
-The 0.1.13 update passed frontend/disc geometry tests, Menu/volume process tests, real ALSA PCM gain tests with a mocked hardware mixer, script/dependency checks, archive integrity and uncached SD read-back. All 50 save files, both working private game runtimes and Slot settings were unchanged during the owner's update. The owner reports the current setup works well; NFS speed remains limited. This is not a guarantee that every G350 revision, emulator or downloaded port works. Historical release notes remain under `docs/`.
+The G350 0.1.13 baseline passed frontend/disc geometry tests, Menu/volume process tests, real ALSA PCM gain tests with a mocked hardware mixer, script/dependency checks, archive integrity and uncached SD read-back. All 50 save files, both working private game runtimes and Slot settings were unchanged during the owner's update. The owner reports the current setup works well; NFS speed remains limited. This is not a guarantee that every G350 revision, emulator or downloaded port works. Historical release notes remain under `docs/`.
 
 ## Sharing, licenses and credits
 

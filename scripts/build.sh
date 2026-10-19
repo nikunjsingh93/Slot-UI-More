@@ -34,6 +34,10 @@ chmod 755 "$task_build/root/usr/bin/slot-start" "$task_build/root/usr/bin/slot-g
 gcc -O2 -Wall -Wextra "$repo/firmware/ports/portwatch.c" -o "$task_build/slot-portwatch" -lasound -lm
 gcc -O2 -Wall -Wextra -shared -fPIC "$repo/firmware/ports/slot-no-grab.c" -o "$task_build/slot-no-grab.so" -ldl
 python3 "$repo/firmware/ports/patch_system.py" "$task_build/root" "$task_build/slot/target/device/slot" "$task_build/slot-portwatch" "$task_build/slot-no-grab.so"
+# The complete image bundles the pinned upstream manager. Existing installs are preserved.
+if [ -n "${SLOT_PORTMASTER_ZIP:-}" ]; then
+    cp "$SLOT_PORTMASTER_ZIP" "$task_build/root/usr/share/slot/portmaster.zip"
+fi
 for task_core in flycast ppsspp; do
     mkdir -p "$task_build/root/usr/share/slot/notices/$task_core"
     for task_notice in LICENSE LICENSE.TXT COPYING README.md; do

@@ -1,0 +1,38 @@
+Slot Anbernic RG35XX SP 0.2.3 - fresh installation
+
+Download slot-rg35xxsp-0.2.3.img.zip and extract its .img. Flash that .img
+to a 16 GB or larger SD card with your usual image writer. Flashing erases the
+target card: back up any games, labels and saves first. Use this image only
+on Anbernic RG35XX SP. Insert into TF1/OS; keep TF2 empty for the initial boot.
+
+Let the first boot finish expanding the data partition and installing Slot.
+Do not copy games before this completes: first boot formats the empty data
+partition. A restart or a longer first boot is expected. Keep power available.
+After reaching Slot, shut down and connect the card to your computer.
+
+At the BASEOS root, add games to Games/GB, Games/GBC, Games/GBA, Games/SNES,
+Games/PS1, Games/N64, Games/DC and Games/PSP. Artwork goes under Labels in
+the corresponding system folders, with matching game filename stems.
+Copy your existing BIOS, Saves, States and Config folders back if restoring.
+Keep this image's System folder. G350 SYSTEM updates are incompatible.
+No games or proprietary BIOS are included; PPSSPP's free assets are bundled.
+The artwork tool is under Tools/Slot-Auto-Artwork-Studio-v4.html.
+
+Controls: hold Menu alone one second to return to Slot. Console save/load
+states: Menu+X / Menu+Y. GB/GBC/GBA: Select+R1 / Select+L1 (prompt chord).
+N64/DC/PSP: Menu+Select toggles D-pad digital/analog; N64 starts analog.
+GB/GBC: L1 alternates full-screen stretch and full-height aspect fit;
+R1 restores default. Tap Menu at the shelf to select Shader: Original,
+Sharp Pixels, Smooth, LCD or CRT. The repository README lists all hotkeys.
+
+This fresh image contains the current frontend and eight emulated systems and Ports directly;
+no older base image or follow-up System update is required.
+PortMaster is bundled in System/PortMasterH700. Open the Ports shelf to install
+games; internet is needed for downloads and missing runtimes. For Wi-Fi, copy
+System/wifi-example.conf to Config/wifi.conf, fill in your network name/password
+and reboot. Check Config/wifi.log if needed. Game data stays
+in ports/.ports; top-level launch scripts appear under ports. Labels for these
+entries go in Labels/PORTS with matching names. Hold Menu one second to quit.
+The H700 native runtime is new and still requires physical testing. Runtime, image,
+installer and rendering checks pass. Physical first boot of this newly packaged
+image still needs validation; no new hardware performance claim is made.

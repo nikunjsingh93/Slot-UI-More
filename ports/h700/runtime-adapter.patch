@@ -1,0 +1,47 @@
+--- a/launch.sh
++++ b/launch.sh
+@@ -13,14 +13,14 @@
+ mkdir -p "$USERDATA_PATH/PORTS-portmaster"
+ mkdir -p "$SHARED_USERDATA_PATH/PORTS-portmaster"
+ 
+-export PAK_DIR="$SDCARD_PATH/Emus/$PLATFORM/PORTS.pak"
+-export EMU_DIR="$SDCARD_PATH/Emus/$PLATFORM/PORTS.pak/PortMaster"
++export PAK_DIR="$SDCARD_PATH/System/PortMasterH700"
++export EMU_DIR="$PAK_DIR/PortMaster"
+ 
+ export PATH="$EMU_DIR:$PAK_DIR/bin:$PATH"
+ # gt-h700-syslib: the system SDL2 stack is /usr/trimui/lib on TrimUI but
+ # NextUI ships its own SDL2 under .system on h700 (BaseOS has none).
+ case "$PLATFORM" in
+-    h700) SYSTEM_LIB_DIR="$SDCARD_PATH/.system/h700/lib"; PM_PYSDL2_DIR="$PAK_DIR/lib" ;;
++    h700) SYSTEM_LIB_DIR="$PAK_DIR/system-lib"; PM_PYSDL2_DIR="$PAK_DIR/lib" ;;
+     *) SYSTEM_LIB_DIR="/usr/trimui/lib"; PM_PYSDL2_DIR="/usr/trimui/lib" ;;
+ esac
+ if [ "$PLATFORM" = "h700" ]; then
+@@ -884,7 +884,7 @@
+             || grep -Fxq "$ROM_NAME" "$USERDATA_PATH/PORTS-portmaster/use-hud-blocklist" 2>/dev/null; then
+             echo "HUD disabled (blocklisted) for $ROM_NAME"
+         else
+-            export GT_HUD=1
++            export GT_HUD=0 # Slot owns native volume, without a second HUD
+         fi
+     fi
+ 
+@@ -925,7 +925,7 @@
+     fi
+ 
+     # gt-h700-sleepmon / gt-h700-alsa-suspend (F47)
+-    if [ "$PLATFORM" = "h700" ]; then
++    if false; then # Slot retains its private ALSA gain configuration
+         if grep -Fxq "$ROM_NAME" "$PAK_DIR/files/gt-sleep-blocklist.txt" 2>/dev/null \
+             || grep -Fxq "$ROM_NAME" "$USERDATA_PATH/PORTS-portmaster/use-sleep-blocklist" 2>/dev/null; then
+             echo "Sleep support disabled (blocklisted) for $ROM_NAME"
+@@ -967,7 +967,7 @@
+     patch_pylibs
+     install_control_txt
+ 
+-    minui-power-control &
++    # Slot owns volume and Menu-hold; do not launch NextUI power controls.
+ 
+     if echo "$ROM_NAME" | grep -qi "portmaster"; then
+         run_portmaster_gui

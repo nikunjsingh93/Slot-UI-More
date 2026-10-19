@@ -6,7 +6,7 @@ export HOME=/storage
 export LD_LIBRARY_PATH=/usr/lib:/usr/lib/pulseaudio
 mkdir -p "$SLOT_ROOT/System" "$SLOT_ROOT/Config"
 exec >> "$SLOT_ROOT/slot.log" 2>&1
-echo "slot: G350 0.1.13 Ports startup $(date)"
+echo "slot: G350 0.1.14 Ports startup $(date)"
 trap 'result=$?; echo "slot: startup script exited=$result before frontend exec"' EXIT
 echo 'slot: provisioning folders and missing cores' 
 for platform in GBA GB GBC PS1 SNES N64 DC PSP PORTS; do
@@ -122,6 +122,7 @@ if ! cmp -s /usr/lib/slot-no-grab.so "$SLOT_ROOT/System/slot-no-grab.so"; then
 fi
 echo "slot: launching frontend"
 cd "$SLOT_ROOT"
+/usr/bin/python3 /usr/bin/slot-provision-portmaster.py "$SLOT_ROOT" /usr/share/slot/portmaster.zip || echo 'slot: manager installation failed; continuing to frontend'
 /usr/bin/python3 /usr/bin/slot-refresh-ports.py "$SLOT_ROOT"
 while :; do
     set +e

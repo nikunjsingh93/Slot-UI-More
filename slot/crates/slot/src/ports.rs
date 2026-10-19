@@ -16,8 +16,8 @@ pub fn port_id(text: &str) -> io::Result<&str> {
 }
 
 pub fn request(root: &Path, descriptor: &Path) -> io::Result<()> {
-    if std::env::var("SLOT_DEVICE").as_deref() != Ok("g350") {
-        return Err(io::Error::new(io::ErrorKind::Unsupported, "ports require G350"));
+    if !matches!(std::env::var("SLOT_DEVICE").as_deref(), Ok("g350" | "rgsp" | "rg35xxsp")) {
+        return Err(io::Error::new(io::ErrorKind::Unsupported, "ports require a supported device"));
     }
     if descriptor.canonicalize()?.parent() != Some(root.join("Games/PORTS").canonicalize()?.as_path()) {
         return Err(io::Error::new(io::ErrorKind::InvalidInput, "port outside library"));

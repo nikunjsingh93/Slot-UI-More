@@ -35,3 +35,7 @@ nfsu2*.aarch64
 libGTASA.so
 libSCAnd.so
 libOpenAL64.so
+
+# User network credentials never belong in source history.
+**/wifi.conf
+**/wpa_supplicant.conf

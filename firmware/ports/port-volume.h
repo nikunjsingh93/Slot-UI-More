@@ -17,7 +17,7 @@ static int volume_raw(int n,int muted){
  int raw=(int)lround((db+80.0)*1000.0/80.0);
  return raw<1?1:raw>1000?1000:raw;
 }
-static int read_hp(const char *path){FILE*f=fopen(path,"r");int n=0;if(f){fscanf(f,"%d",&n);fclose(f);}return n==1;}
+static int read_hp(const char *path){FILE*f=fopen(path,"r");int n=0;if(f){if(!strcmp(path,"/sys/kernel/debug/gpio")){char line[512];while(fgets(line,sizeof(line),f))if(strstr(line,"|Headphone detection")){char*q=strrchr(line,')');if(q&&strstr(q," hi"))n=1;}}else fscanf(f,"%d",&n);fclose(f);}return n==1;}
 static int volume_apply(port_volume*v){
  int raw=volume_raw(v->level[v->hp],v->mute[v->hp]);
  if(v->mock[0]){
@@ -57,7 +57,7 @@ static int volume_changed(port_volume*v){
 static int volume_init(port_volume*v,const char*root,const char*test){
  memset(v,0,sizeof(*v));v->level[0]=v->level[1]=60;
  if(snprintf(v->state,sizeof(v->state),"%s/Config/slot.state",root)>=(int)sizeof(v->state))return -1;
- snprintf(v->gpio,sizeof(v->gpio),"%s", "/sys/class/gpio/gpio86/value");
+ snprintf(v->gpio,sizeof(v->gpio),"%s", getenv("SLOT_HP_PATH")?getenv("SLOT_HP_PATH"):"/sys/class/gpio/gpio86/value");
  if(test){snprintf(v->gpio,sizeof(v->gpio),"%s/gpio",test);snprintf(v->mock,sizeof(v->mock),"%s/mixer.log",test);}
  FILE*f=fopen(v->state,"r");char*line=NULL;size_t cap=0;int value,has_hp=0,has_mute_hp=0;
  while(f&&getline(&line,&cap,f)>=0){

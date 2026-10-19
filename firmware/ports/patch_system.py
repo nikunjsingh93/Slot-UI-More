@@ -11,11 +11,12 @@ for src,name in [(frontend,'slot-g350'),(supervisor,'slot-portwatch'),
                  (here.parent/'slot-start','slot-start'),
                  (here/'slot-port-runner.sh','slot-port-runner.sh'),
                  (here/'slot-refresh-ports.py','slot-refresh-ports.py'),
+                 (here/'slot-provision-portmaster.py','slot-provision-portmaster.py'),
                  (here/'show_splash.sh','show_splash.sh')]:
     target=root/'usr/bin'/name;shutil.copyfile(src,target);target.chmod(0o755)
 shutil.copyfile(input_sharing,root/'usr/lib/slot-no-grab.so')
 (root/'usr/lib/slot-no-grab.so').chmod(0o755)
-(root/'usr/share/slot/VERSION').write_text('0.1.13-ports-controls-splash\n')
+(root/'usr/share/slot/VERSION').write_text('0.1.14-complete-ports\n')
 logo=here/'visuals/slot-splash.png'
 sequence=root/'usr/share/p4_splash'
 assert sequence.resolve().is_relative_to(root.resolve())

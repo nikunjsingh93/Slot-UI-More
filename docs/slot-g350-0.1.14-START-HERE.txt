@@ -1,0 +1,29 @@
+Slot BATLEXP G350 0.1.14 - fresh installation
+
+Extract slot-g350-0.1.14.img.zip and flash its .img to a 16 GB or larger
+SD card. Flashing erases that card, so back up games/labels/saves first.
+Use the card in the G350 OS/TF1 slot. This is the G350 build, not an H700 build.
+Let the first boot expand the empty data partition and finish its restart.
+After reaching Slot, shut down before adding games. No older SYSTEM update
+is needed: this image already contains the current 0.1.14 SYSTEM and KERNEL pairs, including the gray SLOT splash.
+
+On GAMES, put games under Slot/Games/GB, GBC, GBA, SNES, PS1, N64, DC or PSP.
+Native Ports are integrated, and PortMaster installs automatically on first
+boot. Open it from the Ports shelf; downloads need internet. User game files
+and extra runtimes remain separate. Ports artwork uses Slot/Labels/PORTS.
+Labels go in matching Slot/Labels folders, with matching filename stems.
+Restore Slot/BIOS, Saves, States, Config and Wallpapers if you have a backup.
+No games or proprietary BIOS are included. PPSSPP's free assets are bundled.
+The repository's studio/ directory contains Artwork Studio v4.
+
+Hold Menu alone one second to return to Slot. Console states: Menu+X saves,
+Menu+Y loads. GB/GBC/GBA: Select+R1 saves; Select+L1 loads (prompt chord).
+GB/GBC: L1 cycles stretch/full-height aspect fit, R1 restores default.
+Tap Menu at the shelf for Shader: Original, Sharp Pixels, Smooth, LCD, CRT.
+See the repository README for all controls and emulator-specific hotkeys.
+
+The original dedicated PAN4ELEC G350 bootloader/default panel files and
+first-boot resize setup are preserved. The matching latest SYSTEM and MD5
+are installed in the image and read back for verification. The G350 0.1.14
+frontend/system update was validated separately; physical first boot of this
+newly composed fresh image is pending. No new performance claim is made.

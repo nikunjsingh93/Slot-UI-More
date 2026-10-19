@@ -111,14 +111,16 @@ def h700(model):
     # Staging comes only from the original clean SP firmware payload.
     for forbidden in ['Games','Labels','Saves','States','Config','BIOS']:
         assert not (stage/forbidden).exists(),forbidden
-    for rel in ['System/slot','System/launch_frontend.sh','System/slot-sp-build.json']:
-        shutil.copyfile(Path(info['frontend_payload'])/rel,stage/rel)
+    # Current overlays include the native-port supervisor and pinned runtime.
+    shutil.copytree(Path(info['frontend_payload'])/'System',stage/'System',dirs_exist_ok=True)
     for p in (stage/'System').glob('*.sh'):p.chmod(0o755)
     (stage/'System/slot').chmod(0o755)
     manifest=json.loads((stage/'System/slot-sp-build.json').read_text())
     assert manifest['version']==version
     assert sha(stage/'System/slot')==manifest['frontend_sha256']
     for f,h in manifest['cores'].items():assert sha(stage/'System'/f)==h,f
+    for asset in (stage/'System/ppsspp-assets.txt').read_text().splitlines():
+        assert (stage/'System/PPSSPP'/asset).is_file(),f'Missing bundled free PSP asset: {asset}'
     label=info['display_name'];guide_name=info['guide_name']
     guide=f'''Slot {label} {version} - fresh installation
 
@@ -147,8 +149,15 @@ GB/GBC: L1 alternates full-screen stretch and full-height aspect fit;
 R1 restores default. Tap Menu at the shelf to select Shader: Original,
 Sharp Pixels, Smooth, LCD or CRT. The repository README lists all hotkeys.
 
-This fresh image contains the current frontend and all eight systems directly;
-no older base image or follow-up System update is required. Runtime, image,
+This fresh image contains the current frontend and eight emulated systems and Ports directly;
+no older base image or follow-up System update is required.
+PortMaster is bundled in System/PortMasterH700. Open the Ports shelf to install
+games; internet is needed for downloads and missing runtimes. For Wi-Fi, copy
+System/wifi-example.conf to Config/wifi.conf, fill in your network name/password
+and reboot. Check Config/wifi.log if needed. Game data stays
+in ports/.ports; top-level launch scripts appear under ports. Labels for these
+entries go in Labels/PORTS with matching names. Hold Menu one second to quit.
+The H700 native runtime is new and still requires physical testing. Runtime, image,
 installer and rendering checks pass. Physical first boot of this newly packaged
 image still needs validation; no new hardware performance claim is made.
 '''
@@ -201,7 +210,9 @@ fi
     def install(folder,broken=False):
         env=dict(os.environ,SLOT_INSTALL_ROOT='/'+folder,SLOT_INSTALL_PAYLOAD='/broken.tar.gz' if broken else '/usr/share/slot-sp/payload.tar.gz')
         return subprocess.run(['chroot',str(sandbox),'/bin/sh','/usr/sbin/slot-sp-install'],env=env,capture_output=True,text=True)
-    (sandbox/'clean').mkdir();r=install('clean');assert r.returncode==0,r.stdout+r.stderr
+    (sandbox/'clean').mkdir();r=install('clean')
+    write(d/'clean-install.log',r.stdout+r.stderr)
+    assert r.returncode==0,(r.stdout+r.stderr)[-2000:]
     marker=sandbox/'clean/System'/('.'+name);assert marker.exists()
     for f,h in manifest['cores'].items():assert sha(sandbox/'clean/System'/f)==h
     assert sha(sandbox/'clean/System/slot')==manifest['frontend_sha256']
@@ -237,6 +248,9 @@ def g350():
     with zipfile.ZipFile(checked(info['update'])) as z:
         with z.open('SYSTEM') as src,system.open('wb') as dst:shutil.copyfileobj(src,dst,4<<20)
         (d/'SYSTEM.md5').write_bytes(z.read('SYSTEM.md5'))
+        if 'KERNEL' in z.namelist():
+            (d/'KERNEL').write_bytes(z.read('KERNEL'))
+            (d/'KERNEL.md5').write_bytes(z.read('KERNEL.md5'))
     manifest=json.loads(Path(info['system_manifest']).read_text())
     assert sha(system)==manifest['system_sha256']
     assert (d/'SYSTEM.md5').read_text().strip()==sha(system,'md5')+'  target/SYSTEM'
@@ -244,6 +258,13 @@ def g350():
     fat=f'{image}@@16777216'
     run('mdel','-i',fat,'::SYSTEM');run('mdel','-i',fat,'::SYSTEM.md5')
     run('mcopy','-o','-i',fat,str(system),'::SYSTEM');run('mcopy','-o','-i',fat,str(d/'SYSTEM.md5'),'::SYSTEM.md5')
+    if (d/'KERNEL').exists():
+        assert sha(d/'KERNEL')==manifest['kernel_sha256']
+        assert (d/'KERNEL.md5').read_text().strip()==sha(d/'KERNEL','md5')+'  target/KERNEL'
+        run('mcopy','-o','-i',fat,str(d/'KERNEL'),'::KERNEL')
+        run('mcopy','-o','-i',fat,str(d/'KERNEL.md5'),'::KERNEL.md5')
+        run('mcopy','-i',fat,'::KERNEL',str(d/'KERNEL-readback'))
+        assert sha(d/'KERNEL-readback')==manifest['kernel_sha256']
     zeroed=zero_free_fat_clusters(image,16777216)
     run('mcopy','-i',fat,'::SYSTEM',str(d/'SYSTEM-readback'))
     assert sha(d/'SYSTEM-readback')==manifest['system_sha256']
@@ -267,9 +288,12 @@ SD card. Flashing erases that card, so back up games/labels/saves first.
 Use the card in the G350 OS/TF1 slot. This is the G350 build, not an H700 build.
 Let the first boot expand the empty data partition and finish its restart.
 After reaching Slot, shut down before adding games. No older SYSTEM update
-is needed: this image already contains the exact validated {version} SYSTEM pair.
+is needed: this image already contains the current {version} SYSTEM and KERNEL pairs, including the gray SLOT splash.
 
 On GAMES, put games under Slot/Games/GB, GBC, GBA, SNES, PS1, N64, DC or PSP.
+Native Ports are integrated, and PortMaster installs automatically on first
+boot. Open it from the Ports shelf; downloads need internet. User game files
+and extra runtimes remain separate. Ports artwork uses Slot/Labels/PORTS.
 Labels go in matching Slot/Labels folders, with matching filename stems.
 Restore Slot/BIOS, Saves, States, Config and Wallpapers if you have a backup.
 No games or proprietary BIOS are included. PPSSPP's free assets are bundled.
@@ -287,7 +311,7 @@ are installed in the image and read back for verification. The G350 {version}
 frontend/system update was validated separately; physical first boot of this
 newly composed fresh image is pending. No new performance claim is made.
 '''
-    validation='PASS verified old fresh-image input and latest SYSTEM input; SYSTEM/MD5 image readbacks; FAT/ext4 checks; original bootloader and empty storage partition unchanged; first-boot resize marker retained; ZIP CRC/decompressed image SHA256. Exact SYSTEM is the previously validated G350 0.1.10 shader/scaling build. Fresh physical first boot remains pending.\n'
+    validation='PASS verified old fresh-image input and latest SYSTEM input; SYSTEM/MD5 image readbacks; FAT/ext4 checks; original bootloader and empty storage partition unchanged; first-boot resize marker retained; ZIP CRC/decompressed image SHA256. Includes the accepted 0.1.13 frontend/cores and the bundled-manager bootstrap. Fresh physical first boot remains pending.\n'
     manifest.update(version=version,device='BATLEXP G350',base_fresh_image_sha256=info['base']['sha256'],bootloader_and_initial_storage_unchanged=True,free_boot_clusters_zeroed_bytes=zeroed)
     publish_local('g350',version,image,manifest,guide,validation)
 if args.model in ['g350','all']:g350()

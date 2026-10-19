@@ -1,0 +1,550 @@
+diff --git a/slot/crates/slot-store/src/core.rs b/slot/crates/slot-store/src/core.rs
+index 751f6d5..b24250a 100644
+--- a/slot/crates/slot-store/src/core.rs
++++ b/slot/crates/slot-store/src/core.rs
+@@ -89,6 +89,7 @@ impl Core {
+             Platform::N64 => Core::ParallelN64,
+             Platform::Dreamcast => Core::Flycast,
+             Platform::Psp => Core::Ppsspp,
++            Platform::Ports => Core::Mgba, // External launcher; no core is opened.
+         }
+     }
+ }
+diff --git a/slot/crates/slot-store/src/platform.rs b/slot/crates/slot-store/src/platform.rs
+index fc77ba7..58f5925 100644
+--- a/slot/crates/slot-store/src/platform.rs
++++ b/slot/crates/slot-store/src/platform.rs
+@@ -11,10 +11,11 @@ pub enum Platform {
+     N64,
+     Dreamcast,
+     Psp,
++    Ports,
+ }
+ 
+ impl Platform {
+-    pub const ALL: [Platform; 8] = [
++    pub const ALL: [Platform; 9] = [
+         Platform::Gba,
+         Platform::Gb,
+         Platform::Gbc,
+@@ -23,6 +24,7 @@ impl Platform {
+         Platform::N64,
+         Platform::Dreamcast,
+         Platform::Psp,
++        Platform::Ports,
+     ];
+ 
+     pub fn name(self) -> &'static str {
+@@ -35,6 +37,7 @@ impl Platform {
+             Platform::N64 => "Nintendo 64",
+             Platform::Dreamcast => "Dreamcast",
+             Platform::Psp => "PSP",
++            Platform::Ports => "Ports",
+         }
+     }
+ 
+@@ -48,11 +51,13 @@ impl Platform {
+             Platform::N64 => "N64",
+             Platform::Dreamcast => "DC",
+             Platform::Psp => "PSP",
++            Platform::Ports => "PORTS",
+         }
+     }
+ 
+     pub fn extensions(self) -> &'static [&'static str] {
+         match self {
++            Platform::Ports => &["port"],
+             Platform::Gba => &["gba"],
+             Platform::Gb | Platform::Gbc => &["gb", "gbc"],
+             Platform::Ps1 => &["chd", "cue", "m3u", "pbp", "exe"],
+@@ -69,6 +74,7 @@ impl Platform {
+             Platform::Gb | Platform::Gbc => (160, 144),
+             Platform::Ps1 | Platform::Snes | Platform::N64 | Platform::Dreamcast => (640, 480),
+             Platform::Psp => (480, 272),
++            Platform::Ports => (640, 480),
+         }
+     }
+ 
+diff --git a/slot/crates/slot-store/src/scan.rs b/slot/crates/slot-store/src/scan.rs
+index dd80562..b66f63f 100644
+--- a/slot/crates/slot-store/src/scan.rs
++++ b/slot/crates/slot-store/src/scan.rs
+@@ -102,7 +102,8 @@ pub fn scan(root: &Path) -> Result<Vec<Cart>, StoreError> {
+                 | Platform::Snes
+                 | Platform::N64
+                 | Platform::Dreamcast
+-                | Platform::Psp => (stem.to_string(), String::new()),
++                | Platform::Psp
++                | Platform::Ports => (stem.to_string(), String::new()),
+                 _ => (crate::gb::title(&rom).unwrap_or_default(), String::new()),
+             };
+             carts.push(Cart {
+diff --git a/slot/crates/slot-store/tests/platform.rs b/slot/crates/slot-store/tests/platform.rs
+index e5e8649..f9652b4 100644
+--- a/slot/crates/slot-store/tests/platform.rs
++++ b/slot/crates/slot-store/tests/platform.rs
+@@ -5,7 +5,7 @@ fn every_platform_has_a_directory() {
+     let names: Vec<&str> = Platform::ALL.iter().map(|p| p.dir_name()).collect();
+     assert_eq!(
+         names,
+-        vec!["GBA", "GB", "GBC", "PS1", "SNES", "N64", "DC", "PSP"]
++        vec!["GBA", "GB", "GBC", "PS1", "SNES", "N64", "DC", "PSP", "PORTS"]
+     );
+ }
+ 
+@@ -21,7 +21,8 @@ fn every_platform_is_a_shelf_of_its_own() {
+             Platform::Snes,
+             Platform::N64,
+             Platform::Dreamcast,
+-            Platform::Psp
++            Platform::Psp,
++            Platform::Ports
+         ]
+     );
+     for (i, p) in Platform::ALL.iter().enumerate() {
+@@ -41,3 +42,11 @@ fn each_platform_takes_only_its_own_extensions() {
+     assert!(!Platform::Gb.accepts(std::path::Path::new("Metroid Fusion.gba")));
+     assert!(Platform::Gba.accepts(std::path::Path::new("Shrek.GBA")));
+ }
++
++#[test]
++fn ports_accept_descriptors_but_not_binaries_or_shell_scripts() {
++    use std::path::Path;
++    assert!(Platform::Ports.accepts(Path::new("NFSU2.port")));
++    assert!(!Platform::Ports.accepts(Path::new("NFSU2.sh")));
++    assert!(!Platform::Ports.accepts(Path::new("gtasa")));
++}
+diff --git a/slot/crates/slot-store/tests/scan.rs b/slot/crates/slot-store/tests/scan.rs
+index 6e96a6b..41717e0 100644
+--- a/slot/crates/slot-store/tests/scan.rs
++++ b/slot/crates/slot-store/tests/scan.rs
+@@ -4,6 +4,19 @@ use common::tmp_root;
+ use slot_store::{scan, Platform};
+ use tempfile::TempDir;
+ 
++#[test]
++fn native_port_descriptor_uses_filename_and_pairs_its_label() {
++    let d = tmp_root();
++    std::fs::create_dir_all(d.path().join("Games/PORTS")).unwrap();
++    std::fs::write(d.path().join("Games/PORTS/Grand Theft Auto San Andreas.port"), "gtasa\n").unwrap();
++    write_png(&d, "PORTS/Grand Theft Auto San Andreas.png");
++    let carts = scan(d.path()).unwrap();
++    assert_eq!(carts.len(), 1);
++    assert_eq!(carts[0].platform, Platform::Ports);
++    assert_eq!(carts[0].title, "Grand Theft Auto San Andreas");
++    assert!(carts[0].label.is_some());
++}
++
+ fn write_rom(d: &TempDir, rel: &str, title: &str) {
+     let mut rom = vec![0u8; 0x100];
+     rom[0xa0..0xa0 + title.len()].copy_from_slice(title.as_bytes());
+diff --git a/slot/crates/slot-ui/src/cart.rs b/slot/crates/slot-ui/src/cart.rs
+index deba93f..6edd040 100644
+--- a/slot/crates/slot-ui/src/cart.rs
++++ b/slot/crates/slot-ui/src/cart.rs
+@@ -92,7 +92,8 @@ pub fn gb_shell_of(cart: &Cart) -> Option<GbShell> {
+         | Platform::Snes
+         | Platform::N64
+         | Platform::Dreamcast
+-        | Platform::Psp => None,
++        | Platform::Psp
++        | Platform::Ports => None,
+         Platform::Gb | Platform::Gbc => Some(match cart.shell.map(|c| c.outline) {
+             Some(Outline::Notched) => GbShell::Notched,
+             Some(Outline::Rounded) => GbShell::Rounded,
+@@ -158,7 +159,7 @@ const GB_SEATED_H: u32 = 259;
+ 
+ pub fn seated_box(platform: Platform) -> (u32, u32) {
+     match platform {
+-        Platform::Ps1 | Platform::Dreamcast => (312, 312),
++        Platform::Ps1 | Platform::Dreamcast | Platform::Ports => (312, 312),
+         Platform::Psp => (312, 328),
+         Platform::Snes => (240, 147),
+         Platform::N64 => (240, 155),
+@@ -174,7 +175,7 @@ pub fn cart_box(platform: Platform) -> (u32, u32) {
+     if platform == Platform::Snes {
+         return (360, 220);
+     }
+-    if matches!(platform, Platform::Ps1 | Platform::Dreamcast) {
++    if matches!(platform, Platform::Ps1 | Platform::Dreamcast | Platform::Ports) {
+         return (312, 312);
+     }
+     if platform == Platform::Psp {
+@@ -186,7 +187,8 @@ pub fn cart_box(platform: Platform) -> (u32, u32) {
+         | Platform::Snes
+         | Platform::N64
+         | Platform::Dreamcast
+-        | Platform::Psp => Shape::Gba,
++        | Platform::Psp
++        | Platform::Ports => Shape::Gba,
+         Platform::Gb | Platform::Gbc => Shape::Gb(GbShell::Notched),
+     });
+     (s.w, s.h)
+@@ -215,7 +217,7 @@ pub fn cart_face(cart: &Cart) -> CartFace {
+     if cart.platform == Platform::Snes {
+         return snes_face(cart);
+     }
+-    if matches!(cart.platform, Platform::Ps1 | Platform::Dreamcast) {
++    if matches!(cart.platform, Platform::Ps1 | Platform::Dreamcast | Platform::Ports) {
+         return disc_face(cart);
+     }
+     if cart.platform == Platform::Psp {
+@@ -551,7 +553,7 @@ fn disc_face(cart: &Cart) -> CartFace {
+     let base = label_colour(&title);
+     let artwork = cart.label.as_deref().and_then(|p| art::cover(p, w, w));
+     // The studio marks original disc scans with a transparent spindle hole.
+-    let scanned_disc = artwork
++    let scanned_disc = cart.platform == Platform::Ports || artwork
+         .as_ref()
+         .is_some_and(|a| a[3] < 8 && a[((156 * w + 156) * 4 + 3) as usize] < 8);
+     let mut print = vec![0u8; 220 * 54 * 4];
+diff --git a/slot/crates/slot-ui/src/shelf.rs b/slot/crates/slot-ui/src/shelf.rs
+index 7f84e6a..7a10752 100644
+--- a/slot/crates/slot-ui/src/shelf.rs
++++ b/slot/crates/slot-ui/src/shelf.rs
+@@ -252,7 +252,7 @@ impl Shelf {
+ 
+     pub fn draw(&self, shake: f32, out: &mut Vec<Draw>) {
+         self.draw_row(None, shake, 0.0, 1.0, out);
+-        if self.platform == slot_store::Platform::Ps1 {
++        if matches!(self.platform, slot_store::Platform::Ps1 | slot_store::Platform::Ports) {
+             crate::slot_chrome::draw_disc_drive(1.0, out);
+         } else {
+             draw_empty_slot(out);
+@@ -299,6 +299,7 @@ impl Shelf {
+                         | slot_store::Platform::N64
+                         | slot_store::Platform::Dreamcast
+                         | slot_store::Platform::Psp
++                        | slot_store::Platform::Ports
+                 )
+             {
+                 let backing = match self.shells.get(i).copied().flatten() {
+diff --git a/slot/crates/slot-ui/src/shell.rs b/slot/crates/slot-ui/src/shell.rs
+index 05df87e..eb2c53f 100644
+--- a/slot/crates/slot-ui/src/shell.rs
++++ b/slot/crates/slot-ui/src/shell.rs
+@@ -91,7 +91,8 @@ pub fn shell_for(cart: &Cart) -> Shell {
+         | Platform::Snes
+         | Platform::N64
+         | Platform::Dreamcast
+-        | Platform::Psp => gba_shell_for(&cart.code),
++        | Platform::Psp
++        | Platform::Ports => gba_shell_for(&cart.code),
+         Platform::Gb | Platform::Gbc => gb_shell_for(&cart.rom),
+     }
+ }
+diff --git a/slot/crates/slot-ui/src/slot_chrome.rs b/slot/crates/slot-ui/src/slot_chrome.rs
+index 04f9410..c98a566 100644
+--- a/slot/crates/slot-ui/src/slot_chrome.rs
++++ b/slot/crates/slot-ui/src/slot_chrome.rs
+@@ -137,7 +137,7 @@ impl SlotChrome<'_> {
+     }
+ 
+     pub fn draw(&self, out: &mut Vec<Draw>) {
+-        if self.cart.platform == slot_store::Platform::Ps1 {
++        if matches!(self.cart.platform, slot_store::Platform::Ps1 | slot_store::Platform::Ports) {
+             self.draw_disc(out);
+             return;
+         }
+diff --git a/slot/crates/slot-ui/tests/chrome.rs b/slot/crates/slot-ui/tests/chrome.rs
+index 35d573c..236b47f 100644
+--- a/slot/crates/slot-ui/tests/chrome.rs
++++ b/slot/crates/slot-ui/tests/chrome.rs
+@@ -45,7 +45,7 @@ fn label_band(c: &Cart) -> (f32, f32) {
+         Platform::Gb | Platform::Gbc => (GB_LABEL_Y as f32, GB_LABEL_H as f32),
+         Platform::Snes => (24.0, 139.0),
+         Platform::N64 => (18.0, 190.0),
+-        Platform::Ps1 | Platform::Dreamcast | Platform::Psp => {
++        Platform::Ps1 | Platform::Dreamcast | Platform::Psp | Platform::Ports => {
+             unreachable!("cartridge label geometry does not apply to discs")
+         }
+     };
+diff --git a/slot/crates/slot/src/app.rs b/slot/crates/slot/src/app.rs
+index d502b5d..113a9d0 100644
+--- a/slot/crates/slot/src/app.rs
++++ b/slot/crates/slot/src/app.rs
+@@ -478,11 +478,11 @@ impl App {
+                 if self.seated_cart().is_some_and(|c| {
+                     matches!(
+                         c.platform,
+-                        Platform::N64 | Platform::Dreamcast | Platform::Psp
++                        Platform::N64 | Platform::Dreamcast | Platform::Psp | Platform::Ports
+                     )
+                 }) || matches!(
+                     self.shelves[at].0,
+-                    Platform::N64 | Platform::Dreamcast | Platform::Psp
++                    Platform::N64 | Platform::Dreamcast | Platform::Psp | Platform::Ports
+                 ) {
+                     // A native core crash must never be relaunched on every
+                     // service restart or power-on. N64 is launched manually.
+@@ -844,7 +844,7 @@ impl App {
+     pub fn may_rewind(&self) -> bool {
+         !matches!(
+             self.platform,
+-            Platform::Ps1 | Platform::Snes | Platform::N64 | Platform::Dreamcast | Platform::Psp
++            Platform::Ps1 | Platform::Snes | Platform::N64 | Platform::Dreamcast | Platform::Psp | Platform::Ports
+         ) && !self.link_active()
+     }
+ 
+diff --git a/slot/crates/slot/src/frontend.rs b/slot/crates/slot/src/frontend.rs
+index 6b5a1dd..34f5f6a 100644
+--- a/slot/crates/slot/src/frontend.rs
++++ b/slot/crates/slot/src/frontend.rs
+@@ -123,6 +123,7 @@ impl Frontend {
+                     slot_store::Platform::Ps1
+                         | slot_store::Platform::Dreamcast
+                         | slot_store::Platform::Psp
++                        | slot_store::Platform::Ports
+                 ) {
+                     self.disc_faces.push(tex);
+                 }
+diff --git a/slot/crates/slot/src/lib.rs b/slot/crates/slot/src/lib.rs
+index c777b71..1f794ab 100644
+--- a/slot/crates/slot/src/lib.rs
++++ b/slot/crates/slot/src/lib.rs
+@@ -20,6 +20,7 @@ pub mod link_screen;
+ pub mod link_start;
+ pub mod link_state;
+ pub mod persist;
++pub mod ports;
+ pub mod resample;
+ pub mod rewind;
+ pub mod root;
+diff --git a/slot/crates/slot/src/ports.rs b/slot/crates/slot/src/ports.rs
+new file mode 100644
+index 0000000..bf70c3e
+--- /dev/null
++++ b/slot/crates/slot/src/ports.rs
+@@ -0,0 +1,44 @@
++//! A port runs in its own process, after the frontend releases hardware.
++use std::io;
++use std::path::Path;
++
++pub fn port_id(text: &str) -> io::Result<&str> {
++    let id = text.trim();
++    let script = id.strip_prefix("script:").is_some_and(|name| {
++        name.len() <= 120 && name.ends_with(".sh") && !name.starts_with('.')
++            && name.chars().all(|c| c.is_ascii_alphanumeric() || " ._-()".contains(c))
++    });
++    if matches!(id, "nfsu2" | "gtasa" | "portmaster") || script {
++        Ok(id)
++    } else {
++        Err(io::Error::new(io::ErrorKind::InvalidData, "unknown port id"))
++    }
++}
++
++pub fn request(root: &Path, descriptor: &Path) -> io::Result<()> {
++    if !matches!(std::env::var("SLOT_DEVICE").as_deref(), Ok("g350" | "rgsp" | "rg35xxsp")) {
++        return Err(io::Error::new(io::ErrorKind::Unsupported, "ports require a supported device"));
++    }
++    if descriptor.canonicalize()?.parent() != Some(root.join("Games/PORTS").canonicalize()?.as_path()) {
++        return Err(io::Error::new(io::ErrorKind::InvalidInput, "port outside library"));
++    }
++    let text = std::fs::read_to_string(descriptor)?;
++    let id = port_id(&text)?;
++    if !root.join("System/slot-port-runner.sh").is_file() {
++        return Err(io::Error::new(io::ErrorKind::NotFound, "port runtime missing"));
++    }
++    slot_store::atomic_write(&root.join("Config/port.request"), id.as_bytes())
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    #[test]
++    fn descriptors_are_ids_not_commands_or_paths() {
++        assert_eq!(port_id("nfsu2\n").unwrap(), "nfsu2");
++        assert_eq!(port_id("script:Half-Life.sh").unwrap(), "script:Half-Life.sh");
++        for bad in ["", "../gtasa", "gtasa;reboot", "nfsu2\ngtasa", "/bin/sh", "script:../bad.sh", "script:x;bad.sh"] {
++            assert!(port_id(bad).is_err(), "{bad}");
++        }
++    }
++}
+diff --git a/slot/crates/slot/src/session.rs b/slot/crates/slot/src/session.rs
+index 3971817..5b0fea5 100644
+--- a/slot/crates/slot/src/session.rs
++++ b/slot/crates/slot/src/session.rs
+@@ -457,6 +457,16 @@ impl Session {
+         else {
+             return;
+         };
++        if platform == Platform::Ports {
++            if let Err(error) = crate::ports::request(&self.root, &rom) {
++                eprintln!("slot: port launch: {error}");
++                self.app.on_core_failed();
++                return;
++            }
++            // The parent launcher runs the port after this process exits,
++            // releasing DRM master, EGL and ALSA before the game starts.
++            std::process::exit(85);
++        }
+         let core = slot_store::core_for_platform(&self.root, stem, platform);
+         self.ps1_menu = false;
+         self.ps1_chord = false;
+diff --git a/slot/crates/slot/tests/g350_disc.rs b/slot/crates/slot/tests/g350_disc.rs
+index bbc93d1..9e585aa 100644
+--- a/slot/crates/slot/tests/g350_disc.rs
++++ b/slot/crates/slot/tests/g350_disc.rs
+@@ -1,86 +1,88 @@
+ #[cfg(target_os = "linux")]
+ #[test]
+-fn g350_ps1_disc_is_round_after_full_panel_blit() {
++fn g350_console_and_native_port_discs_are_round_after_full_panel_blit() {
+     use slot::frontend::correct_disc_aspect;
+     use slot_gfx::{Compositor, Draw, HeadlessSurface};
+     use slot_store::{Cart, Platform};
+     let surface = HeadlessSurface::new().expect("surfaceless EGL");
+     let mut c = Compositor::new(&surface).unwrap();
+-    let cart = Cart {
+-        platform: Platform::Ps1,
+-        stem: "Disc test".into(),
+-        title: String::new(),
+-        rom: "test.chd".into(),
+-        label: None,
+-        code: String::new(),
+-        shell: None,
+-    };
+-    let face = slot_ui::cart_face(&cart);
+-    let tex = c.create_texture(face.w, face.h, &face.rgba);
+-    let other = c.create_texture(1, 1, &[0, 0, 0, 0]);
+-    // Includes full-size and side/animation-size draws; centres must stay put.
+-    for size in [312.0, 240.0, 160.0] {
+-        let mut draws = vec![
+-            Draw::Tex {
+-                x: 360.0 - size / 2.0,
+-                y: 240.0 - size / 2.0,
+-                w: size,
+-                h: size,
+-                tex,
+-                alpha: 1.0,
+-            },
+-            Draw::Tex {
+-                x: 0.0,
+-                y: 0.0,
+-                w: 15.0,
+-                h: 15.0,
+-                tex: other,
+-                alpha: 1.0,
+-            },
+-        ];
+-        let untouched = draws[1];
+-        correct_disc_aspect(&mut draws, &[tex], 720.0 / 640.0);
+-        assert_eq!(draws[1], untouched);
+-        c.set_fill_panel(true);
+-        c.begin_frame();
+-        c.draw_list(&draws);
+-        c.end_frame((640, 480));
+-        // Read the actual presentation framebuffer, not the 720x480 logical canvas.
+-        let mut pixels = vec![0u8; 640 * 480 * 4];
+-        unsafe {
+-            gl::ReadPixels(
+-                0,
+-                0,
+-                640,
+-                480,
+-                gl::RGBA,
+-                gl::UNSIGNED_BYTE,
+-                pixels.as_mut_ptr().cast(),
+-            );
+-        }
+-        let (mut left, mut right, mut top, mut bottom) = (640, 0, 480, 0);
+-        for y in 0..480 {
+-            for x in 0..640 {
+-                let o = (y * 640 + x) * 4;
+-                // Measure the opaque metallic rim, excluding a subpixel filter fringe.
+-                if pixels[o..o + 3].iter().any(|v| *v > 127) {
+-                    left = left.min(x);
+-                    right = right.max(x);
+-                    top = top.min(y);
+-                    bottom = bottom.max(y);
++    for platform in [Platform::Ps1, Platform::Dreamcast, Platform::Ports] {
++        let cart = Cart {
++            platform,
++            stem: "Disc test".into(),
++            title: String::new(),
++            rom: "test.chd".into(),
++            label: None,
++            code: String::new(),
++            shell: None,
++        };
++        let face = slot_ui::cart_face(&cart);
++        let tex = c.create_texture(face.w, face.h, &face.rgba);
++        let other = c.create_texture(1, 1, &[0, 0, 0, 0]);
++        // Includes full-size and side/animation-size draws; centres must stay put.
++        for size in [312.0, 240.0, 160.0] {
++            let mut draws = vec![
++                Draw::Tex {
++                    x: 360.0 - size / 2.0,
++                    y: 240.0 - size / 2.0,
++                    w: size,
++                    h: size,
++                    tex,
++                    alpha: 1.0,
++                },
++                Draw::Tex {
++                    x: 0.0,
++                    y: 0.0,
++                    w: 15.0,
++                    h: 15.0,
++                    tex: other,
++                    alpha: 1.0,
++                },
++            ];
++            let untouched = draws[1];
++            correct_disc_aspect(&mut draws, &[tex], 720.0 / 640.0);
++            assert_eq!(draws[1], untouched);
++            c.set_fill_panel(true);
++            c.begin_frame();
++            c.draw_list(&draws);
++            c.end_frame((640, 480));
++            // Read the actual presentation framebuffer, not the 720x480 logical canvas.
++            let mut pixels = vec![0u8; 640 * 480 * 4];
++            unsafe {
++                gl::ReadPixels(
++                    0,
++                    0,
++                    640,
++                    480,
++                    gl::RGBA,
++                    gl::UNSIGNED_BYTE,
++                    pixels.as_mut_ptr().cast(),
++                );
++            }
++            let (mut left, mut right, mut top, mut bottom) = (640, 0, 480, 0);
++            for y in 0..480 {
++                for x in 0..640 {
++                    let o = (y * 640 + x) * 4;
++                    // Measure the opaque metallic rim, excluding a subpixel filter fringe.
++                    if pixels[o..o + 3].iter().any(|v| *v > 127) {
++                        left = left.min(x);
++                        right = right.max(x);
++                        top = top.min(y);
++                        bottom = bottom.max(y);
++                    }
+                 }
+             }
++            let width = right - left + 1;
++            let height = bottom - top + 1;
++            assert!(
++                width.abs_diff(height) <= 1,
++                "disc size {size}: {width}x{height}"
++            );
++            assert!(
++                (left + right).abs_diff(639) <= 1,
++                "disc shifted horizontally"
++            );
++            assert!((top + bottom).abs_diff(479) <= 1, "disc shifted vertically");
+         }
+-        let width = right - left + 1;
+-        let height = bottom - top + 1;
+-        assert!(
+-            width.abs_diff(height) <= 1,
+-            "disc size {size}: {width}x{height}"
+-        );
+-        assert!(
+-            (left + right).abs_diff(639) <= 1,
+-            "disc shifted horizontally"
+-        );
+-        assert!((top + bottom).abs_diff(479) <= 1, "disc shifted vertically");
+     }
+ }

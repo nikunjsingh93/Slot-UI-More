@@ -12,6 +12,7 @@ with tempfile.TemporaryDirectory() as tmp:
 #include <errno.h>
 static long volume=1000;
 int snd_ctl_open(void**ctl,const char*name,int mode){*ctl=(void*)(uintptr_t)1;return 0;}
+int snd_ctl_open_lconf(void**ctl,const char*name,int mode,void*config){return snd_ctl_open(ctl,name,mode);}
 int snd_ctl_close(void*ctl){return 0;}
 int snd_ctl_elem_info(void*ctl,struct snd_ctl_elem_info*info){
  info->type=SNDRV_CTL_ELEM_TYPE_INTEGER;info->access=SNDRV_CTL_ELEM_ACCESS_USER|SNDRV_CTL_ELEM_ACCESS_READWRITE|SNDRV_CTL_ELEM_ACCESS_TLV_READ|SNDRV_CTL_ELEM_ACCESS_TLV_WRITE;
@@ -39,7 +40,8 @@ int main(int argc,char**argv){
  env=dict(os.environ,HOME=str(p),SLOT_ALSA_DEVICE='slot_test_sink',LD_PRELOAD=str(p/'mock.so'))
  command=[str(p/'audio'),str(p)]
  if len(sys.argv)>1:
-  fw=Path(sys.argv[1]);command=[str(fw/'usr/lib/ld-linux-aarch64.so.1'),'--library-path',str(fw/'usr/lib'),*command]
+  fw=Path(sys.argv[1]);libs=[fw/'usr/lib/aarch64-linux-gnu',fw/'usr/lib']
+  command=[str(fw/'usr/lib/ld-linux-aarch64.so.1'),'--library-path',':'.join(str(x) for x in libs if x.is_dir()),*command]
  subprocess.run(command,env=env,check=True)
  data=struct.unpack('<512h',(p/'audio.raw').read_bytes())
  for n,expected in enumerate([100,2500,10000,0]):

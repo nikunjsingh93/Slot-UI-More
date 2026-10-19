@@ -8,15 +8,16 @@ Slot is the home screen and launches emulators or native Linux ports. PortMaster
 
 ## First installation on a new card
 
-1. Back up anything you need: flashing erases the selected card. Charge the G350 and use a reliable reader/card.
-2. Download `slot-g350-0.1.10.img.zip` from [the G350 base release](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/v0.1.10). Extract the `.img` and write it to your OS card using an image writer such as the one you normally use for handheld firmware. Select the correct removable card.
-3. Put it in TF1/OS. Leave TF2 empty for this initial setup. Boot and allow first-boot partition expansion to finish. Power off using Slot's power menu before removing the card.
-4. Reconnect the card to the computer. It has a small **PAN4ELC** boot partition and a larger **GAMES** partition. Windows may also offer to format an unreadable Linux partition: cancel that prompt.
-5. Apply the 0.1.13 update below. Then add your games/labels and PortMaster. The 0.1.10 image alone does not contain the new Ports integration.
+1. Download **slot-g350-0.1.14.img.zip** from [the complete G350 release](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/v0.1.14).
+2. Extract its `.img` and flash it directly to a 16 GB or larger card. Flashing erases the selected card; back up anything you need and select the correct removable drive.
+3. Put it in G350 TF1/OS with TF2 empty initially. Charge the device, boot, and allow partition expansion/restart and manager installation to finish.
+4. Once Slot appears, shut down using the power menu. Reconnect the card to copy games and labels to GAMES. Cancel any Windows offer to format an unreadable Linux partition.
+
+The image already includes the latest system, gray SLOT boot/splash, all eight emulated systems, Ports integration and automatic PortMaster installation. **Do not flash 0.1.10 or install 0.1.13 first.** It is one complete image. Individual games and additional downloadable port runtimes are separate.
 
 ## Updating an existing Slot G350 card
 
-Download `slot-g350-0.1.13-update.zip` and `G350-0.1.13-manifest.json` from [0.1.13](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/v0.1.13). The generic release is separate from the owner's personal artwork update.
+Download `slot-g350-0.1.14-update.zip` and `G350-0.1.14-manifest.json` from [0.1.14](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/v0.1.14). The generic release is separate from the owner's personal artwork update.
 
 With the handheld powered off, copy these **four files from the ZIP to the root of PAN4ELC**, replacing their existing copies:
 
@@ -28,14 +29,14 @@ PAN4ELC/
   KERNEL.md5
 ```
 
-Do not format the card and do not copy these files into GAMES. Keep the file names exactly as shown; Windows can hide extensions. The KERNEL pair replaces the early splash; replacing SYSTEM alone leaves that earlier boot image unchanged. Use this only with the matching G350 base kernel (original SHA256 `18f4ca8d5a0c32b7674d6aa83dcaf657e5ccfad0aa51ae6322bd047e5207da7b`) or the already updated 0.1.13 kernel.
+Do not format the card and do not copy these files into GAMES. Keep the file names exactly as shown; Windows can hide extensions. The KERNEL pair replaces the early splash; replacing SYSTEM alone leaves that earlier boot image unchanged. Use this only with the matching G350 base kernel (original SHA256 `18f4ca8d5a0c32b7674d6aa83dcaf657e5ccfad0aa51ae6322bd047e5207da7b`) or the already updated 0.1.13/0.1.14 kernel.
 
 For a checked Windows installation, download/clone this source repository and run its installer in PowerShell, adjusting drive letters and paths:
 
 ```powershell
 & .\firmware\ports\install-update.ps1 `
-  -ArchivePath .\slot-g350-0.1.13-update.zip `
-  -ManifestPath .\G350-0.1.13-manifest.json `
+  -ArchivePath .\slot-g350-0.1.14-update.zip `
+  -ManifestPath .\G350-0.1.14-manifest.json `
   -BootDrive D -GamesDrive E
 ```
 
@@ -61,7 +62,10 @@ Copy supported uncompressed game formats into the following directories on GAMES
 
 Recognized does not mean every game or file variant is supported by its emulator. BIOS requirements depend on the system/core; no proprietary BIOS is supplied. N64/DC/PSP performance varies significantly by title. Emulator saves and states are under `Slot/Saves` and `Slot/States`; native ports have their own save locations, often inside their game folder or the Linux storage partition. Do not assume copying only Slot/Saves backs up native ports.
 
-## Install PortMaster
+## Bundled PortMaster
+
+On the complete 0.1.14 image, PortMaster is installed automatically when missing. Open it from the Ports shelf; an existing working manager is preserved. The following manual steps are only for repairing a missing installation or using an earlier update. The bundled catalogue permits offline browsing; downloads and missing runtimes still need internet.
+
 
 1. Download **PortMaster.zip** from [the pinned upstream release](https://github.com/PortsMaster/PortMaster-GUI/releases/tag/2026.10.18-0059). This is the version used for this integration; future releases may need retesting. Do not use the muOS/TrimUI variant.
 2. Extract its `PortMaster` directory into `ports` at the root of GAMES:

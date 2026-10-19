@@ -12,9 +12,9 @@ docker build --platform linux/arm64 -t slot-g350-builder .
 docker run --rm --platform linux/arm64 -v "${PWD}:/repo" slot-g350-builder sh scripts/build.sh
 ```
 
-This portable route preserves the verified earlier core binaries, rebuilds the current frontend/Flycast/PPSSPP from the archived pinned sources, compiles the port supervisor and input-sharing helper, and applies the Ports/splash overlay. It outputs a **rebuilt SYSTEM-only** update under dist/. It writes image files, never a physical disk. The new Ports overlay/build wiring has syntax/recipe checks; the entire multi-hour portable rebuild has not been rerun for this documentation update. The installed 0.1.13 release was built and verified separately using the accepted 0.1.10 cores unchanged.
+This portable route preserves the verified earlier core binaries, rebuilds the current frontend/Flycast/PPSSPP from the archived pinned sources, compiles the port supervisor and input-sharing helper, and applies the Ports/splash overlay. It outputs a **rebuilt SYSTEM-only** update under dist/. It writes image files, never a physical disk. The new Ports overlay/build wiring has syntax/recipe checks; the entire multi-hour portable rebuild has not been rerun for this documentation update. The 0.1.14 complete-image release was built and verified separately using the accepted 0.1.10 cores unchanged.
 
-The new early boot splash also requires the matching KERNEL pair from the 0.1.13 release. To rebuild that pair, supply the untouched original G350 KERNEL from the 0.1.10 image, then run:
+The new early boot splash also requires the matching KERNEL pair from the 0.1.14 release. To rebuild that pair, supply the untouched original G350 KERNEL from the 0.1.10 image, then run:
 
 ```text
 python firmware/ports/patch_boot_splash.py ORIGINAL_KERNEL firmware/ports/visuals/slot-splash.png KERNEL
@@ -27,3 +27,5 @@ For a frontend-only iteration on an extracted accepted 0.1.10 SYSTEM: build slot
 Tests: firmware/ports/test_portwatch.py and test_port_volume.py take the compiled supervisor path. test_port_audio.py optionally takes an extracted firmware root to test its ALSA library (only the absent kernel mixer is mocked). The Rust g350_disc integration test needs Linux with surfaceless EGL; it renders actual framebuffer geometry. Retain exact source/patches and component notices with distributed binaries.
 
 PortMaster is a separate upstream download. Game assets, generated NFS guest code and its linked executable are not inputs to the firmware build; keep them outside this repository. See the private NFS rebuild recipe for the exact executable matching process.
+
+The complete 0.1.14 image also bundles the pinned official PortMaster manager (2026.10.18-0059). Supply its ZIP through SLOT_PORTMASTER_ZIP for a local rebuild. The image-stage tool scripts/build_latest_images.py installs the matching SYSTEM/KERNEL pairs into a clean model-specific image and verifies readback/filesystems/archive hashes. The first-boot provisioner preserves an existing manager. Corresponding H700 native launcher/runtime preparation is documented under ports/h700.

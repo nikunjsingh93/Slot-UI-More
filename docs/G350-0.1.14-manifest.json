@@ -1,0 +1,26 @@
+{
+  "version": "0.1.14",
+  "device": "G350",
+  "system_size": 1147912192,
+  "system_sha256": "9f6520855671e397c702a12cb59b3079026366dcedd5c51f505a054c730f0702",
+  "system_md5": "7b4194c9e4b77ad67c89f9d329a235bb",
+  "update_sha256": "a8d8952b091f665aaeb9aa7526d90c45c62f6f2940c397b101f2afc17b05c7b2",
+  "kernel_sha256": "bad5bd08eaa26dbf6a7523e6ac867e898b7321498c118806fb19f0f912ae5c02",
+  "kernel_md5": "f431fe5d81079eaa71c7a371825e034f",
+  "kernel_size": 16365576,
+  "base_kernel_sha256": "18f4ca8d5a0c32b7674d6aa83dcaf657e5ccfad0aa51ae6322bd047e5207da7b",
+  "core_sha256": {
+    "mgba_libretro.so": "962ab910d17db1298c6b41be1955b582d15e76b149c4d4ae3a7f2cb02ebc749b",
+    "parallel_n64_libretro.so": "6f06977c294b7e8ae336c3f57977a23448387d55a4618d18b3973a006a9ee628",
+    "ppsspp_libretro.so": "75b4972a0018addc3359b68b26136d5b75d9e7558bebbec6401b1421b1654969",
+    "flycast_libretro.so": "6d1bacd9ab8700d395f7147548d525deb7039456c722767bcc1b9e182380da0c",
+    "gpsp_libretro.so": "96a13edea672637ef5bf9705ac0b5887a4c6934937ffa163fc9560bec692ce12",
+    "snes9x2005_plus_libretro.so": "87ab323dc307ecf230e71d0c79c791ae850923f3225ce8547915b30748f4e79e",
+    "snes9x_libretro.so": "798f9862939fad25fd664b21a826f12c4d4f023ac6a091a2b55ebb88974f193f",
+    "pcsx_rearmed_libretro.so": "8eac8b03343943745e4bf1a2f97eb400b28631ad07b04405d86a342dcb5ad9af",
+    "mupen64plus_next_libretro.so": "4a258260f7dbb26057a6f17df19f1d27969bac14bd56fc20d7254b8de8f4ebd9"
+  },
+  "emulator_cores_unchanged": true,
+  "portmaster_bundled": true,
+  "hardware_tested": false
+}

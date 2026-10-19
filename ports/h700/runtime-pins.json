@@ -1,0 +1,9 @@
+{
+  "adapter_repo": "https://github.com/Logarythms/nextui-portmaster-h700",
+  "adapter_commit": "931a8ef8b3581a2be02ad057c767d0067e456f93",
+  "runtime_release": "v0.4.0",
+  "nextui_release": "https://github.com/pvaibhav/NextUI/releases/tag/h700-rc11",
+  "ports_pak_sha256": "3c455f54c864cce460597c66ddb0d188dd6ee00fb956eae6d00aa9eb04ed7ee7",
+  "nextui_zip_sha256": "e89bb0a939ab3e528144f843a4248f8a642264d8714237ef5d8c6849820cd22d",
+  "g350_official_portmaster_sha256": "cde44901ed0dba0be7d4ab8f18149545dc167bad12a99fba76304cf1986a3a07"
+}
