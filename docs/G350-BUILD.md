@@ -1,9 +1,9 @@
 # Building the G350 source
 
-Use Git, GitHub CLI and Docker Desktop with Linux containers/ARM64 emulation. The repository and releases are currently private; sign in with an authorized account. The build uses ARM64 Debian Bullseye so its executables load on the firmware's older glibc.
+Use Git, GitHub CLI and Docker Desktop with Linux containers/ARM64 emulation. The repository and current releases are public. The build uses ARM64 Debian Bullseye so its executables load on the firmware's older glibc.
 
 ```powershell
-git clone https://github.com/nikunjsingh93/slot-ui-g350.git
+git clone https://github.com/nikunjsingh93/Slot-UI-More.git
 cd slot-ui-g350
 gh auth login
 gh release download g350-v1.1.15 --repo nikunjsingh93/slot-ui-g350 --pattern "slot-g350-1.1.15-system-files.zip" --dir backups

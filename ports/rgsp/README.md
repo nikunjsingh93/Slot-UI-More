@@ -1,6 +1,6 @@
 # Slot for Anbernic RG SP 1.1.15
 
-Download the [complete 1.1.15 image](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/rgsp-v1.1.15): **slot-rgsp-1.1.15.img.zip**. Extract its `.img` and flash it directly to a 16 GB or larger card. No earlier image or separate update is needed. Flashing erases the selected card.
+Download the [complete 1.1.15 image](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/rgsp-v1.1.15): **slot-rgsp-1.1.15.img.zip**. Extract its `.img` and flash it directly to a 16 GB or larger card. No earlier image or separate update is needed. Flashing erases the selected card.
 
 Use RG SP TF1/OS, with TF2 empty initially. Allow first-boot expansion and installation to finish before adding games to BASEOS/Games and PNG labels to BASEOS/Labels. This image is only for RG SP; other models have different boot files.
 

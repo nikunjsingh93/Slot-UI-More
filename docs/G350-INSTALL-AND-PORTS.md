@@ -8,7 +8,7 @@ Slot is the home screen and launches emulators or native Linux ports. PortMaster
 
 ## First installation on a new card
 
-1. Download **slot-g350-1.1.15.img.zip** from [the complete G350 release](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/g350-v1.1.15).
+1. Download **slot-g350-1.1.15.img.zip** from [the complete G350 release](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/g350-v1.1.15).
 2. Extract its `.img` and flash it directly to a 16 GB or larger card. Flashing erases the selected card; back up anything you need and select the correct removable drive.
 3. Put it in G350 TF1/OS with TF2 empty initially. Charge the device, boot, and allow partition expansion/restart and manager installation to finish.
 4. Once Slot appears, shut down using the power menu. Reconnect the card to copy games and labels to GAMES. Cancel any Windows offer to format an unreadable Linux partition.
@@ -17,7 +17,7 @@ The image already includes the latest system, gray SLOT boot/splash, all eight e
 
 ## Updating an existing Slot G350 card
 
-Download `slot-g350-1.1.15-system-files.zip` and `slot-g350-1.1.15-manifest.json` from [1.1.15](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/g350-v1.1.15). The generic release is separate from the owner's personal artwork update.
+Download `slot-g350-1.1.15-system-files.zip` and `slot-g350-1.1.15-manifest.json` from [1.1.15](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/g350-v1.1.15). The generic release is separate from the owner's personal artwork update.
 
 With the handheld powered off, copy these **four files from the ZIP to the root of PAN4ELC**, replacing their existing copies:
 

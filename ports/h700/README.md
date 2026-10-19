@@ -8,8 +8,8 @@ This is a new, experimental Slot integration. Both frontends compile; platform d
 
 Download the image for the exact handheld:
 
-- [RG SP 1.1.15](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/rgsp-v1.1.15): `slot-rgsp-1.1.15.img.zip`.
-- [RG35XX SP 1.1.15](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/rg35xxsp-v1.1.15): `slot-rg35xxsp-1.1.15.img.zip`.
+- [RG SP 1.1.15](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/rgsp-v1.1.15): `slot-rgsp-1.1.15.img.zip`.
+- [RG35XX SP 1.1.15](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/rg35xxsp-v1.1.15): `slot-rg35xxsp-1.1.15.img.zip`.
 
 Extract the `.img` and flash it to a 16 GB or larger card. Flashing erases the selected card. Put it in TF1/OS; keep TF2 empty initially. Allow first-boot expansion and installation to finish before copying games. No older image or separate update is needed. Use the model's own image; RG SP, RG35XX SP and G350 boot files are incompatible.
 

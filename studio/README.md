@@ -1,5 +1,7 @@
 # Slot Automatic Artwork Studio v5
 
+**[Open the hosted studio](https://nikunjsingh93.github.io/Slot-UI-More/)** in Chrome or Edge. It runs locally in your browser after loading. [Image sources, permissions and privacy](ARTWORK-SOURCES.md) explain the external artwork requests and copyright limits.
+
 Open `Slot-Auto-Artwork-Studio-v5.html` in Chrome or Edge. Choose **Slot folder** once, let artwork download, then click **Save ready labels to Slot**. Alternatively download the labels ZIP and merge its `Labels` folder into Slot. Restart Slot to see the new labels. No firmware update or reflash is needed. GB, GBC and GBA now work in this same app; no separate Cart Studio is needed for their artwork.
 
 On G350, choose `GAMES/Slot`. On RG SP / RG35XX SP, choose the `BASEOS` folder containing `Games` and `Labels`. The studio also accepts a parent folder containing `Slot`. Preview results before saving and correct uncertain names using the search on each game tile.

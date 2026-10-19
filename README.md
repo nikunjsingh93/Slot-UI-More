@@ -26,13 +26,13 @@ All eight emulated systems and the native Ports shelf, shown with cartridge/disc
 
 | Device | Fresh installation | Guide / optional system files |
 |---|---|---|
-| G350 | [1.1.15 complete image](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/g350-v1.1.15) | [1.1.15 system files](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/g350-v1.1.15) · [step-by-step G350 guide](docs/G350-INSTALL-AND-PORTS.md) |
-| RG35XX SP | [1.1.15 complete image](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/rg35xxsp-v1.1.15) | [RG35XX SP instructions](ports/rg35xxsp/README.md) |
-| RG SP | [1.1.15 complete image](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/rgsp-v1.1.15) | [RG SP instructions](ports/rgsp/README.md) |
+| G350 | [1.1.15 complete image](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/g350-v1.1.15) | [1.1.15 system files](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/g350-v1.1.15) · [step-by-step G350 guide](docs/G350-INSTALL-AND-PORTS.md) |
+| RG35XX SP | [1.1.15 complete image](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/rg35xxsp-v1.1.15) | [RG35XX SP instructions](ports/rg35xxsp/README.md) |
+| RG SP | [1.1.15 complete image](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/rgsp-v1.1.15) | [RG SP instructions](ports/rgsp/README.md) |
 
 **Use only the image for your exact model.** Each model has its own native-port launcher/runtime. H700 native Ports are experimental and await physical testing. Flashing a fresh image erases the target card. Updating an existing G350 uses SYSTEM + SYSTEM.md5 and, for the 0.1.13 boot artwork, KERNEL + KERNEL.md5. No card reflash is required for an update. Keep games, labels and saves backed up before changing firmware.
 
-The repository is currently private; invited users must sign in to download. Changing visibility is a separate action. No games, proprietary BIOS, APKs/OBBs, private game-linked executables, save files or commercial disc scans are supplied in the latest sharing packages. Each fresh `.img.zip` contains the current firmware and manager setup; no earlier image or follow-up update is needed. Update ZIPs are also available for existing cards. Original emulator core binaries are retained from the accepted G350 base.
+The repository and current releases are public. No games, proprietary BIOS, APKs/OBBs, private game-linked executables, save files or commercial disc scans are supplied in the latest sharing packages. Each fresh `.img.zip` contains the current firmware and manager setup; no earlier image or follow-up update is needed. Update ZIPs are also available for existing cards. Original emulator core binaries are retained from the accepted G350 base.
 
 ## Quick start on G350
 
@@ -65,7 +65,11 @@ Use launcher names containing ASCII letters/numbers, spaces, dots, underscores, 
 
 ## Artwork Studio
 
+**[Open Artwork Studio online](https://nikunjsingh93.github.io/Slot-UI-More/)** — no download or installation needed. Use Chrome or Edge for direct folder saving.
+
 Open [Artwork Studio v5](studio/Slot-Auto-Artwork-Studio-v5.html) in Chrome or Edge, or download its standalone HTML/ZIP from any current device release. **One app handles GB, GBC, GBA, SNES, PS1, N64, Dreamcast and PSP.** Choose the Slot folder (or BASEOS on the H700 devices), let it fetch cartridge/disc artwork, then save all ready labels together. Existing labels, including ones from Cart Studio, are preserved unless replacement is enabled. You can also export a Labels ZIP. No firmware update is needed. See the [studio guide](studio/README.md) for paths, scan adjustments and fallbacks. Artwork downloaded for personal use is not a license to redistribute it.
+
+The site fetches third-party images on demand rather than hosting an artwork library. See [image sources, permissions and privacy](studio/ARTWORK-SOURCES.md); the app's code license does not grant rights to the downloaded game artwork.
 
 ## Controls and hotkeys
 
