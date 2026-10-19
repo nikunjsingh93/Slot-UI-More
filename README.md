@@ -2,15 +2,17 @@
 
 A controller-friendly frontend with cartridge/disc shelves, save-state previews, shaders and long-press Menu to return home. This is an independent adaptation of [Slot](https://slot-cfw.fyi/), not an official Slot, PAN4ELEC or PortMaster release.
 
+**Release 1.1.15 uses the same version across G350, RG SP and RG35XX SP.** It repackages the verified firmware without changing disk image bytes; internal frontend build numbers remain 0.1.14, 0.3.1 and 0.2.3 respectively. Only these three current release pages are retained.
+
 **The latest complete images include native Ports and a bundled PortMaster manager**, round CDs, a gray SLOT splash on black, and in-game volume buttons that inherit Slot's saved speaker/headphone levels. The owner has confirmed GTA SA and NFS U2 launch and play; NFS U2 remains demanding and runs slowly. Compatibility and speed vary by port.
 
 ## Downloads and installation
 
-| Device | Fresh installation | Latest update / guide |
+| Device | Fresh installation | Guide / optional system files |
 |---|---|---|
-| BATLEXP G350 | [0.1.14 complete image](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/v0.1.14) | [0.1.14 update](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/v0.1.14) · [step-by-step G350 guide](docs/G350-INSTALL-AND-PORTS.md) |
-| Anbernic RG35XX SP | [0.2.3 complete image](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/rg35xxsp-v0.2.3) | [RG35XX SP instructions](ports/rg35xxsp/README.md) |
-| Anbernic RG SP | [0.3.1 complete image](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/rgsp-v0.3.1) | [RG SP instructions](ports/rgsp/README.md) |
+| G350 | [1.1.15 complete image](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/g350-v1.1.15) | [1.1.15 system files](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/g350-v1.1.15) · [step-by-step G350 guide](docs/G350-INSTALL-AND-PORTS.md) |
+| RG35XX SP | [1.1.15 complete image](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/rg35xxsp-v1.1.15) | [RG35XX SP instructions](ports/rg35xxsp/README.md) |
+| RG SP | [1.1.15 complete image](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/rgsp-v1.1.15) | [RG SP instructions](ports/rgsp/README.md) |
 
 **Use only the image for your exact model.** Each model has its own native-port launcher/runtime. H700 native Ports are experimental and await physical testing. Flashing a fresh image erases the target card. Updating an existing G350 uses SYSTEM + SYSTEM.md5 and, for the 0.1.13 boot artwork, KERNEL + KERNEL.md5. No card reflash is required for an update. Keep games, labels and saves backed up before changing firmware.
 

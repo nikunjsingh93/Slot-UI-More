@@ -6,15 +6,15 @@ Use Git, GitHub CLI and Docker Desktop with Linux containers/ARM64 emulation. Th
 git clone https://github.com/nikunjsingh93/slot-ui-g350.git
 cd slot-ui-g350
 gh auth login
-gh release download v0.1.8 --repo nikunjsingh93/slot-ui-g350 --pattern "slot-g350-0.1.8-parallel-n64-update.zip" --dir backups
-gh release download v0.1.9.2 --repo nikunjsingh93/slot-ui-g350 --pattern "slot-g350-0.1.9.2-sources.zip" --dir backups
+gh release download g350-v1.1.15 --repo nikunjsingh93/slot-ui-g350 --pattern "slot-g350-1.1.15-system-files.zip" --dir backups
+gh release download g350-v1.1.15 --repo nikunjsingh93/slot-ui-g350 --pattern "slot-1.1.15-core-sources.zip" --dir backups
 docker build --platform linux/arm64 -t slot-g350-builder .
 docker run --rm --platform linux/arm64 -v "${PWD}:/repo" slot-g350-builder sh scripts/build.sh
 ```
 
 This portable route preserves the verified earlier core binaries, rebuilds the current frontend/Flycast/PPSSPP from the archived pinned sources, compiles the port supervisor and input-sharing helper, and applies the Ports/splash overlay. It outputs a **rebuilt SYSTEM-only** update under dist/. It writes image files, never a physical disk. The new Ports overlay/build wiring has syntax/recipe checks; the entire multi-hour portable rebuild has not been rerun for this documentation update. The 0.1.14 complete-image release was built and verified separately using the accepted 0.1.10 cores unchanged.
 
-The new early boot splash also requires the matching KERNEL pair from the 0.1.14 release. To rebuild that pair, supply the untouched original G350 KERNEL from the 0.1.10 image, then run:
+The new early boot splash also requires the matching KERNEL pair from the 1.1.15 system-files archive. To rebuild that pair, supply the untouched original G350 KERNEL from the upstream base (the current release already includes a patched KERNEL), then run:
 
 ```text
 python firmware/ports/patch_boot_splash.py ORIGINAL_KERNEL firmware/ports/visuals/slot-splash.png KERNEL

@@ -8,7 +8,7 @@ Slot is the home screen and launches emulators or native Linux ports. PortMaster
 
 ## First installation on a new card
 
-1. Download **slot-g350-0.1.14.img.zip** from [the complete G350 release](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/v0.1.14).
+1. Download **slot-g350-1.1.15.img.zip** from [the complete G350 release](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/g350-v1.1.15).
 2. Extract its `.img` and flash it directly to a 16 GB or larger card. Flashing erases the selected card; back up anything you need and select the correct removable drive.
 3. Put it in G350 TF1/OS with TF2 empty initially. Charge the device, boot, and allow partition expansion/restart and manager installation to finish.
 4. Once Slot appears, shut down using the power menu. Reconnect the card to copy games and labels to GAMES. Cancel any Windows offer to format an unreadable Linux partition.
@@ -17,7 +17,7 @@ The image already includes the latest system, gray SLOT boot/splash, all eight e
 
 ## Updating an existing Slot G350 card
 
-Download `slot-g350-0.1.14-update.zip` and `G350-0.1.14-manifest.json` from [0.1.14](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/v0.1.14). The generic release is separate from the owner's personal artwork update.
+Download `slot-g350-1.1.15-system-files.zip` and `slot-g350-1.1.15-manifest.json` from [1.1.15](https://github.com/nikunjsingh93/slot-ui-g350/releases/tag/g350-v1.1.15). The generic release is separate from the owner's personal artwork update.
 
 With the handheld powered off, copy these **four files from the ZIP to the root of PAN4ELC**, replacing their existing copies:
 
@@ -35,8 +35,8 @@ For a checked Windows installation, download/clone this source repository and ru
 
 ```powershell
 & .\firmware\ports\install-update.ps1 `
-  -ArchivePath .\slot-g350-0.1.14-update.zip `
-  -ManifestPath .\G350-0.1.14-manifest.json `
+  -ArchivePath .\slot-g350-1.1.15-system-files.zip `
+  -ManifestPath .\slot-g350-1.1.15-manifest.json `
   -BootDrive D -GamesDrive E
 ```
 
@@ -64,7 +64,7 @@ Recognized does not mean every game or file variant is supported by its emulator
 
 ## Bundled PortMaster
 
-On the complete 0.1.14 image, PortMaster is installed automatically when missing. Open it from the Ports shelf; an existing working manager is preserved. The following manual steps are only for repairing a missing installation or using an earlier update. The bundled catalogue permits offline browsing; downloads and missing runtimes still need internet.
+On the complete 1.1.15 image, PortMaster is installed automatically when missing. Open it from the Ports shelf; an existing working manager is preserved. The following manual steps are only for repairing a missing installation or using an earlier update. The bundled catalogue permits offline browsing; downloads and missing runtimes still need internet.
 
 
 1. Download **PortMaster.zip** from [the pinned upstream release](https://github.com/PortsMaster/PortMaster-GUI/releases/tag/2026.10.18-0059). This is the version used for this integration; future releases may need retesting. Do not use the muOS/TrimUI variant.
