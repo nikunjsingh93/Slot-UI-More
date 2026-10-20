@@ -1,0 +1,38 @@
+# G350 N64 / Dreamcast trial — 2026-10-19
+
+This branch is a hardware-test candidate, **not part of the public 1.1.15 revision 2 image**. The public revision only changes directory creation. Do not infer device FPS from host smoke-test timings.
+
+## Why these changes
+
+The owner's logs show missed audio deadlines and slow emulation despite stock CPU/GPU performance governors. Increasing an audio buffer alone cannot restore real-time emulation. RK3326 performance depends on game, renderer, dynarec and frontend overhead; newer emulator code is not always faster.
+
+- ROCKNIX's [Flycast 2021 recipe](https://github.com/ROCKNIX/distribution/blob/f57baba03199b19bed20333cb0226944ec96b555/projects/ROCKNIX/packages/emulators/libretro/flycast2021-lr/package.mk) pins metallic77/flycast `603814c`. Use that lighter core with Cortex-A35 optimization, GLES2, 320x240, per-strip transparency and frameskip 1. Keep DSP off and HLE BIOS, matching the existing setup.
+- Unlike modern Flycast, this legacy core's threaded mode delivers input/audio callbacks on its worker thread. Slot currently uses a thread-local callback host. Disable legacy threading, avoiding silent audio/input and a missing thread-wait callback at unload. Modern Flycast retains threaded mode. Identify the supported option set, rather than assuming every Flycast exposes the same options.
+- Build current ParaLLEl N64 `6f23339`, ARM64 dynarec, Glide64 GLES2/HLE, 320x240. Set graphics accuracy to low, as in [ROCKNIX's profile](https://github.com/ROCKNIX/distribution/blob/f57baba03199b19bed20333cb0226944ec96b555/projects/ROCKNIX/packages/emulators/libretro/parallel-n64-lr/config/ParaLLEl%20N64.opt). Lower accuracy can introduce graphical differences; compare during testing.
+- dArkOS also maintains RK3326-specific [Flycast builds](https://github.com/christianhaitian/rk3326_core_builds) and [standalone Mupen](https://github.com/christianhaitian/dArkOS/blob/daecf488075f0194c164578b90617fa7002ce8bd/build_mupen64plussa.sh). We retain libretro to preserve Slot's controls and long-press Menu exit. No overclock or new Vulkan driver is introduced.
+
+## Exact core build
+
+Use an ARM64 Debian Bullseye build environment with GCC 10, make, GLES development libraries and the Rust workspace dependencies. Download the two source archives described in the adjacent JSON files and verify SHA256 before extracting. No games, BIOS or saves belong in source packages.
+
+For ParaLLEl, from its extracted source:
+
+```sh
+make -j4 platform=unix ARCH=aarch64 CPUFLAGS='-mcpu=cortex-a35 -DARM -DARM64 -DDONT_WANT_ARM_OPTIMIZATIONS' FORCE_GLES=1 HAVE_PARALLEL=0 HAVE_PARALLEL_RSP=0 HAVE_GLIDEN64=0 HAVE_GLIDE64=1 HAVE_RICE=1 GIT_VERSION=6f23339
+```
+
+For Flycast 2021, replace `cortex-a53` with `cortex-a35` in its Makefile, apply the adjacent ROCKNIX postprocess patch with `patch -p1`, then:
+
+```sh
+make -j4 platform=arm64_cortex_a53_gles2 FORCE_GLES=1 HAVE_VULKAN=0 HAVE_OPENMP=0 HAVE_LTCG=0 GIT_VERSION=603814c
+```
+
+Strip unneeded symbols from both .so files. Preserve the `reicast` option prefix (ROCKNIX's separate prefix rename is intentionally omitted). The adjacent patch comes from ROCKNIX's GPL-2.0-licensed package recipe. Upstream source licenses remain applicable.
+
+Build the frontend from this branch's `slot/` with `cargo build --offline --locked --profile device --bin slot --no-default-features --features device`. In an extracted matching SYSTEM, replace `/usr/bin/slot-g350` and the two `/usr/share/slot/*_libretro.so` files. Existing cards also require replacing the matching two `Slot/System/` cores, since startup preserves existing files. Repack squashfs with gzip, block size 131072; compute SYSTEM.md5. Do not modify the kernel, bootloader or other cores.
+
+## Validation and hardware hand-off
+
+The `g350_compat_probe` example runs a caller-supplied game with temporary saves. It asserts nonzero video/audio, exercises Start, serializes/unserializes, unloads and repeats. Actual app options are used without test-only overrides. Diddy Kong Racing: 2 x 900 frames; Virtua Tennis: 2 x 900; SoulCalibur: 2 x 1800 passed on the build host. This is compatibility evidence, not a speed benchmark. The shipping frontend entrypoint also passed its KMS/DRM selection check.
+
+The test card has an exact pre-trial SYSTEM/core rollback retained privately. Existing N64/Dreamcast state directories are renamed in place before testing; old states can be incompatible with changed cores. In-game save files remain, with private backups. Test both games from cold launch for around one minute, include actual gameplay, hold Menu to return, and relaunch. Reconnect the card to compare audio starvation/frame timing in Slot/slot.log. Public release promotion awaits that result.
