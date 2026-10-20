@@ -1,6 +1,6 @@
 # G350 installation, ports and labels
 
-For BATLEXP G350 only. RG SP, RG35XX SP and R36S use different boot images. This guide describes the shared 0.1.13 update, which contains firmware and integration code but no commercial game files or disc scans.
+For BATLEXP G350 only. RG SP, RG35XX SP and R36S use different boot images. This guide describes the complete 1.1.15 image, which contains firmware and integration code but no commercial game files or disc scans.
 
 ## What Slot and PortMaster do
 
@@ -14,6 +14,8 @@ Slot is the home screen and launches emulators or native Linux ports. PortMaster
 4. Once Slot appears, shut down using the power menu. Reconnect the card to copy games and labels to GAMES. Cancel any Windows offer to format an unreadable Linux partition.
 
 The image already includes the latest system, gray SLOT boot/splash, all eight emulated systems, Ports integration and automatic PortMaster installation. **Do not flash 0.1.10 or install 0.1.13 first.** It is one complete image. Individual games and additional downloadable port runtimes are separate.
+
+Revision 2 no longer creates the 117 unused legacy system folders at the GAMES root. Use `Slot/Games/<SYSTEM>/` for emulated games. Auxiliary folders such as `ports`, `bios` and `gamedata` remain for native-port compatibility. Existing user folders are preserved.
 
 ## Updating an existing Slot G350 card
 

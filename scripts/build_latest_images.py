@@ -140,7 +140,7 @@ the corresponding system folders, with matching game filename stems.
 Copy your existing BIOS, Saves, States and Config folders back if restoring.
 Keep this image's System folder. G350 SYSTEM updates are incompatible.
 No games or proprietary BIOS are included; PPSSPP's free assets are bundled.
-The artwork tool is under Tools/Slot-Auto-Artwork-Studio-v4.html.
+The artwork tool is under Tools/Slot-Auto-Artwork-Studio-v5.html.
 
 Controls: hold Menu alone one second to return to Slot. Console save/load
 states: Menu+X / Menu+Y. GB/GBC/GBA: Select+R1 / Select+L1 (prompt chord).
@@ -297,7 +297,7 @@ and extra runtimes remain separate. Ports artwork uses Slot/Labels/PORTS.
 Labels go in matching Slot/Labels folders, with matching filename stems.
 Restore Slot/BIOS, Saves, States, Config and Wallpapers if you have a backup.
 No games or proprietary BIOS are included. PPSSPP's free assets are bundled.
-The repository's studio/ directory contains Artwork Studio v4.
+The repository's studio/ directory contains Artwork Studio v5.
 
 Hold Menu alone one second to return to Slot. Console states: Menu+X saves,
 Menu+Y loads. GB/GBC/GBA: Select+R1 saves; Select+L1 loads (prompt chord).

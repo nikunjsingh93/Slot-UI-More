@@ -16,6 +16,10 @@ for src,name in [(frontend,'slot-g350'),(supervisor,'slot-portwatch'),
     target=root/'usr/bin'/name;shutil.copyfile(src,target);target.chmod(0o755)
 shutil.copyfile(input_sharing,root/'usr/lib/slot-no-grab.so')
 (root/'usr/lib/slot-no-grab.so').chmod(0o755)
+# The stock tmpfiles rule creates 117 unused system folders on every boot.
+# Replace only its directory-creation list; never remove existing user data.
+shutil.copyfile(here/'slot-directories.conf',root/'usr/lib/tmpfiles.d/amberelec-dirs.conf')
+(root/'usr/lib/tmpfiles.d/amberelec-dirs.conf').chmod(0o644)
 (root/'usr/share/slot/VERSION').write_text('0.1.14-complete-ports\n')
 logo=here/'visuals/slot-splash.png'
 sequence=root/'usr/share/p4_splash'

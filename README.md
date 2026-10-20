@@ -4,7 +4,7 @@ A controller-friendly frontend with cartridge/disc shelves, save-state previews,
 
 **Based on [Slot by Brandon Kowalski](https://github.com/BrandonKowalski/slot).** Credit for the original frontend and its visual foundation belongs to the upstream project and its contributors, including Markus for the skeuomorphic artwork credited upstream. See [credits and attribution](CREDITS.md).
 
-**Release 1.1.15 uses the same version across G350, RG SP and RG35XX SP.** It repackages the verified firmware without changing disk image bytes; internal frontend build numbers remain 0.1.14, 0.3.1 and 0.2.3 respectively. Only these three current release pages are retained.
+**Release 1.1.15 uses the same version across G350, RG SP and RG35XX SP.** G350 image revision 2 stops creating the 117 unused legacy ROM folders; emulator cores and gameplay settings are unchanged. RG SP and RG35XX SP retain their verified image bytes. Internal frontend build numbers remain 0.1.14, 0.3.1 and 0.2.3 respectively. Only these three current release pages are retained.
 
 **The latest complete images include native Ports and a bundled PortMaster manager**, round CDs, a gray SLOT splash on black, and in-game volume buttons that inherit Slot's saved speaker/headphone levels. The owner has confirmed GTA SA and NFS U2 launch and play; NFS U2 remains demanding and runs slowly. Compatibility and speed vary by port.
 

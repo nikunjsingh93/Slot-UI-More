@@ -65,8 +65,8 @@
     "tag": "v0.1.9.2"
   },
   "slot-g350-1.1.15-system-files.zip": {
-    "sha256": "a8d8952b091f665aaeb9aa7526d90c45c62f6f2940c397b101f2afc17b05c7b2",
-    "size": 1164278254,
+    "sha256": "665ccd032858445b9b79aaa5e99402fad5ef60b6444eae5699af7c339281d899",
+    "size": 1145504164,
     "tag": "g350-v1.1.15"
   },
   "slot-1.1.15-core-sources.zip": {
@@ -75,3 +75,4 @@
     "tag": "g350-v1.1.15"
   }
 }
+
