@@ -1,14 +1,17 @@
 {
-  "version": "0.1.8",
-  "status": "owner-confirmed stable baseline",
+  "version": "1.1.15",
+  "status": "owner-confirmed primary Dreamcast runtime baseline",
   "target": "BATLEXP G350",
-  "confirmed_date": "2026-10-09",
-  "owner_report": "now it works amazingly keep this version as base now",
-  "firmware_archive": "slot-g350-0.1.8-parallel-n64-update.zip",
-  "firmware_archive_sha256": "f458278347885ae02fcefcb0ed527242a465cddd5f01b8f51c73038b6049ce87",
-  "system_sha256": "76c7fa4a5b6b75a323debcde121d35837705f9dfed78e8e7a2e767bdd9988455",
-  "system_md5": "651351a2f9c3f85591a57200853e1d8c",
-  "source_archive": "slot-g350-0.1.8-sources.zip",
-  "source_archive_sha256": "ba2d7e39f3a6becc89d459db2bd53cf28b0edc8a58eb265c0c18b81dbe93a980",
-  "future_work": "Derive PSP/Dreamcast experimental builds from these sources. Preserve baseline firmware/source archives and existing N64, SNES, PS1, audio, display and button/one-second Menu-hold behavior."
+  "confirmed_date": "2026-10-19",
+  "owner_report": "dreamcast is flawless now gameplay and audio",
+  "source_commit": "eb08581",
+  "system_sha256": "0e63a9ff44bb6e106b26ee4572bde3fd616d037f153eb0b432771b07ae9e8004",
+  "system_md5": "0676dbab150a41c9184e32dd69a6325d",
+  "dreamcast_core_sha256": "a796659516812f23c6fb8ad575f927d66517f1f0c1624f43dc6f6f0f9eb541f4",
+  "n64_core_sha256": "bb57223f55f2aaa9f053e64da21b802a3dd88201dbb066f8734f8ab89e7c6d78",
+  "dreamcast_profile": "Flycast 2021 + ARM64 ABI repair + threaded callback bridge; 320x240 per-strip frameskip 1; 20ms audio recovery",
+  "n64_status": "Wave Race confirmed smooth; Diddy Kong Racing improved, with remaining heavy-area dips. Future N64 candidates require separate hardware validation.",
+  "public_release_status": "This accepted runtime has not yet replaced the public complete image. Use the pinned source commit and experiment build instructions to reproduce it.",
+  "build_instructions": "experiments/g350-performance-20261019/README.md",
+  "future_work": "Preserve this Dreamcast core and its frontend/audio/controls as the primary base. Tune N64 independently, retaining matching original core rollback and all game progress. Never revert Dreamcast to an older unbridged core while tuning N64."
 }

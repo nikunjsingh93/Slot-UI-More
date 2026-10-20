@@ -62,3 +62,19 @@ Several old-core assumptions needed fixing: unsupported GET_FASTFORWARDING must 
 Slot's large Dreamcast queue previously required 160 ms of new PCM after every underrun. Its recovery threshold is now 20 ms, while the 320 ms capacity/160 ms pacing target remain. Other systems retain their old recovery threshold. Regression tests check both short-gap recovery and switching back to an ordinary core.
 
 The probe now checks continued audio after state load and accepts optional caller-owned state-in/state-out paths. Repeated SoulCalibur tests, cross-loading a state produced by the previous synchronous core (including cold resume before the first frame), and repeated Crazy Taxi 2 launches passed with nonzero video/audio, correct register preservation, no queue overflow and a clean process exit. These are host compatibility tests, not G350 FPS benchmarks. Save formats, Menu-hold exit and bindings are unchanged. The card installation is still a physical-test candidate; the public complete image is not replaced by this experiment.
+
+## N64 follow-up after Dreamcast acceptance
+
+The owner confirmed the threaded Dreamcast build flawless for gameplay and audio. `docs/G350-STABLE-BASE.json` now records that exact primary runtime and source commit. Keep its SYSTEM, kernel, Flycast binary, audio and control behavior when experimenting with N64.
+
+ArkOS documents standalone Mupen64Plus as usually fastest but less convenient to remap. The owner's previous standalone trial was rejected for control changes and compatibility issues, so this trial remains in ParaLLEl/Glide64. The upstream [RK3326 ParaLLEl build script](https://github.com/christianhaitian/rk3326_core_builds/blob/master/scripts/parallel-n64.sh) and target64 patch inform device-specific compilation. On this newer core, disabling threaded Angrylion entirely leaves unresolved shared HLE helper symbols; retain the dependency rather than applying that older patch wholesale. It does not select Angrylion as the renderer.
+
+Build the identical pinned `6f233392445dcef4188a321d4ba65a776f0e1672` source with the following command, then strip unneeded symbols:
+
+```sh
+make -j4 platform=unix ARCH=aarch64 CPUFLAGS='-mcpu=cortex-a35 -mtune=cortex-a35 -DARM -DARM64 -DDONT_WANT_ARM_OPTIMIZATIONS -DARM_FIX -DCLASSIC -flto=4' FORCE_GLES=1 HAVE_PARALLEL=0 HAVE_PARALLEL_RSP=0 HAVE_GLIDEN64=0 HAVE_GLIDE64=1 HAVE_RICE=1 HAVE_LTCG=1 GIT_VERSION=6f23339
+```
+
+Link-time optimization permits cross-file optimization. The renderer stays Glide64, 320x240, low accuracy/HLE; there is no new clock limit, lower-resolution hack, changed binding or audio-rate adjustment. Only `Slot/System/parallel_n64_libretro.so` is replaced for this hardware test. The accepted Dreamcast SYSTEM and Flycast file are verified unchanged. Keep the original N64 file for rollback. Future complete images must explicitly incorporate the candidate only after owner acceptance.
+
+Compatibility checks: the baseline and candidate each ran two 1800-frame Diddy sessions starting from the same private owner state, with matching audio sample counts, state sizes and nonblack pixel counts, plus successful state round trips, post-load audio and ARM64 register preservation. Wave Race passed two 900-frame sessions. Diddy host times were 3.07/3.01 seconds baseline and 2.60/2.83 candidate; host timing is not a G350 FPS benchmark and no device speed claim follows from it. Race-area hardware testing remains necessary. No private games or states are included in source control.

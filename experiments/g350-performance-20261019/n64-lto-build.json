@@ -1,0 +1,18 @@
+{
+  "target": "G350",
+  "status": "hardware test candidate; Dreamcast primary base preserved",
+  "source_repository": "https://github.com/libretro/parallel-n64",
+  "source_commit": "6f233392445dcef4188a321d4ba65a776f0e1672",
+  "source_archive_sha256": "1a08df967cd1fafb32edbf61e5489e04e9be0bf8b0c622b5df496b0090290748",
+  "candidate_sha256": "169d618a2540eab59070cd57889bd90a19ee853f30d39c6d00952929fad8a7c9",
+  "accepted_original_sha256": "bb57223f55f2aaa9f053e64da21b802a3dd88201dbb066f8734f8ab89e7c6d78",
+  "candidate_bytes": 3303408,
+  "cpu_flags": "-mcpu=cortex-a35 -mtune=cortex-a35 -DARM -DARM64 -DDONT_WANT_ARM_OPTIMIZATIONS -DARM_FIX -DCLASSIC -flto=4",
+  "make_options": "platform=unix ARCH=aarch64 FORCE_GLES=1 HAVE_PARALLEL=0 HAVE_PARALLEL_RSP=0 HAVE_GLIDEN64=0 HAVE_GLIDE64=1 HAVE_RICE=1 HAVE_LTCG=1 GIT_VERSION=6f23339",
+  "compiler": "GCC 10, ARM64 Debian Bullseye",
+  "postprocess": "strip --strip-unneeded",
+  "settings_changed": false,
+  "bindings_changed": false,
+  "dreamcast_changed": false,
+  "hardware_speedup_claimed": false
+}
