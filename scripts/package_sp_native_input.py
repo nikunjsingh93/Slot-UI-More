@@ -26,11 +26,13 @@ into the BASEOS root, replacing those TWO files. Leave everything else intact.
 Safely eject and boot. The other model's launcher is incompatible.
 
 In a native port, hold Menu then press Select to toggle D-pad / left stick.
-The mode starts as D-pad and is remembered separately for each .sh launcher.
+The mode starts as D-pad for ordinary ports, analog for the named GTA SA/NFS
+launchers, and is remembered separately for each .sh launcher.
 Hold Menu ALONE for one second to quit. Release both buttons after toggling.
 Normal Select remains available when Menu is not held. Analog is full tilt.
 The PortMaster manager remains in normal D-pad mode. Emulator controls and
-save-state shortcuts are unchanged. No GTA SA-specific fixes are included.
+save-state shortcuts are unchanged. Named GTA SA/NFS U2 controller profiles
+are included; game runtimes and data are supplied separately.
 
 Modes are stored in Config/port-input/<launcher>.sh.mode (0=dpad, 1=analog).
 Remove one game's mode file while powered off to reset just that game.
@@ -45,7 +47,9 @@ native games, graphics/audio and real controller enumeration.
 Requires the firmware kernel's uinput and mount-namespace support. Setup
 failure returns to Slot; it does not change boot files or game data.
 Keyboard-style ports still depend on the port's own mappings for analog mode.
-There are no mouse/right-stick modes or game-specific patches in this test.
+There are no mouse/right-stick modes or game binary patches in this test.
+For Need for Speed Underground 2.sh, Menu+X opens its native R3 keyboard.
+The physical SP Select key is code 310; code 314 remains L2.
 
 To undo, power off and restore the two original System files. Keep your
 Games, Labels, BIOS, Saves, States, Config and port game directories.
@@ -57,7 +61,7 @@ Do not use this update on G350. Stable full images have NOT been replaced.
             'files':{n:sha(b) for n,b in files.items()},
             'source_sha256':{n:sha((ports/n).read_bytes()) for n in ['portwatch.c','port-input.h','port-volume.h']},
             'games_included':False,
-            'gta_specific_patch':False,'emulator_files_changed':False}
+            'gta_binary_patch':False,'named_game_profiles':['Grand Theft Auto San Andreas.sh','Need for Speed Underground 2.sh'],'emulator_files_changed':False}
   files['native-input-test.json']=(json.dumps(metadata,indent=2)+'\n').encode()
   files['SHA256SUMS.txt']=''.join(sha(b)+'  '+n+'\n' for n,b in files.items()).encode()
   archive=out/(name+'.zip')
@@ -80,4 +84,5 @@ Do not use this update on G350. Stable full images have NOT been replaced.
   z.write(Path(__file__),'scripts/package_sp_native_input.py');z.write(repo/'LICENSE','LICENSE')
   z.write(repo/'ports/h700/native-input-validation.json','ports/h700/native-input-validation.json')
   z.write(repo/'ports/h700/README.md','ports/h700/README.md')
+  for f in (repo/'ports/h700/launchers').glob('*.sh'):z.write(f,'ports/h700/launchers/'+f.name)
  print('PASS corresponding input source and test bundle',flush=True)

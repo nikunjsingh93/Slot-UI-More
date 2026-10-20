@@ -17,16 +17,21 @@
     "existing Menu/normal-exit regression tests",
     "existing volume/headphone/mute/state-preservation regression tests",
     "actual kernel private namespace: event/js routing, duplicate hiding, original FD preserved, host paths unchanged after child exit",
-    "ZIP CRC, per-file checksums and two-file-only System payload"
+    "ZIP CRC, per-file checksums and two-file-only System payload",
+    "SP physical Select code 310; L2 code 314 remains a game button",
+    "named GTA profile: normalized face/shoulder/Start/Select, analog default, saved digital override",
+    "actual private GTA wrapper normalized dispatch replay: axes and buttons match its working R36S semantics",
+    "named NFS profile: GO-Super layout and Menu+X R3 keyboard chord"
   ],
   "not_verified": [
     "physical kernel uinput support and module/device creation",
     "physical kernel mount-namespace support",
     "actual SDL/joydev controller enumeration on either SP",
-    "native games and analog-mode mappings in keyboard-style ports"
+    "native games and analog-mode mappings in keyboard-style ports",
+    "GTA normalized-profile hardware auto-detection",
+    "NFS/GTA graphics, audio, controls and performance on either SP"
   ],
   "not_included": [
-    "GTA SA special fixes",
     "mouse/right-stick modes",
     "stable full-image replacement",
     "G350 runtime changes"
