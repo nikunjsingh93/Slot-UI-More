@@ -64,3 +64,12 @@ The runtime uses [nextui-portmaster-h700 v0.4.0](https://github.com/Logarythms/n
 The matching source ZIP contains the full updated model frontend. Build it in ARM64 Bullseye with Rust using `cargo build --profile device --bin slot --no-default-features --features device`. Compile the common supervisor with `-lasound -lm`, and the input-sharing helper with `-shared -fPIC -ldl`. Add the runtime/launch files to the previous clean model payload, update its frontend manifest/hash and include PORTS in its system list. `scripts/build_latest_images.py` packages and verifies the image with the updated first-boot installer. It never writes a physical SD card.
 
 The selected NextUI library build carries upstream noncommercial terms and MinUI-derived notices. The adapter is MIT, but those libraries keep their own terms; copies are in licenses/ and the packaged System/licenses/portmaster-h700 directory. See the repository sharing notes before redistribution.
+
+
+## Optional Controls Test
+
+`native-input-probe.c` is a small original SDL2 diagnostic with no game data. Build in ARM64 Bullseye with `gcc -O2 -Wall -Wextra -Werror native-input-probe.c -o slot-controls-test $(sdl2-config --cflags --libs)` (SDL2 development headers required). A `SDL_VIDEODRIVER=dummy ./slot-controls-test --self-test` smoke test runs five frames without hardware. That checks application startup/render calls, not physical input or the vendor video driver.
+
+Install its binary in `ports/.ports/slot-controls-test/slot-controls-test` and copy the adjacent `Slot Controls Test.sh` to both `ports/.ports` and `ports`. Restart Slot to scan it, or add a `Games/PORTS/Slot Controls Test.port` descriptor containing `script:Slot Controls Test.sh`. No game, BIOS, Wi-Fi or additional download is required.
+
+Open **Ports → Slot Controls Test**. Hold a direction: in digital mode the DPAD HAT number changes while LEFT STICK X/Y stay zero. Hold Menu, tap Select, release both and hold a direction again: X/Y should change while HAT stays zero. Check face/shoulder buttons, then hold Menu alone one second to return. Launch it again to check that its mode is remembered. The mode for this diagnostic is separate from every game. Reconnect the card after testing to inspect `Config/ports.log` and the H700 adapter log if anything fails. Actual on-device testing is pending.
