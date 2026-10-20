@@ -46,6 +46,14 @@ The repository and current releases are public. No games, proprietary BIOS, APKs
 
 For RG SP / RG35XX SP, follow [the H700 Ports guide](ports/h700/README.md). It uses different paths and a pinned H700-compatible manager; do not copy the G350 runtime onto it.
 
+## Artwork Studio
+
+**[Open Artwork Studio online](https://nikunjsingh93.github.io/Slot-UI-More/)** — no download or installation needed. Use Chrome or Edge for direct folder saving.
+
+Open [Artwork Studio v5](studio/Slot-Auto-Artwork-Studio-v5.html) in Chrome or Edge, or download its standalone HTML/ZIP from any current device release. **One app handles GB, GBC, GBA, SNES, PS1, N64, Dreamcast and PSP.** Choose the Slot folder (or BASEOS on the H700 devices), let it fetch cartridge/disc artwork, then save all ready labels together. Existing labels, including ones from Cart Studio, are preserved unless replacement is enabled. You can also export a Labels ZIP. No firmware update is needed. See the [studio guide](studio/README.md) for paths, scan adjustments and fallbacks. Artwork downloaded for personal use is not a license to redistribute it.
+
+The site fetches third-party images on demand rather than hosting an artwork library. See [image sources, permissions and privacy](studio/ARTWORK-SOURCES.md); the app's code license does not grant rights to the downloaded game artwork.
+
 ## Adding ports and disc labels
 
 Installed top-level `.sh` launchers under `GAMES/ports/` are imported into the Ports shelf at startup and after returning from a port. Game data stays in each port's own folder. `Slot/Games/PORTS/*.port` contains small launch descriptors, not PC game files.
@@ -64,14 +72,6 @@ GAMES/
 Use launcher names containing ASCII letters/numbers, spaces, dots, underscores, hyphens or parentheses. Use the same spelling and capitalization for the PNG. A square PNG (for example 512 × 512) with the disc face centered works well; Slot clips it to a round CD and draws its hub. Missing labels use the generic disc. Restart Slot/the handheld after copying artwork. The current Artwork Studio covers SNES/PS1/N64/DC/PSP; custom Ports labels are added manually.
 
 **Native port controls:** hold Menu alone for one second to quit. Volume +/− changes the current speaker/headphone level; holding repeats; both together toggle mute. Use the game's own save menu. Emulator save states, double-Menu state browsing and Slot shaders do not apply to native ports. Some third-party launch scripts can override audio/input settings and need adaptation.
-
-## Artwork Studio
-
-**[Open Artwork Studio online](https://nikunjsingh93.github.io/Slot-UI-More/)** — no download or installation needed. Use Chrome or Edge for direct folder saving.
-
-Open [Artwork Studio v5](studio/Slot-Auto-Artwork-Studio-v5.html) in Chrome or Edge, or download its standalone HTML/ZIP from any current device release. **One app handles GB, GBC, GBA, SNES, PS1, N64, Dreamcast and PSP.** Choose the Slot folder (or BASEOS on the H700 devices), let it fetch cartridge/disc artwork, then save all ready labels together. Existing labels, including ones from Cart Studio, are preserved unless replacement is enabled. You can also export a Labels ZIP. No firmware update is needed. See the [studio guide](studio/README.md) for paths, scan adjustments and fallbacks. Artwork downloaded for personal use is not a license to redistribute it.
-
-The site fetches third-party images on demand rather than hosting an artwork library. See [image sources, permissions and privacy](studio/ARTWORK-SOURCES.md); the app's code license does not grant rights to the downloaded game artwork.
 
 ## Controls and hotkeys
 
