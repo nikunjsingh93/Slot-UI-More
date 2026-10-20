@@ -1,0 +1,32 @@
+--- a/core/rec-ARM64/rec_arm64.cpp
++++ b/core/rec-ARM64/rec_arm64.cpp
+@@ -1379,10 +1379,10 @@
+ 		Stp(x23, x24, MemOperand(sp, 32));
+ 		Stp(x25, x26, MemOperand(sp, 48));
+ 		Stp(x27, x28, MemOperand(sp, 64));
+-		Stp(s14, s15, MemOperand(sp, 80));
+-		Stp(vixl::aarch64::s8, s9, MemOperand(sp, 96));
+-		Stp(s10, s11, MemOperand(sp, 112));
+-		Stp(s12, s13, MemOperand(sp, 128));
++		Stp(d14, d15, MemOperand(sp, 80));
++		Stp(vixl::aarch64::d8, d9, MemOperand(sp, 96));
++		Stp(d10, d11, MemOperand(sp, 112));
++		Stp(d12, d13, MemOperand(sp, 128));
+ 		Stp(x29, x30, MemOperand(sp, 144));
+ 
+ 		Sub(x0, x0, sizeof(Sh4Context));
+@@ -1447,10 +1447,10 @@
+ 			Add(sp, sp, 16);
+ 		// Restore registers
+ 		Ldp(x29, x30, MemOperand(sp, 144));
+-		Ldp(s12, s13, MemOperand(sp, 128));
+-		Ldp(s10, s11, MemOperand(sp, 112));
+-		Ldp(vixl::aarch64::s8, s9, MemOperand(sp, 96));
+-		Ldp(s14, s15, MemOperand(sp, 80));
++		Ldp(d12, d13, MemOperand(sp, 128));
++		Ldp(d10, d11, MemOperand(sp, 112));
++		Ldp(vixl::aarch64::d8, d9, MemOperand(sp, 96));
++		Ldp(d14, d15, MemOperand(sp, 80));
+ 		Ldp(x27, x28, MemOperand(sp, 64));
+ 		Ldp(x25, x26, MemOperand(sp, 48));
+ 		Ldp(x23, x24, MemOperand(sp, 32));

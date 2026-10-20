@@ -23,9 +23,12 @@ fn main() {
         let game = args[2].clone();
         std::thread::spawn(move || {
             core.load(Path::new(&game)).unwrap();
+            #[cfg(all(feature = "core-diagnostics", target_arch = "aarch64"))]
+            assert!(core.check_frame_fp_abi(), "Core corrupted callee-saved floating-point registers");
             let began=Instant::now();
             let mut samples=0;
             for frame in 0..frames {
+                core.set_frame_skip(frame % 2 == 0);
                 core.run_frame(ButtonMask(if frame==120 || frame==240 {ButtonMask::START} else {0}));
                 samples+=core.take_audio().len();
             }

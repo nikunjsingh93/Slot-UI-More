@@ -32,6 +32,8 @@ struct Host {
     native_3d: bool,
     skip_video: bool,
     skipped_video: u8,
+    av_enable_queried: bool,
+    skip_av_phase: u8,
     axes: [i16; 4],
     av_override: Option<AvInfo>,
     #[cfg(target_os = "linux")]
@@ -112,6 +114,21 @@ unsafe extern "C" fn set_rumble_state(port: c_uint, effect: c_uint, strength: u1
 
 unsafe extern "C" fn environment(cmd: c_uint, data: *mut c_void) -> bool {
     match cmd {
+        GET_AUDIO_VIDEO_ENABLE => {
+            if data.is_null() {
+                return false;
+            }
+            with_host(|h| {
+                // One hidden VI in three avoids phase-locking to a 30 fps
+                // game's draw/duplicate cadence. Audio always stays enabled.
+                let hidden = h.n64 && h.skip_video && h.skip_av_phase == 0;
+                h.av_enable_queried |= h.n64;
+                // Advance even when pressure clears: alternating pressure must
+                // not repeatedly hide the same half of a 30 fps game's VIs.
+                if h.n64 { h.skip_av_phase = (h.skip_av_phase + 1) % 3; }
+                *(data as *mut c_int) = if hidden { 2 } else { 3 };
+            }).is_some()
+        }
         GET_PREFERRED_HW_RENDER => {
             if data.is_null() {
                 return false;
@@ -450,6 +467,7 @@ unsafe extern "C" fn video_refresh(
         // synchronous GPU readback on every frame. Never skip twice in a row.
         if (h.n64 || h.native_3d)
             && h.skip_video
+            && !h.av_enable_queried
             && !hardware_readback_is_async(h)
             && h.video.len() == width as usize * height as usize * 4
             && h.skipped_video == 0
@@ -769,6 +787,8 @@ impl LibretroCore {
             native_3d: false,
             skip_video: false,
             skipped_video: 0,
+            av_enable_queried: false,
+            skip_av_phase: 0,
             axes: [0; 4],
             av_override: None,
             #[cfg(target_os = "linux")]
@@ -1044,7 +1064,7 @@ impl RetroCore for LibretroCore {
                     geometry.geometry.max_height
                 },
             )?);
-            if dreamcast && std::env::var_os("SLOT_DC_SYNC_READBACK").is_none() {
+            if (dreamcast || self.host.n64) && std::env::var_os("SLOT_DC_SYNC_READBACK").is_none() {
                 self.host
                     .hardware
                     .as_mut()
@@ -1290,6 +1310,8 @@ mod tests {
             native_3d: false,
             skip_video: false,
             skipped_video: 0,
+            av_enable_queried: false,
+            skip_av_phase: 0,
             axes: [0; 4],
             av_override: None,
             #[cfg(target_os = "linux")]
@@ -1532,6 +1554,46 @@ mod tests {
 
         assert!(ok, "withdrawing is a legal call and must be answered true");
         assert!(host.audio_status.is_none());
+    }
+
+    #[test]
+    fn n64_audio_pressure_hides_one_vi_in_three_without_disabling_audio() {
+        let mut host = host_with(HashMap::new(), false);
+        host.n64 = true;
+        host.skip_video = true;
+        let _active = Active::bind(&mut host);
+        let mut mask = 0i32;
+        for expected in [2, 3, 3, 2, 3, 3] {
+            assert!(unsafe { environment(GET_AUDIO_VIDEO_ENABLE, (&mut mask as *mut i32).cast()) });
+            assert_eq!(mask, expected);
+        }
+        unsafe { with_host(|h| h.skip_video = false); }
+        assert!(unsafe { environment(GET_AUDIO_VIDEO_ENABLE, (&mut mask as *mut i32).cast()) });
+        assert_eq!(mask, 3);
+        assert!(!unsafe { environment(GET_AUDIO_VIDEO_ENABLE, ptr::null_mut()) });
+    }
+
+    #[test]
+    fn other_consoles_keep_their_audio_and_video_enable_bits() {
+        let mut host = host_with(HashMap::new(), false);
+        host.skip_video = true;
+        let _active = Active::bind(&mut host);
+        let mut mask = 0i32;
+        assert!(unsafe { environment(GET_AUDIO_VIDEO_ENABLE, (&mut mask as *mut i32).cast()) });
+        assert_eq!(mask, 3);
+    }
+
+    #[test]
+    fn alternating_audio_pressure_cannot_hide_every_fresh_thirty_fps_frame() {
+        let mut host = host_with(HashMap::new(), false);
+        host.n64 = true;
+        let _active = Active::bind(&mut host);
+        for vi in 0..12 {
+            unsafe { with_host(|h| h.skip_video = vi % 2 == 0); }
+            let mut mask = 0i32;
+            assert!(unsafe { environment(GET_AUDIO_VIDEO_ENABLE, (&mut mask as *mut i32).cast()) });
+            assert_eq!(mask, if vi % 6 == 0 { 2 } else { 3 });
+        }
     }
 
     #[test]
@@ -2375,5 +2437,60 @@ mod n64_input_tests {
         ] {
             assert_eq!(n64_buttons(0, axes), expected);
         }
+    }
+}
+#[cfg(all(feature = "diagnostics", target_arch = "aarch64"))]
+core::arch::global_asm!(r#"
+.text
+.global slot_check_core_fp_abi
+.hidden slot_check_core_fp_abi
+.type slot_check_core_fp_abi, %function
+slot_check_core_fp_abi:
+    stp x29, x30, [sp, #-112]!
+    stp x19, x20, [sp, #16]
+    stp d8, d9, [sp, #32]
+    stp d10, d11, [sp, #48]
+    stp d12, d13, [sp, #64]
+    stp d14, d15, [sp, #80]
+    mov x19, x1
+    mov x20, x0
+    fmov d8, #1.0
+    fmov d9, #2.0
+    fmov d10, #3.0
+    fmov d11, #4.0
+    fmov d12, #5.0
+    fmov d13, #6.0
+    fmov d14, #7.0
+    fmov d15, #8.0
+    blr x20
+    stp d8, d9, [x19]
+    stp d10, d11, [x19, #16]
+    stp d12, d13, [x19, #32]
+    stp d14, d15, [x19, #48]
+    ldp d8, d9, [sp, #32]
+    ldp d10, d11, [sp, #48]
+    ldp d12, d13, [sp, #64]
+    ldp d14, d15, [sp, #80]
+    ldp x19, x20, [sp, #16]
+    ldp x29, x30, [sp], #112
+    ret
+.size slot_check_core_fp_abi, .-slot_check_core_fp_abi
+"#);
+
+#[cfg(all(feature = "diagnostics", target_arch = "aarch64"))]
+impl LibretroCore {
+    /// Execute one real frame while checking AAPCS64's d8-d15 preservation.
+    /// The assembly restores the caller even if the core fails the check.
+    pub fn check_frame_fp_abi(&mut self) -> bool {
+        unsafe extern "C" {
+            fn slot_check_core_fp_abi(run: unsafe extern "C" fn(), out: *mut u64);
+        }
+        let mut got = [0u64; 8];
+        let _active = Active::bind(&mut self.host);
+        unsafe { slot_check_core_fp_abi(self.api.run, got.as_mut_ptr()); }
+        let expected = std::array::from_fn::<_, 8, _>(|i| ((i + 1) as f64).to_bits());
+        let passed = got == expected;
+        eprintln!("slot: ARM64 FP ABI: {} values={got:x?}", if passed { "PASS" } else { "FAIL" });
+        passed
     }
 }

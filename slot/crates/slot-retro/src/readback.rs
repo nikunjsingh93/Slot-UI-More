@@ -1,6 +1,6 @@
-//! Bounded, nonblocking GLES3 readback for Dreamcast's offscreen renderer.
-//! Three pixel-pack buffers keep emulation off the GPU completion wait. N64
-//! and PSP continue to use their existing synchronous path.
+//! Bounded, nonblocking GLES3 readback for Dreamcast and N64 offscreen rendering.
+//! Three pixel-pack buffers keep emulation off the GPU completion wait.
+//! PSP retains its existing synchronous path.
 use crate::hardware::Display;
 use std::ffi::{c_void, CStr};
 

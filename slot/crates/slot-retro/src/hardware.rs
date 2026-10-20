@@ -281,7 +281,7 @@ impl Hardware {
     pub fn enable_async_readback(&mut self, display: &Display) {
         self.readback = unsafe { crate::readback::Readback::new(display) };
         eprintln!(
-            "slot: Dreamcast readback: {}",
+            "slot: console readback: {}",
             if self.readback.is_some() {
                 "GLES3 pixel-pack queue (nonblocking, three buffers)"
             } else {

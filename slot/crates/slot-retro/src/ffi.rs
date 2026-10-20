@@ -8,6 +8,7 @@ pub const API_VERSION: c_uint = 1;
 
 pub const SET_HW_RENDER: c_uint = 14;
 pub const SET_SYSTEM_AV_INFO: c_uint = 32;
+pub const GET_AUDIO_VIDEO_ENABLE: c_uint = 47 | 0x10000;
 pub const GET_PREFERRED_HW_RENDER: c_uint = 56;
 pub const GET_INPUT_BITMASKS: c_uint = 51 | 0x10000;
 pub const DEVICE_ANALOG: c_uint = 5;
