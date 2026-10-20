@@ -865,6 +865,11 @@ impl LibretroCore {
 
 impl Drop for LibretroCore {
     fn drop(&mut self) {
+        // The bridged 2021 core has a live SH4 worker. Join it before freeing
+        // the renderer/context; other cores retain their established ordering.
+        if self.host.declared.contains_key("slot_threaded_callbacks") {
+            self.unload();
+        }
         #[cfg(target_os = "linux")]
         if self.host.native_3d && self.host.hardware.is_some() {
             let destroy = self

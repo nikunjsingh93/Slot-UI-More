@@ -31,6 +31,7 @@ pub struct Ring {
     consuming: AtomicBool,
     priming: AtomicBool,
     wait_ms: AtomicU32,
+    recovery_samples: AtomicUsize,
 }
 
 impl Ring {
@@ -56,6 +57,7 @@ impl Ring {
             consuming: AtomicBool::new(true),
             priming: AtomicBool::new(false),
             wait_ms: AtomicU32::new(50),
+            recovery_samples: AtomicUsize::new(capacity_frames),
         }
     }
 
@@ -77,6 +79,7 @@ impl Ring {
         self.consuming.store(true, Ordering::Relaxed);
         self.priming.store(false, Ordering::Relaxed);
         self.wait_ms.store(50, Ordering::Relaxed);
+        self.recovery_samples.store(frames, Ordering::Relaxed);
     }
 
     /// Select a larger queue only for burst-producing cores; reset on system changes.
@@ -90,6 +93,13 @@ impl Ring {
         } else {
             rate as usize * millis.min(500) as usize / 1000
         };
+        // A large burst queue must not also force 160 ms of silence after
+        // every small underrun. Recover Dreamcast after 20 ms of fresh PCM;
+        // other systems retain their existing half-queue recovery threshold.
+        self.recovery_samples.store(
+            if millis == 0 { frames } else { rate as usize * 20 / 1000 * 2 },
+            Ordering::Relaxed,
+        );
         self.wait_ms.store(
             if millis == 0 {
                 50
@@ -197,7 +207,9 @@ impl Ring {
         let mut i = self.lock();
         lay_pending(&mut i);
         let cap = i.buf.len();
-        let holding = self.priming.load(Ordering::Relaxed) && cap > 0 && i.len < cap / 2;
+        let holding = self.priming.load(Ordering::Relaxed)
+            && cap > 0
+            && i.len < self.recovery_samples.load(Ordering::Relaxed);
         self.priming.store(holding, Ordering::Relaxed);
         let n = if holding { 0 } else { out.len().min(i.len) };
         if cap > 0 && !holding {
@@ -337,6 +349,36 @@ mod burst_tests {
     fn dreamcast_queue_survives_a_render_gap_that_starves_the_default_queue() {
         assert!(after_render_gap(0) > 0);
         assert_eq!(after_render_gap(320), 0);
+    }
+
+    #[test]
+    fn dreamcast_recovers_after_twenty_ms_without_waiting_for_half_the_large_queue() {
+        let ring = Ring::new(0);
+        ring.reopen(48_000);
+        ring.configure_buffer_ms(320);
+        ring.fill(&mut vec![0; ring.queued_frames() * 2]);
+        ring.fill(&mut [0; 960]); // underrun starts recovery
+        ring.push(&[1234; 960]); // only ten ms: hold until there is some headroom
+        let mut out = [0; 960];
+        ring.fill(&mut out);
+        assert!(out.iter().all(|&v| v == 0));
+        ring.push(&[1234; 960]); // twenty ms: resume, rather than waiting 160 ms
+        ring.fill(&mut out);
+        assert!(out.iter().all(|&v| v == 1234));
+    }
+
+    #[test]
+    fn normal_cores_keep_their_existing_recovery_threshold() {
+        let ring = Ring::new(0);
+        ring.reopen(48_000);
+        ring.configure_buffer_ms(320);
+        ring.configure_buffer_ms(0);
+        ring.fill(&mut vec![0; ring.queued_frames() * 2]);
+        ring.fill(&mut [0; 960]);
+        ring.push(&[1234; 1920]);
+        let mut out = [0; 960];
+        ring.fill(&mut out);
+        assert!(out.iter().all(|&v| v == 0));
     }
 
     #[test]

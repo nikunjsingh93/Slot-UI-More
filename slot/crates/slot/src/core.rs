@@ -153,8 +153,9 @@ pub fn apply_core_options(
         // Flycast 2021 lacks adaptive skipping and invokes audio/input from its
         // worker thread. Slot's libretro callbacks belong to the run thread.
         let legacy = !core.declared_options().contains_key("reicast_auto_skip_frame");
+        let bridged = core.declared_options().contains_key("slot_threaded_callbacks");
         core.set_option("reicast_internal_resolution", "320x240");
-        core.set_option("reicast_threaded_rendering", if legacy { "disabled" } else { "enabled" });
+        core.set_option("reicast_threaded_rendering", if legacy && !bridged { "disabled" } else { "enabled" });
         // Same low-end renderer settings used by dArkOS's RK3326 RetroRun profile.
         core.set_option("reicast_alpha_sorting", "per-strip (fast, least accurate)");
         core.set_option("reicast_volume_modifier_enable", "disabled");
@@ -174,7 +175,7 @@ pub fn apply_core_options(
         if !legacy {
             core.set_option("reicast_auto_skip_frame", "more");
         }
-        eprintln!("slot: Dreamcast Flycast / native 320x240 / per-strip / frameskip 1 / HLE / renderer={}", if legacy { "2021 synchronous" } else { "threaded + adaptive" });
+        eprintln!("slot: Dreamcast Flycast / native 320x240 / per-strip / frameskip 1 / HLE / renderer={}", if bridged { "2021 threaded + callback bridge" } else if legacy { "2021 synchronous" } else { "threaded + adaptive" });
         return;
     }
     if which == Core::Ppsspp {
