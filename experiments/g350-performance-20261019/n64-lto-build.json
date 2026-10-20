@@ -1,6 +1,6 @@
 {
   "target": "G350",
-  "status": "hardware test candidate; Dreamcast primary base preserved",
+  "status": "owner-tested and accepted G350 N64 baseline",
   "source_repository": "https://github.com/libretro/parallel-n64",
   "source_commit": "6f233392445dcef4188a321d4ba65a776f0e1672",
   "source_archive_sha256": "1a08df967cd1fafb32edbf61e5489e04e9be0bf8b0c622b5df496b0090290748",
@@ -14,5 +14,9 @@
   "settings_changed": false,
   "bindings_changed": false,
   "dreamcast_changed": false,
-  "hardware_speedup_claimed": false
+  "hardware_speedup_claimed": false,
+  "hardware_tested": true,
+  "confirmed_date": "2026-10-19",
+  "accepted_sha256": "169d618a2540eab59070cd57889bd90a19ee853f30d39c6d00952929fad8a7c9",
+  "hardware_comparison_controlled": false
 }

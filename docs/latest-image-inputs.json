@@ -3,11 +3,11 @@
     "version": "1.1.15",
     "base": {
       "path": "/inputs/slot-g350-1.1.15.img.zip",
-      "sha256": "137f37205c9de76987fb25b54fc23c87bda33f1077a2146b4f244547f61feafe"
+      "sha256": "3a9dd990587de48c93d0012c844825edd1740c1430e91adb4ca18aa11a3fcf42"
     },
     "update": {
       "path": "/inputs/slot-g350-1.1.15-system-files.zip",
-      "sha256": "665ccd032858445b9b79aaa5e99402fad5ef60b6444eae5699af7c339281d899"
+      "sha256": "bce165e4c5a726b0b97646f12af32a6d907f6a21e2907a700bad6a74c02d19ba"
     },
     "system_manifest": "/inputs/slot-g350-1.1.15-manifest.json"
   },

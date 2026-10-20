@@ -1,6 +1,6 @@
 # G350 N64 / Dreamcast trial — 2026-10-19
 
-This branch is a hardware-test candidate, **not part of the public 1.1.15 revision 2 image**. The public revision only changes directory creation. Do not infer device FPS from host smoke-test timings.
+These owner-tested G350 performance changes are accepted on main and included in **G350 1.1.15 image revision 3**. Revision 2 contained only the directory cleanup. Do not infer device FPS from host smoke-test timings.
 
 ## Why these changes
 
@@ -78,3 +78,8 @@ make -j4 platform=unix ARCH=aarch64 CPUFLAGS='-mcpu=cortex-a35 -mtune=cortex-a35
 Link-time optimization permits cross-file optimization. The renderer stays Glide64, 320x240, low accuracy/HLE; there is no new clock limit, lower-resolution hack, changed binding or audio-rate adjustment. Only `Slot/System/parallel_n64_libretro.so` is replaced for this hardware test. The accepted Dreamcast SYSTEM and Flycast file are verified unchanged. Keep the original N64 file for rollback. Future complete images must explicitly incorporate the candidate only after owner acceptance.
 
 Compatibility checks: the baseline and candidate each ran two 1800-frame Diddy sessions starting from the same private owner state, with matching audio sample counts, state sizes and nonblack pixel counts, plus successful state round trips, post-load audio and ARM64 register preservation. Wave Race passed two 900-frame sessions. Diddy host times were 3.07/3.01 seconds baseline and 2.60/2.83 candidate; host timing is not a G350 FPS benchmark and no device speed claim follows from it. Race-area hardware testing remains necessary. No private games or states are included in source control.
+
+
+## Current acceptance decision
+
+The owner confirmed Dreamcast flawless and reported the optimized N64 core improved. Latest Diddy logs excluding startup show about 56.4 emulated calls/s versus 45.9 in the preceding run; the play segments differ, so this is supporting evidence rather than a controlled percentage speedup. Wave Race remains close to its PAL 50 Hz target. Heavy-area audio starvation remains. Accept the LTO core without further speculative settings changes. The primary runtime is recorded in `docs/G350-STABLE-BASE.json`; the folder name here preserves the history of its development. The default `scripts/build.sh` now invokes the checksum-verified accepted core recipe. G350 1.1.15 complete image revision 3 now embeds both accepted cores, with matching source archives and checksums. Earlier candidate/testing statements above describe the development stages.

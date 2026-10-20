@@ -4,15 +4,17 @@ Use Git, GitHub CLI and Docker Desktop with Linux containers/ARM64 emulation. Th
 
 ```powershell
 git clone https://github.com/nikunjsingh93/Slot-UI-More.git
-cd slot-ui-g350
+cd Slot-UI-More
 gh auth login
-gh release download g350-v1.1.15 --repo nikunjsingh93/slot-ui-g350 --pattern "slot-g350-1.1.15-system-files.zip" --dir backups
-gh release download g350-v1.1.15 --repo nikunjsingh93/slot-ui-g350 --pattern "slot-1.1.15-core-sources.zip" --dir backups
+gh release download g350-v1.1.15 --repo nikunjsingh93/Slot-UI-More --pattern "slot-g350-1.1.15-system-files.zip" --dir backups
+gh release download g350-v1.1.15 --repo nikunjsingh93/Slot-UI-More --pattern "slot-1.1.15-core-sources.zip" --dir backups
 docker build --platform linux/arm64 -t slot-g350-builder .
 docker run --rm --platform linux/arm64 -v "${PWD}:/repo" slot-g350-builder sh scripts/build.sh
 ```
 
-This portable route preserves the verified earlier core binaries, rebuilds the current frontend/Flycast/PPSSPP from the archived pinned sources, compiles the port supervisor and input-sharing helper, and applies the Ports/splash overlay. It outputs a **rebuilt SYSTEM-only** update under dist/. It writes image files, never a physical disk. The new Ports overlay/build wiring has syntax/recipe checks; the entire multi-hour portable rebuild has not been rerun for this documentation update. The 0.1.14 complete-image release was built and verified separately using the accepted 0.1.10 cores unchanged.
+The default source build now rebuilds the accepted Flycast 2021 core with the ARM64 register repair, threaded PCM/input bridge and save/load fixes, plus the Cortex-A35/LTO ParaLLEl N64 core. Their upstream source archives are downloaded from pinned commits and checked by SHA256 before patching. PPSSPP is rebuilt from its existing archived source; the other base cores remain unchanged. All exact sources, patches and profiles are documented in [the runtime build notes](../experiments/g350-performance-20261019/README.md).
+
+The core-only build helper has been run in the ARM64 builder and reproduced both accepted core SHA256 hashes exactly. The accepted binaries were separately tested by the owner on G350. The complete portable frontend/PPSSPP/overlay pipeline has not been rerun end to end for this source update, so newly rebuilt outputs still need normal validation. It produces a SYSTEM-only update in `dist/`; it never writes a physical disk. Public G350 1.1.15 image revision 3 packages the exact accepted frontend and these reproduced cores. Its filesystems, installed payload and archive hashes are checked; physical first boot of the newly packaged image remains pending. The performance-core-sources ZIP on that release contains both pinned upstream archives and the applied patches.
 
 The new early boot splash also requires the matching KERNEL pair from the 1.1.15 system-files archive. To rebuild that pair, supply the untouched original G350 KERNEL from the upstream base (the current release already includes a patched KERNEL), then run:
 

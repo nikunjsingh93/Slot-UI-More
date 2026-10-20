@@ -1,0 +1,52 @@
+{
+  "target": "G350",
+  "date": "2026-10-19",
+  "accepted_n64_sha256": "169d618a2540eab59070cd57889bd90a19ee853f30d39c6d00952929fad8a7c9",
+  "dreamcast_sha256": "a796659516812f23c6fb8ad575f927d66517f1f0c1624f43dc6f6f0f9eb541f4",
+  "comparison": {
+    "before": {
+      "Diddy Kong Racing (U) (M2) (V1.1) [!]": {
+        "game": "Diddy Kong Racing (U) (M2) (V1.1) [!]",
+        "periods_after_startup": 6,
+        "median_core_ms": 20.4,
+        "mean_emulated_frames_per_second": 45.93,
+        "starvation_fraction": 0.2382
+      },
+      "Wave Race 64 (E) (M2) [!]": {
+        "game": "Wave Race 64 (E) (M2) [!]",
+        "periods_after_startup": 9,
+        "median_core_ms": 16.2,
+        "mean_emulated_frames_per_second": 48.8,
+        "starvation_fraction": 0.0293
+      }
+    },
+    "after": {
+      "Diddy Kong Racing (U) (M2) (V1.1) [!]": {
+        "game": "Diddy Kong Racing (U) (M2) (V1.1) [!]",
+        "periods_after_startup": 17,
+        "median_core_ms": 15.4,
+        "mean_emulated_frames_per_second": 56.41,
+        "starvation_fraction": 0.0634
+      },
+      "Wave Race 64 (E) (M2) [!]": {
+        "game": "Wave Race 64 (E) (M2) [!]",
+        "periods_after_startup": 5,
+        "median_core_ms": 14.5,
+        "mean_emulated_frames_per_second": 49.12,
+        "starvation_fraction": 0.0209
+      }
+    }
+  },
+  "method": "Each first reporting interval excluded for startup; remaining report intervals approximately five seconds. Emulated core calls are not presented display FPS.",
+  "limitations": "Different user play segments and durations; indicative improvement, not a controlled same-scene speedup measurement. Audio starvation still occurs in heavy areas.",
+  "decision": "Accept the user-tested LTO core; preserve Dreamcast unchanged; do not add speculative tuning.",
+  "preserved": [
+    "games",
+    "labels",
+    "save formats",
+    "controls",
+    "long-press Menu exit",
+    "kernel",
+    "Dreamcast binary"
+  ]
+}
