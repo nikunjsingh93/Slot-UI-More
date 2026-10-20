@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-20",
+  "models": [
+    "rgsp",
+    "rg35xxsp"
+  ],
+  "status": "test update; no card connected; physical validation pending",
+  "passed": [
+    "ARM64 Bullseye gcc -O2 -Wall -Wextra -Werror build",
+    "both SPs: digital and left-stick directions, diagonal and neutral output",
+    "held-direction mode switch clears the previous input class",
+    "Menu+Select suppresses Select and does not invoke Menu-alone quit",
+    "key repeat does not repeatedly toggle modes",
+    "per-launcher mode persistence and isolation",
+    "normal Select passthrough",
+    "one-second Menu-alone exit and process-group cleanup",
+    "existing Menu/normal-exit regression tests",
+    "existing volume/headphone/mute/state-preservation regression tests",
+    "actual kernel private namespace: event/js routing, duplicate hiding, original FD preserved, host paths unchanged after child exit",
+    "ZIP CRC, per-file checksums and two-file-only System payload"
+  ],
+  "not_verified": [
+    "physical kernel uinput support and module/device creation",
+    "physical kernel mount-namespace support",
+    "actual SDL/joydev controller enumeration on either SP",
+    "native games and analog-mode mappings in keyboard-style ports"
+  ],
+  "not_included": [
+    "GTA SA special fixes",
+    "mouse/right-stick modes",
+    "stable full-image replacement",
+    "G350 runtime changes"
+  ]
+}

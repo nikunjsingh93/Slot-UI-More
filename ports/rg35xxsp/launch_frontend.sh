@@ -36,7 +36,7 @@ while :; do
     if [ "$result" -ne 85 ] || [ ! -s "$SD/Config/port.request" ]; then exit "$result"; fi
     port_id=$(cat "$SD/Config/port.request")
     rm -f "$SD/Config/port.request"
-    SLOT_ALSA_DEVICE="${SLOT_ALSA_DEVICE:-plughw:0,0}" LD_LIBRARY_PATH="$PORT_LIBS" "$SYS/slot-portwatch" /bin/sh "$SYS/slot-h700-port-runner.sh" "$port_id" "$SD" >>"$SD/Config/ports.log" 2>&1 || log 'Port exited with an error'
+    SLOT_PORT_ID="$port_id" SLOT_ALSA_DEVICE="${SLOT_ALSA_DEVICE:-plughw:0,0}" LD_LIBRARY_PATH="$PORT_LIBS" "$SYS/slot-portwatch" /bin/sh "$SYS/slot-h700-port-runner.sh" "$port_id" "$SD" >>"$SD/Config/ports.log" 2>&1 || log 'Port exited with an error'
     refresh_ports || true
     sleep 0.2
 done

@@ -73,6 +73,8 @@ GAMES/
 
 Use launcher names containing ASCII letters/numbers, spaces, dots, underscores, hyphens or parentheses. Use the same spelling and capitalization for the PNG. A square PNG (for example 512 × 512) with the disc face centered works well; Slot clips it to a round CD and draws its hub. Missing labels use the generic disc. Restart Slot/the handheld after copying artwork. The current Artwork Studio covers SNES/PS1/N64/DC/PSP; custom Ports labels are added manually.
 
+**SP native-input test update (not yet in stable full images):** on RG SP/RG35XX SP, Menu + Select switches native games between D-pad and left-stick input and remembers each game's choice. Hardware validation is pending; the manager stays digital and GTA SA-specific fixes are deferred. See [setup, rollback and limitations](ports/h700/README.md#controls-and-limits).
+
 **Native port controls:** hold Menu alone for one second to quit. Volume +/− changes the current speaker/headphone level; holding repeats; both together toggle mute. Use the game's own save menu. Emulator save states, double-Menu state browsing and Slot shaders do not apply to native ports. Some third-party launch scripts can override audio/input settings and need adaptation.
 
 ## Controls and hotkeys
