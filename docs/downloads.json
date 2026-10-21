@@ -80,63 +80,98 @@
     "tag": "g350-v1.1.15"
   },
   "slot-g350-1.1.16.img.zip": {
-    "sha256": "11ae276fa4111c4a30c570d731cfb7307e5559df475e4b4472337f757c7010d6",
     "size": 1150952395,
+    "sha256": "11ae276fa4111c4a30c570d731cfb7307e5559df475e4b4472337f757c7010d6",
     "tag": "g350-v1.1.16"
   },
   "slot-g350-1.1.16-manifest.json": {
-    "sha256": "3a77ed34139ba971a3b267394daef686f375e01c68f0dd1a4ea0be3467360054",
     "size": 3104,
+    "sha256": "3a77ed34139ba971a3b267394daef686f375e01c68f0dd1a4ea0be3467360054",
     "tag": "g350-v1.1.16"
   },
   "slot-g350-1.1.16-START-HERE.txt": {
-    "sha256": "dc19528324b27062f7cdb52037713c677c6fffd7893c44f0d98dbb398a5c08c4",
     "size": 1881,
+    "sha256": "dc19528324b27062f7cdb52037713c677c6fffd7893c44f0d98dbb398a5c08c4",
     "tag": "g350-v1.1.16"
   },
   "slot-g350-1.1.16-VALIDATION.txt": {
-    "sha256": "bd22f452846a2e7d28339e0aa4ec6c535abc523c285f874ba4da82f27c7348c3",
     "size": 398,
+    "sha256": "bd22f452846a2e7d28339e0aa4ec6c535abc523c285f874ba4da82f27c7348c3",
     "tag": "g350-v1.1.16"
   },
   "slot-rgsp-1.1.16.img.zip": {
-    "sha256": "8877065a186f79b9cfcf3bdf62bf7eb95c1e3c917f6453f57308dcf26730c27f",
     "size": 291511698,
+    "sha256": "8877065a186f79b9cfcf3bdf62bf7eb95c1e3c917f6453f57308dcf26730c27f",
     "tag": "rgsp-v1.1.16"
   },
   "slot-rgsp-1.1.16-manifest.json": {
-    "sha256": "707753d1ae5895e41ee9b5470e5e0ef315d476d9ec0e94b1dbd104000f49925f",
     "size": 6423,
+    "sha256": "707753d1ae5895e41ee9b5470e5e0ef315d476d9ec0e94b1dbd104000f49925f",
     "tag": "rgsp-v1.1.16"
   },
   "slot-rgsp-1.1.16-START-HERE.txt": {
-    "sha256": "b6bbdcd00b53be9a8e5290b9a3389beeeaf3007b0d58dd8113ae1a03b5372d29",
     "size": 2755,
+    "sha256": "b6bbdcd00b53be9a8e5290b9a3389beeeaf3007b0d58dd8113ae1a03b5372d29",
     "tag": "rgsp-v1.1.16"
   },
   "slot-rgsp-1.1.16-VALIDATION.txt": {
-    "sha256": "b1ce70aabab4e4e44d6954c0a588b21818be7a105b7fe46afe4c23a27c416c1b",
     "size": 499,
+    "sha256": "b1ce70aabab4e4e44d6954c0a588b21818be7a105b7fe46afe4c23a27c416c1b",
     "tag": "rgsp-v1.1.16"
   },
   "slot-rg35xxsp-1.1.16.img.zip": {
-    "sha256": "1acd4d2a91352f5efa67d21e5e42fcd381cfdf8552db98b58733220fdcdfc37f",
     "size": 264984874,
+    "sha256": "1acd4d2a91352f5efa67d21e5e42fcd381cfdf8552db98b58733220fdcdfc37f",
     "tag": "rg35xxsp-v1.1.16"
   },
   "slot-rg35xxsp-1.1.16-manifest.json": {
-    "sha256": "4f586e8519bd56670fee5a645dabe6188c6aa877a220a48779dca0078fbc5d84",
     "size": 6438,
+    "sha256": "4f586e8519bd56670fee5a645dabe6188c6aa877a220a48779dca0078fbc5d84",
     "tag": "rg35xxsp-v1.1.16"
   },
   "slot-rg35xxsp-1.1.16-START-HERE.txt": {
-    "sha256": "9e9a9c96e833aa4425bd85dd7fef0ed6defc871bb8040cb6348687f082734c2d",
     "size": 2767,
+    "sha256": "9e9a9c96e833aa4425bd85dd7fef0ed6defc871bb8040cb6348687f082734c2d",
     "tag": "rg35xxsp-v1.1.16"
   },
   "slot-rg35xxsp-1.1.16-VALIDATION.txt": {
-    "sha256": "0bde0e87641a7446328da2b87cbe22612f2c6d5ea716018b95868b634e6a96e1",
     "size": 503,
+    "sha256": "0bde0e87641a7446328da2b87cbe22612f2c6d5ea716018b95868b634e6a96e1",
+    "tag": "rg35xxsp-v1.1.16"
+  },
+  "slot-1.1.16-sources.zip": {
+    "size": 10600214,
+    "sha256": "a37d7976aa9ed08629574da001b1510d6c58f704a1b636f76b6573204bfb2416",
+    "tag": "g350-v1.1.16"
+  },
+  "slot-1.1.16-compatibility-sources.zip": {
+    "size": 81000656,
+    "sha256": "f5f4eb30fae6fe38f7099b24d53baee20f91b5bfd400a754c33993a3c2309a7a",
+    "tag": "g350-v1.1.16"
+  },
+  "slot-g350-1.1.16-SHA256SUMS.txt": {
+    "size": 578,
+    "sha256": "d0ba400f809a8555c84671d3468e7ba0e7a3c81e066d50ee7d1638b2e864abce",
+    "tag": "g350-v1.1.16"
+  },
+  "slot-rgsp-1.1.16-sources.zip": {
+    "size": 10600214,
+    "sha256": "a37d7976aa9ed08629574da001b1510d6c58f704a1b636f76b6573204bfb2416",
+    "tag": "rgsp-v1.1.16"
+  },
+  "slot-rgsp-1.1.16-SHA256SUMS.txt": {
+    "size": 479,
+    "sha256": "5fa9aed30819f9450dc4154f142327d2a003437e6408fa842d31c236eebf8311",
+    "tag": "rgsp-v1.1.16"
+  },
+  "slot-rg35xxsp-1.1.16-sources.zip": {
+    "size": 10600214,
+    "sha256": "a37d7976aa9ed08629574da001b1510d6c58f704a1b636f76b6573204bfb2416",
+    "tag": "rg35xxsp-v1.1.16"
+  },
+  "slot-rg35xxsp-1.1.16-SHA256SUMS.txt": {
+    "size": 499,
+    "sha256": "598b14729d6cbe07e9974c2481605e7baaba09d0c79835a752b72f8595e5f342",
     "tag": "rg35xxsp-v1.1.16"
   }
 }
