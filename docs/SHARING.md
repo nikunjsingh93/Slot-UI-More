@@ -4,6 +4,13 @@ This is an independent GPL-3.0 Slot adaptation. Preserve the root and upstream l
 
 ## What this release contains
 
+Release 1.1.16 provides complete model-specific images and current full
+frontend/build sources. The unchanged 1.1.15 core source archives stay available.
+The added H700 native N64 source archives and exact Debian source packages for
+the SuperTuxKart compatibility libraries are supplied with 1.1.16, together
+with component notices. Private NFS/GTA game-linked engines and commercial game
+data/artwork remain excluded. Historical notes below describe earlier packages.
+
 The 0.1.13 sharing ZIP contains SYSTEM, SYSTEM.md5, KERNEL and KERNEL.md5 only. It does not include the owner's game folders, disc scans, GTA APK/OBBs/libraries, generated NFS guest source, linked NFS executable, profiles or saves. The personal artwork update and historical private runtime bundle are not uploaded. PortMaster itself is downloaded from its upstream release; this repository contains integration code and original generic labels/splash.
 
 ## Source obligations

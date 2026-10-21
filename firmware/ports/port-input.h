@@ -8,7 +8,7 @@
 #include <limits.h>
 typedef struct {
  int active, fd, source, mode, menu, select, chord, suppress_select;
- int x,y, test, menu_code, gta, nfs, canonical, r3_down;
+ int x,y, test, menu_code, gta, nfs, n64, canonical, r3_down;
  char setting[PATH_MAX], event[PATH_MAX], js[PATH_MAX];
 } port_input;
 static int input_save(port_input *p) {
@@ -77,7 +77,14 @@ static int input_init(port_input *p,const char *root,const char *id,struct pollf
  if(!root)return -1;
  p->gta=id&&!strcmp(id,"script:Grand Theft Auto San Andreas.sh");
  p->nfs=id&&!strcmp(id,"script:Need for Speed Underground 2.sh");
- p->canonical=p->gta||p->nfs;p->mode=p->canonical;
+ p->n64=id&&!strcmp(id,"script:Slot Nintendo 64.sh");
+ /* SDL's H700 fixed-layout driver ignores newly added ABS_X/Y on an
+  * ANBERNIC-named pad. Use the existing normalized pad for these SDL games. */
+ int sdl_port=id&&(!strcmp(id,"script:Grand Theft Auto 3.sh")||
+     !strcmp(id,"script:Grand Theft Auto Vice City.sh")||
+     !strcmp(id,"script:RVGL.sh")||!strcmp(id,"script:SuperTuxKart.sh")||
+     !strcmp(id,"script:Need for Speed Most Wanted.sh"));
+ p->canonical=p->gta||p->nfs||p->n64||sdl_port;p->mode=p->canonical;
  int enabled=input_paths(p,root,id);if(enabled<=0)return enabled;
  if(test) {
   p->test=1;p->source=0;p->fd=open(test,O_WRONLY|O_CREAT|O_TRUNC|O_CLOEXEC,0600);
@@ -157,6 +164,7 @@ static void input_event(port_input *p,int source,const struct input_event *e) {
  if(e->type==EV_KEY&&e->code==354)return; /* Menu echo, not a game key. */
  if(e->type==EV_KEY&&e->code==p->menu_code) {
   p->menu=e->value!=0;
+  if(p->n64){input_emit(p,EV_KEY,708,p->menu);input_emit(p,EV_SYN,SYN_REPORT,0);}
   if(!p->menu&&!p->select&&!p->r3_down)p->chord=0;
   return;
  }
@@ -173,6 +181,7 @@ static void input_event(port_input *p,int source,const struct input_event *e) {
   if(e->value==1&&p->menu){p->r3_down=p->chord=1;input_emit(p,EV_KEY,707,1);input_emit(p,EV_SYN,SYN_REPORT,0);return;}
   if(p->r3_down){if(e->value==0){p->r3_down=0;input_emit(p,EV_KEY,707,0);input_emit(p,EV_SYN,SYN_REPORT,0);if(!p->menu&&!p->select)p->chord=0;}return;}
  }
+ if(p->n64&&p->menu&&e->type==EV_KEY&&(e->code==306||e->code==307)&&e->value==1)p->chord=1;
  if(source!=p->source)return;
  if(e->type==EV_SYN&&e->code==SYN_DROPPED){stopped=1;fprintf(stderr,"slot ports: input stream overrun; returning to Slot safely\n");return;}
  if(e->type==EV_ABS&&(e->code==ABS_HAT0X||e->code==ABS_HAT0Y)) {

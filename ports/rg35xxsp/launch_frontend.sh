@@ -3,6 +3,8 @@ SD="${SLOT_ROOT:-/mnt/sdcard}"
 SYS="$SD/System"
 RUN="${AGS_RUN:-/run}"
 export SLOT_ROOT="$SD" SLOT_DEVICE=rg35xxsp
+export SLOT_N64_BACKEND=native-rice
+[ ! -f "$SD/Config/n64-libretro" ] || export SLOT_N64_BACKEND=libretro
 # Request the highest stock clock. No overclock or voltage changes.
 for policy in /sys/devices/system/cpu/cpufreq/policy*; do
     [ -w "$policy/scaling_governor" ] && printf 'performance\n' > "$policy/scaling_governor"
@@ -21,7 +23,7 @@ if [ -z "$pid" ] || [ ! -d "/proc/$pid" ]; then
 fi
 echo "|/bin/sh $SYS/coresave.sh %p %s %e %t" > /proc/sys/kernel/core_pattern 2>/dev/null
 [ -f "$SD/slot.log" ] && mv -f "$SD/slot.log" "$SD/slot.log.1"
-log "RG35XX SP 0.2.3: fbdev/Mali frontend"
+log "RG35XX SP 1.1.16: fbdev/Mali frontend"
 export SLOT_PORTS_DIR="$SD/ports" SLOT_MENU_CODE=312 SLOT_HP_PATH=/sys/kernel/debug/gpio
 PY="$SYS/PortMasterH700/bin/python3"
 mkdir -p "$SD/ports" "$SD/Games/PORTS" "$SD/Labels/PORTS" "$SD/Config"
@@ -36,7 +38,14 @@ while :; do
     if [ "$result" -ne 85 ] || [ ! -s "$SD/Config/port.request" ]; then exit "$result"; fi
     port_id=$(cat "$SD/Config/port.request")
     rm -f "$SD/Config/port.request"
+    log "Starting native request: $port_id"
     SLOT_PORT_ID="$port_id" SLOT_ALSA_DEVICE="${SLOT_ALSA_DEVICE:-plughw:0,0}" LD_LIBRARY_PATH="$PORT_LIBS" "$SYS/slot-portwatch" /bin/sh "$SYS/slot-h700-port-runner.sh" "$port_id" "$SD" >>"$SD/Config/ports.log" 2>&1 || log 'Port exited with an error'
-    refresh_ports || true
+    log "Native process returned: $port_id"
+    # N64 cannot install or change native ports. Rescanning the PortMaster
+    # library here adds seconds to every Menu-hold return from a race.
+    case "$port_id" in
+        'script:Slot Nintendo 64.sh') ;;
+        *) refresh_ports || true ;;
+    esac
     sleep 0.2
 done

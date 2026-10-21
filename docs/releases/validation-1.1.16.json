@@ -1,0 +1,35 @@
+{
+  "version": "1.1.16",
+  "tests": {
+    "h700_ui_panel_selection": 28,
+    "h700_screen_menu": 22,
+    "h700_production_audio": 2,
+    "g350_production_tests": 11
+  },
+  "physical_first_boot_tested": false,
+  "rg35xxsp_transferred_changes_hardware_tested": false,
+  "owner_tested_predecessor_runtime": [
+    "G350 performance baseline",
+    "RG SP N64/DC/PSP and working ports"
+  ],
+  "artifacts": {
+    "g350": {
+      "image_sha256": "ce434a70486b945f1d4572582728b415518f09513550a7a27a3dd733f9a5cf15",
+      "zip_sha256": "11ae276fa4111c4a30c570d731cfb7307e5559df475e4b4472337f757c7010d6",
+      "zip_bytes": 1150952395,
+      "frontend_sha256": "1b70effbf3366b53b6ad615181e5b9cf3753b264ff78010023ca286b2bd8db07"
+    },
+    "rgsp": {
+      "image_sha256": "52bce5787f78bd1c472c475c94eb8d2c40a39db91172ea5733bef40dfaee43f4",
+      "zip_sha256": "8877065a186f79b9cfcf3bdf62bf7eb95c1e3c917f6453f57308dcf26730c27f",
+      "zip_bytes": 291511698,
+      "frontend_sha256": "724dcca534460c7835b806b1baf7cbec9e7ef4e83df01ad685b3d39fdc6c280f"
+    },
+    "rg35xxsp": {
+      "image_sha256": "70db3f61aa1939fc27020723cf3d89eb5db2783603d03d3f8208720ccb7f3fcd",
+      "zip_sha256": "1acd4d2a91352f5efa67d21e5e42fcd381cfdf8552db98b58733220fdcdfc37f",
+      "zip_bytes": 264984874,
+      "frontend_sha256": "724dcca534460c7835b806b1baf7cbec9e7ef4e83df01ad685b3d39fdc6c280f"
+    }
+  }
+}

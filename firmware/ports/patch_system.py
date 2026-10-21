@@ -20,7 +20,7 @@ shutil.copyfile(input_sharing,root/'usr/lib/slot-no-grab.so')
 # Replace only its directory-creation list; never remove existing user data.
 shutil.copyfile(here/'slot-directories.conf',root/'usr/lib/tmpfiles.d/amberelec-dirs.conf')
 (root/'usr/lib/tmpfiles.d/amberelec-dirs.conf').chmod(0o644)
-(root/'usr/share/slot/VERSION').write_text('0.1.14-complete-ports\n')
+(root/'usr/share/slot/VERSION').write_text('1.1.16\n')
 logo=here/'visuals/slot-splash.png'
 sequence=root/'usr/share/p4_splash'
 assert sequence.resolve().is_relative_to(root.resolve())

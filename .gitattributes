@@ -9,6 +9,7 @@
 *.woff2 binary
 *.patch -whitespace
 slot/licenses/** -whitespace
+ports/h700/frontend/licenses/** -whitespace
 LICENSE -whitespace
 patches/*-GPL-*.txt -whitespace
 patches/*-MPL-*.txt -whitespace

@@ -1,0 +1,72 @@
+{
+  "target": "Anbernic RG SP",
+  "date": "2026-10-21",
+  "hardware_tested": "GTA III, Vice City, RVGL and SuperTuxKart confirmed working; Most Wanted removed after unsuccessful final trial.",
+  "gta_sa_graphics": "owner-confirmed direct EGL / SDL_BLITTER_DISABLED=1; preserved",
+  "gta_sa_audio": "GTA-only ALSOFT_CONF pin to Slot controlled PCM; tested with real OpenAL/ALSA null/file sink, physical test pending",
+  "ports": {
+    "gta3": {
+      "package_url": "https://github.com/PortsMaster-MV/PortMaster-MV-New/releases/download/2025-10-07_1242/gta3.zip",
+      "package_md5": "1e1d1cd75f09d5de029ed849f6a85883",
+      "package_sha256": "bac3659249adf50616b262c879ae683c72a9fd1b006205f4bfefe0603aad0f5a",
+      "source": "https://github.com/nosro1/re3",
+      "commit": "ead2747eadbbdbf0e134eea6679364153dd6c4b8",
+      "librw_commit": "81c9426cdde73717b04ae4dfc0f6c255f74a3a8a",
+      "build_flags": "LIBRW_PLATFORM=GL3 LIBRW_GL3_GFXLIB=SDL2 LIBRW_FORCE_GLES=ON RE3/REVC_SNES_PAD=ON Release -O3 -mcpu=cortex-a53",
+      "hardware_status": "Owner confirmed flawless on RG SP"
+    },
+    "gtavc": {
+      "package_url": "https://github.com/PortsMaster-MV/PortMaster-MV-New/releases/download/2025-10-07_1242/gtavc.zip",
+      "package_md5": "5d2dbb91019a8eb35cf9a35df937f56c",
+      "package_sha256": "1aeeffbabac1bbe4dab9315c7dc56fdd666159c9f42ec7775576ec8f478ec63d",
+      "source": "https://github.com/nosro1/re3",
+      "commit": "b9f0b23466ab4db76615cc2c761df9013a838184",
+      "librw_commit": "81c9426cdde73717b04ae4dfc0f6c255f74a3a8a",
+      "build_flags": "LIBRW_PLATFORM=GL3 LIBRW_GL3_GFXLIB=SDL2 LIBRW_FORCE_GLES=ON RE3/REVC_SNES_PAD=ON Release -O3 -mcpu=cortex-a53",
+      "hardware_status": "Owner confirmed flawless on RG SP"
+    },
+    "rvgl": {
+      "package_url": "https://github.com/PortsMaster/PortMaster-New/releases/download/2025-10-04_1030/rvgl.zip",
+      "package_md5": "5c16ff8d65b600619ad7d76b5416c953",
+      "package_sha256": "3a6d9721fa93dc875405877eea9da2799725b8e3bc8c9a4f0c16dfe17d485fa0",
+      "hardware_status": "Owner confirmed flawless on RG SP"
+    },
+    "supertuxkart": {
+      "package_url": "https://github.com/PortsMaster/PortMaster-New/releases/download/2025-10-04_1030/supertuxkart.zip",
+      "package_md5": "d6c5feb5d651cfa229d725c8ad849b9a",
+      "package_sha256": "e5acd639471e939bb0a80157e6237b397f054b235d3989c635ba1af290f3f04b",
+      "hardware_status": "Owner confirmed working after dependency fix"
+    },
+    "nfsmw": {
+      "source": "https://github.com/Pixelforge-Ports/nfsmw-arm-linux",
+      "release": "1.1.2",
+      "package_sha256": "7b10fe8c9ca214e15d716671f0356755bd701459eff1e65afe4b83631c422d48",
+      "game_version": "Android 1.3.128; user assets exact upstream SHA256",
+      "runtime": "Private ARM32 Bullseye C/C++/ALSA plus H700 stock SDL/Mali from upstream ac-gc-h700; no system library replacements",
+      "alsa_package": "https://deb.debian.org/debian/pool/main/a/alsa-lib/libasound2_1.2.4-1.1_armhf.deb",
+      "alsa_package_sha256": "2b18bdd309f0f127c2ab4829028c7ad89ac27bb3bf42cfc118a5701225131528",
+      "hardware_status": "Removed at owner request after final trial. Controller registration progressed to guest relocation, but libapp fstat remained unresolved. No further test planned."
+    }
+  },
+  "test_results": [
+    "GTA III and Vice City reached GS_FRONTEND under Mesa GLES 3.2, 720x480 Xvfb, original PC assets; terminated by 12s test timeout",
+    "RVGL reached startup/menu and remained alive until 8s test timeout",
+    "SuperTuxKart help and 10s startup smoke test passed; only target hardware can validate gameplay",
+    "Five new SDL controller profiles plus previous GTA SA, NFS U2, N64 and generic SP controls passed",
+    "Volume tap/hold/mute/headphone tests passed",
+    "Most Wanted original APK and OBB exact hashes matched; five libraries verified and audio assets extracted",
+    "Most Wanted private ARM32 SDL/EGL/GLES libraries loaded under qemu-arm; actual GPU/window unavailable in host",
+    "All five game launchers and common GL helper pass shell syntax"
+  ],
+  "limitations": [
+    "New-game handheld behavior and GTA SA volume fix require owner testing",
+    "Most Wanted remains upstream alpha with car-selection timing limitation",
+    "No public images/releases replaced; no game files or extracted Android libraries uploaded"
+  ],
+  "artwork": {
+    "GTA III": "https://www.mobygames.com/game/5189/grand-theft-auto-iii/cover/group-97278/cover-265545/",
+    "Vice City": "https://psxdatacenter.com/psx2/images2/hires/SLUS-20552/SLUS-20552-D-GH.html",
+    "RVGL, SuperTuxKart, Most Wanted": "bundled package covers/logos; local card only"
+  },
+  "launch_fix_record": "PORT-LAUNCH-FIX-20261021.json"
+}

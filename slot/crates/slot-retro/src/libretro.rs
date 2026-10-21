@@ -1166,6 +1166,17 @@ impl RetroCore for LibretroCore {
     }
 
     fn unserialize(&mut self, data: &[u8]) -> Result<(), CoreError> {
+        // ParaLLEl versions have different fixed native state layouts. Older
+        // cores accept the wrong size and then corrupt the interrupt queue.
+        if self.host.n64 {
+            let _a = Active::bind(&mut self.host);
+            let expected = unsafe { (self.api.serialize_size)() };
+            if data.len() != expected {
+                return Err(CoreError::State(format!(
+                    "N64 state belongs to a different core build ({} bytes; expected {expected})", data.len()
+                )));
+            }
+        }
         let data = if self.host.ps1 && data.starts_with(b"SLPS1DSC") {
             if data.len() < 12 {
                 return Err(CoreError::State("truncated PS1 state".into()));

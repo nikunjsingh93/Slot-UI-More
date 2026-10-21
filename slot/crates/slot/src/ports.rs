@@ -15,6 +15,13 @@ pub fn port_id(text: &str) -> io::Result<&str> {
     }
 }
 
+fn runner(device: &str) -> &'static str {
+    match device {
+        "rgsp" | "rg35xxsp" => "System/slot-h700-port-runner.sh",
+        _ => "System/slot-port-runner.sh",
+    }
+}
+
 pub fn request(root: &Path, descriptor: &Path) -> io::Result<()> {
     if !matches!(std::env::var("SLOT_DEVICE").as_deref(), Ok("g350" | "rgsp" | "rg35xxsp")) {
         return Err(io::Error::new(io::ErrorKind::Unsupported, "ports require a supported device"));
@@ -24,7 +31,8 @@ pub fn request(root: &Path, descriptor: &Path) -> io::Result<()> {
     }
     let text = std::fs::read_to_string(descriptor)?;
     let id = port_id(&text)?;
-    if !root.join("System/slot-port-runner.sh").is_file() {
+    let device = std::env::var("SLOT_DEVICE").unwrap_or_default();
+    if !root.join(runner(&device)).is_file() {
         return Err(io::Error::new(io::ErrorKind::NotFound, "port runtime missing"));
     }
     slot_store::atomic_write(&root.join("Config/port.request"), id.as_bytes())
@@ -33,6 +41,13 @@ pub fn request(root: &Path, descriptor: &Path) -> io::Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn runner_matches_the_installed_device_runtime() {
+        assert_eq!(runner("g350"), "System/slot-port-runner.sh");
+        for device in ["rgsp", "rg35xxsp"] {
+            assert_eq!(runner(device), "System/slot-h700-port-runner.sh");
+        }
+    }
     #[test]
     fn descriptors_are_ids_not_commands_or_paths() {
         assert_eq!(port_id("nfsu2\n").unwrap(), "nfsu2");

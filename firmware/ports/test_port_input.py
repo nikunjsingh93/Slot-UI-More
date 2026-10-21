@@ -108,3 +108,32 @@ with tempfile.TemporaryDirectory() as tmp:
   wait(lambda:(1,546,1) in events())
  finally:close(p,w)
  print('PASS NFS: analog default, digital D-pad buttons, Menu+X keyboard toggle and preserved Menu quit handling')
+
+ p,w,send,events=start('Slot Nintendo 64.sh')
+ try:
+  send(3,16,1);send(0,0,0);wait(lambda:(3,0,32767) in events())
+  send(1,312,1);send(1,307,1);send(0,0,0)
+  wait(lambda:(1,708,1) in events() and (1,307,1) in events())
+  time.sleep(1.1)
+  assert p.poll() is None,'N64 save chord triggered hold-to-quit'
+  send(1,307,0);send(1,312,0);send(0,0,0)
+  wait(lambda:(1,708,0) in events())
+  send(1,312,1)
+  p.wait(timeout=3)
+ finally:close(p,w)
+ print('PASS native N64: analog default, Menu chord reaches emulator and suppresses hold quit; Menu alone exits')
+
+ for title in ['Grand Theft Auto 3.sh','Grand Theft Auto Vice City.sh','RVGL.sh','SuperTuxKart.sh','Need for Speed Most Wanted.sh']:
+  p,w,send,events=start(title)
+  try:
+   send(3,16,-1);send(3,17,1);send(1,304,1);send(1,311,1);send(0,0,0)
+   wait(lambda:(3,0,-32767) in events() and (3,1,32767) in events())
+   assert (1,305,1) in events() and (1,705,1) in events()
+   assert (3,16,-1) not in events()
+   send(1,312,1);send(1,310,1)
+   setting=root/'Config/port-input'/(title+'.mode')
+   wait(lambda:setting.exists() and setting.read_text()=='0\n')
+   send(1,310,0);send(1,312,0);send(0,0,0)
+   time.sleep(.1);assert p.poll() is None
+  finally:close(p,w)
+ print('PASS five new SDL ports: normalized buttons, left-stick default and per-game Menu+Select toggle')

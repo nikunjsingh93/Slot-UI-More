@@ -1,5 +1,12 @@
 # Building the G350 source
 
+For release 1.1.16 the frontend reports 1.1.16 and includes the N64 state-size
+guard. The accepted emulator/core pins and 1.1.15 build-input downloads below
+are retained. `scripts/package.py` produces developer SYSTEM files, not a full
+flash image; `scripts/build_latest_images.py` composes the complete model image.
+Use a separate Cargo target directory from the common H700 frontend. Current
+release hashes are recorded under `docs/releases/`.
+
 Use Git, GitHub CLI and Docker Desktop with Linux containers/ARM64 emulation. The repository and current releases are public. The build uses ARM64 Debian Bullseye so its executables load on the firmware's older glibc.
 
 ```powershell

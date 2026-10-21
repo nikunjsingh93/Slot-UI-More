@@ -4,11 +4,13 @@ A controller-friendly frontend with cartridge/disc shelves, save-state previews,
 
 **Based on [Slot by Brandon Kowalski](https://github.com/BrandonKowalski/slot).** Credit for the original frontend and its visual foundation belongs to the upstream project and its contributors, including Markus for the skeuomorphic artwork credited upstream. See [credits and attribution](CREDITS.md).
 
-**Release 1.1.15 uses the same version across G350, RG SP and RG35XX SP.** G350 image revision 3 includes the owner-tested Dreamcast audio fix and optimized N64 core, and keeps the removal of 117 unused legacy ROM folders. RG SP and RG35XX SP retain their verified image bytes. Internal frontend build numbers remain 0.1.14, 0.3.1 and 0.2.3 respectively. Only these three current release pages are retained.
+**Release 1.1.16 provides one complete flashable image per device**, with the same version shown in Slot. No older firmware or follow-up update is needed.
 
-**The latest complete images include native Ports and a bundled PortMaster manager**, round CDs, a gray SLOT splash on black, and in-game volume buttons that inherit Slot's saved speaker/headphone levels. The owner has confirmed GTA SA and NFS U2 launch and play; NFS U2 remains demanding and runs slowly. Compatibility and speed vary by port.
+**RG SP and RG35XX SP:** native Rice N64 with per-game ParaLLEl fallback (press Start on the N64 shelf), the accepted Dreamcast audio/core improvements, full-width PSP presentation, per-system Default/Full screen size, shaders, and native Ports D-pad/left-stick controls. The RG SP predecessor was tested by the owner; the transferred RG35XX SP changes and first boot of these newly packaged images still require handheld validation. The rejected Wave Race VBO experiment and Most Wanted Mobile are excluded.
 
-**Current G350 source baseline (2026-10-19):** owner-tested threaded Dreamcast audio/rendering and an optimized N64 core are now the accepted runtime. Diddy Kong Racing improves, but demanding N64 scenes can still slow down. The [validation notes](docs/G350-2026-10-19-N64-VALIDATION.json) explain the comparison. **The G350 1.1.15 revision 3 downloads include these performance changes.** See [source build instructions](docs/G350-BUILD.md). RG SP/RG35XX SP downloads are unchanged.
+**G350:** retains the owner-tested threaded Dreamcast audio, optimized N64 cores, gray SLOT boot artwork, Ports integration and removal of 117 unused legacy folders. The frontend now reports 1.1.16 and safely rejects N64 states from incompatible core layouts. Demanding N64 scenes may still slow down. See [G350 validation](docs/G350-2026-10-19-N64-VALIDATION.json).
+
+The images contain firmware and the PortMaster manager, **not commercial games, BIOS, APK/OBB files, saves or downloaded game artwork**. RG SP owner tests confirmed GTA III, Vice City, GTA SA, NFS U2, RVGL and SuperTuxKart using separately supplied game runtimes/data. Port compatibility varies; the new flash images are not a claim that every PortMaster game works.
 
 ## Screenshots
 
@@ -28,15 +30,15 @@ All eight emulated systems and the native Ports shelf, shown with cartridge/disc
 
 ## Downloads and installation
 
-| Device | Fresh installation | Guide / optional system files |
+| Device | Complete flashable image | Setup guide |
 |---|---|---|
-| G350 | [1.1.15 complete image](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/g350-v1.1.15) | [1.1.15 system files](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/g350-v1.1.15) · [step-by-step G350 guide](docs/G350-INSTALL-AND-PORTS.md) |
-| RG35XX SP | [1.1.15 complete image](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/rg35xxsp-v1.1.15) | [RG35XX SP instructions](ports/rg35xxsp/README.md) |
-| RG SP | [1.1.15 complete image](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/rgsp-v1.1.15) | [RG SP instructions](ports/rgsp/README.md) |
+| BATLEXP G350 | [Slot G350 1.1.16](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/g350-v1.1.16) | [G350 installation](docs/G350-INSTALL-AND-PORTS.md) |
+| Anbernic RG SP | [Slot RG SP 1.1.16](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/rgsp-v1.1.16) | [RG SP installation](ports/rgsp/README.md) |
+| Anbernic RG35XX SP | [Slot RG35XX SP 1.1.16](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/rg35xxsp-v1.1.16) | [RG35XX SP installation](ports/rg35xxsp/README.md) |
 
-**Use only the image for your exact model.** Each model has its own native-port launcher/runtime. H700 native Ports are experimental and await physical testing. Flashing a fresh image erases the target card. Updating an existing G350 uses SYSTEM + SYSTEM.md5 and, for the 0.1.13 boot artwork, KERNEL + KERNEL.md5. No card reflash is required for an update. Keep games, labels and saves backed up before changing firmware.
+Download only your model's **`.img.zip`**, extract the `.img`, and flash it. **Flashing erases the selected card.** Use TF1/OS, keep TF2 empty for initial setup, and let first-boot expansion finish before adding games. The three models have different boot files; their images are not interchangeable. No previous release or separate System installation is needed.
 
-The repository and current releases are public. No games, proprietary BIOS, APKs/OBBs, private game-linked executables, save files or commercial disc scans are supplied in the latest sharing packages. Each fresh `.img.zip` contains the current firmware and manager setup; no earlier image or follow-up update is needed. Update ZIPs are also available for existing cards. Original emulator core binaries are retained from the accepted G350 base.
+Source archives, checksums and validation records are separate supporting downloads; you do not flash them. Older 1.1.15 corresponding core sources remain available for the unchanged bundled components. The [1.1.16 release notes](docs/RELEASE-1.1.16.md) describe transferred changes and hardware-test limits.
 
 ## Quick start on G350
 
@@ -71,15 +73,15 @@ GAMES/
     Labels/PORTS/My Game.png     (optional disc print)
 ```
 
-Use launcher names containing ASCII letters/numbers, spaces, dots, underscores, hyphens or parentheses. Use the same spelling and capitalization for the PNG. A square PNG (for example 512 × 512) with the disc face centered works well; Slot clips it to a round CD and draws its hub. Missing labels use the generic disc. Restart Slot/the handheld after copying artwork. The current Artwork Studio covers SNES/PS1/N64/DC/PSP; custom Ports labels are added manually.
+Use launcher names containing ASCII letters/numbers, spaces, dots, underscores, hyphens or parentheses. Use the same spelling and capitalization for the PNG. A square PNG (for example 512 × 512) with the disc face centered works well; Slot clips it to a round CD and draws its hub. Missing labels use the generic disc. Restart Slot/the handheld after copying artwork. Artwork Studio covers GB/GBC/GBA/SNES/PS1/N64/DC/PSP; custom Ports labels are added manually.
 
-**SP native-input test update (not yet in stable full images):** on RG SP/RG35XX SP, Menu + Select switches native games between D-pad and left-stick input and remembers each game's choice. Hardware validation is pending; the manager stays digital. Named GTA SA/NFS U2 virtual-controller profiles are included; game files are supplied separately. See [setup, rollback and limitations](ports/h700/README.md#controls-and-limits).
+**SP native input is included in the 1.1.16 images:** Menu + Select switches native games between D-pad and left-stick mode and remembers the choice per game. The manager stays digital. Named GTA SA/NFS U2 profiles and compatible example launchers are included; their game engines/data are supplied separately. Templates are under `System/PortTemplates/`; read [the H700 guide](ports/h700/README.md) before using them. Hold Menu alone to quit.
 
 **Native port controls:** hold Menu alone for one second to quit. Volume +/− changes the current speaker/headphone level; holding repeats; both together toggle mute. Use the game's own save menu. Emulator save states, double-Menu state browsing and Slot shaders do not apply to native ports. Some third-party launch scripts can override audio/input settings and need adaptation.
 
 ## Controls and hotkeys
 
-These are the emulator controls retained in G350 0.1.14, checked against the input/session code. **Menu** means the handheld's centre **M** button; L1/R1 are the first shoulder buttons and L2/R2 the second pair. For a combination, hold the first button, tap the second, then release both. A long hold of Menu **alone** quits the game.
+These controls are checked against the input/session code. H700 native Rice differences are noted below. **Menu** means the handheld's centre **M** button; L1/R1 are the first shoulder buttons and L2/R2 the second pair. For a combination, hold the first button, tap the second, then release both. A long hold of Menu **alone** quits the game.
 
 ### Save and load by system
 
@@ -87,7 +89,7 @@ These are the emulator controls retained in G350 0.1.14, checked against the inp
 |---|---|---|
 | PS1 / PCSX ReARMed | Menu + X | Menu + Y |
 | SNES / Snes9x 2005 Plus (or Snes9x) | Menu + X | Menu + Y |
-| N64 / ParaLLEl N64 (or Mupen64Plus Next) | Menu + X | Menu + Y |
+| N64 / ParaLLEl, or H700 native Rice | Menu + X | Menu + Y |
 | Dreamcast / Flycast | Menu + X | Menu + Y |
 | PSP / PPSSPP | Menu + X | Menu + Y |
 | GBA / mGBA or gpSP | Select + R1 | Select + L1 |
@@ -97,6 +99,10 @@ These are the emulator controls retained in G350 0.1.14, checked against the inp
 For Game Boy **Select** combinations, press the second button promptly, within about **0.6 seconds** of pressing Select. Holding Select longer hands it to the game instead. For example, on PS1: hold M, tap X, release both to save; hold M, tap Y, release both to load.
 
 Save states are emulator snapshots, separate from a game's normal memory-card/VMU/memory-stick saves. Loading restores the saved moment. Use the browser below to choose an older state; the quick load shortcut chooses the newest saved state. Normal game saves remain managed through each game's own save menu.
+
+On RG SP and RG35XX SP, highlight an N64 game and tap **Start** to choose Rice or ParaLLEl; the choice is saved per game. Rice and ParaLLEl use separate state formats. Menu+X/Menu+Y save/load in both, and long-press Menu returns to the selected N64 shelf item. Native Rice uses its own resume state; the frontend's state-picture browser and shader presets apply to libretro sessions, not native Rice.
+
+At the shelf, tap Menu and choose **Screen Size → Default / Full** for that shelf's system. H700 images remember the setting separately for each system; native ports may retain their own aspect settings. Default preserves the model's intended proportions.
 
 ### Common controls while playing emulators
 

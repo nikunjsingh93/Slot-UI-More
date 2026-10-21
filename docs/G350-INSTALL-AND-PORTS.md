@@ -1,6 +1,6 @@
 # G350 installation, ports and labels
 
-For BATLEXP G350 only. RG SP, RG35XX SP and R36S use different boot images. This guide describes the complete 1.1.15 image, which contains firmware and integration code but no commercial game files or disc scans.
+For BATLEXP G350 only. RG SP, RG35XX SP and R36S use different boot images. This guide describes the complete 1.1.16 image, which contains firmware and integration code but no commercial game files or disc scans.
 
 ## What Slot and PortMaster do
 
@@ -8,7 +8,7 @@ Slot is the home screen and launches emulators or native Linux ports. PortMaster
 
 ## First installation on a new card
 
-1. Download **slot-g350-1.1.15.img.zip** from [the complete G350 release](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/g350-v1.1.15).
+1. Download **slot-g350-1.1.16.img.zip** from [the complete G350 release](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/g350-v1.1.16).
 2. Extract its `.img` and flash it directly to a 16 GB or larger card. Flashing erases the selected card; back up anything you need and select the correct removable drive.
 3. Put it in G350 TF1/OS with TF2 empty initially. Charge the device, boot, and allow partition expansion/restart and manager installation to finish.
 4. Once Slot appears, shut down using the power menu. Reconnect the card to copy games and labels to GAMES. Cancel any Windows offer to format an unreadable Linux partition.
@@ -19,32 +19,7 @@ Revision 2 no longer creates the 117 unused legacy system folders at the GAMES r
 
 ## Updating an existing Slot G350 card
 
-Download `slot-g350-1.1.15-system-files.zip` and `slot-g350-1.1.15-manifest.json` from [1.1.15](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/g350-v1.1.15). The generic release is separate from the owner's personal artwork update.
-
-With the handheld powered off, copy these **four files from the ZIP to the root of PAN4ELC**, replacing their existing copies:
-
-```text
-PAN4ELC/
-  SYSTEM
-  SYSTEM.md5
-  KERNEL
-  KERNEL.md5
-```
-
-Do not format the card and do not copy these files into GAMES. Keep the file names exactly as shown; Windows can hide extensions. The KERNEL pair replaces the early splash; replacing SYSTEM alone leaves that earlier boot image unchanged. Use this only with the matching G350 base kernel (original SHA256 `18f4ca8d5a0c32b7674d6aa83dcaf657e5ccfad0aa51ae6322bd047e5207da7b`) or the already updated 0.1.13/0.1.14 kernel.
-
-For a checked Windows installation, download/clone this source repository and run its installer in PowerShell, adjusting drive letters and paths:
-
-```powershell
-& .\firmware\ports\install-update.ps1 `
-  -ArchivePath .\slot-g350-1.1.15-system-files.zip `
-  -ManifestPath .\slot-g350-1.1.15-manifest.json `
-  -BootDrive D -GamesDrive E
-```
-
-The script checks the G350 card labels, original kernel and archive hashes, flushes writes, and verifies direct card reads. It can require administrator access for direct verification. It does not erase the card or replace game/save folders. Use `-VerifyOnly` for a later read-back check. Do not bypass a checksum error: leave the card connected and investigate the copy/reader.
-
-Safely eject and boot. Missing platform directories are created automatically. Your existing games, labels, settings and saves remain. For the unchanged early logo or a boot problem, first check that both kernel files and both system files came from the same release; also check charge and the reader/card.
+The 1.1.16 release provides a complete flashable image. Back up your games, labels, BIOS and saves, flash the matching `.img`, finish first boot, then restore your content. The image is self-contained; do not mix SYSTEM/KERNEL pairs from older releases. Keep a copy of your old card until the replacement boots successfully.
 
 ## Games and folders
 
@@ -66,7 +41,7 @@ Recognized does not mean every game or file variant is supported by its emulator
 
 ## Bundled PortMaster
 
-On the complete 1.1.15 image, PortMaster is installed automatically when missing. Open it from the Ports shelf; an existing working manager is preserved. The following manual steps are only for repairing a missing installation or using an earlier update. The bundled catalogue permits offline browsing; downloads and missing runtimes still need internet.
+On the complete 1.1.16 image, PortMaster is installed automatically when missing. Open it from the Ports shelf; an existing working manager is preserved. The following manual steps are only for repairing a missing installation or using an earlier update. The bundled catalogue permits offline browsing; downloads and missing runtimes still need internet.
 
 
 1. Download **PortMaster.zip** from [the pinned upstream release](https://github.com/PortsMaster/PortMaster-GUI/releases/tag/2026.10.18-0059). This is the version used for this integration; future releases may need retesting. Do not use the muOS/TrimUI variant.

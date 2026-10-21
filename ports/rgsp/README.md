@@ -1,15 +1,13 @@
-# Slot for Anbernic RG SP 1.1.15
+# Slot for Anbernic RG SP 1.1.16
 
-Download the [complete 1.1.15 image](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/rgsp-v1.1.15): **slot-rgsp-1.1.15.img.zip**. Extract its `.img` and flash it directly to a 16 GB or larger card. No earlier image or separate update is needed. Flashing erases the selected card.
+Download [Slot RG SP 1.1.16](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/rgsp-v1.1.16), extract **slot-rgsp-1.1.16.img.zip**, and flash its `.img` to a 16 GB or larger card. This is one complete image; no older release or update is needed. Flashing erases the selected card.
 
-Use RG SP TF1/OS, with TF2 empty initially. Allow first-boot expansion and installation to finish before adding games to BASEOS/Games and PNG labels to BASEOS/Labels. This image is only for RG SP; other models have different boot files.
+Use TF1/OS and keep TF2 empty initially. Allow first-boot expansion/installation to finish, then shut down and add games to BASEOS/Games and matching PNG labels to BASEOS/Labels. Use only this model's image: its original BaseOS 1.3.0 boot/kernel/driver regions are retained.
 
-It includes GB/GBC/GBA/SNES/PS1/N64/Dreamcast/PSP, the accepted nine emulator core binaries, shaders, aspect controls and the new Ports shelf with a bundled H700-compatible PortMaster runtime. All model-specific BaseOS 1.3.0 boot/kernel/driver regions are retained. H700 native Ports are experimental and await physical game/audio/quit testing; they are not a claim of universal port compatibility or performance.
+Includes GB/GBC/GBA, SNES, PS1, N64, Dreamcast, PSP, native Ports, PortMaster and Artwork Studio v5. Native Rice is N64's default; highlight an N64 game and press Start for the per-game ParaLLEl fallback. The rejected Wave Race VBO trial is excluded. The Dreamcast improvements and accepted emulator binaries are shared with the tested RG SP setup.
 
-**Already running 0.3.0 on this model?** Use `slot-rgsp-1.1.15-system-files.zip` instead of flashing. Merge its System folder into BASEOS, replacing matching files; keep Games, Labels, BIOS, Saves, States and Config. The emulator cores remain the accepted versions. Do not use a G350 SYSTEM update or convert a different model's card with this ZIP.
+Tap Menu at the shelf for Shader and per-system Screen Size (Default/Full). Hold Menu alone about one second to quit a game. Menu+Select switches D-pad/left-stick mode in N64/DC/PSP and native ports; native games remember their choice. Menu+X saves and Menu+Y loads console states; GB/GBC/GBA use Select+R1 / Select+L1. Ports use their own save menus.
 
-Hold Menu alone for one second to return to Slot. Existing emulator save-state, shader and D-pad/analog controls are retained. Native ports use their own save menus; emulator save-state shortcuts do not apply.
+The RG SP predecessor runtime was owner-tested. RG35XX SP's transferred changes and first boot of both freshly packaged images remain unverified on hardware. No commercial games, BIOS, APK/OBBs, private NFS/GTA executables or commercial artwork are included. Most Wanted Mobile was removed after failed trials.
 
-Read the [full H700 setup/Ports/labels/Wi-Fi guide](../h700/README.md), the release START-HERE and [all emulator hotkeys](../../README.md#controls-and-hotkeys). Wi-Fi setup uses a copy of the bundled System/wifi-example.conf saved as Config/wifi.conf with your own network details.
-
-The matching sources ZIP contains the full updated model frontend. Runtime pins, preparation recipe, Slot adapter patch and original notices are under ports/h700. Compile in ARM64 Bullseye; retain component licenses and historical corresponding core sources. The original baseline source/packaging record remains in Git history. This is an independent Slot adaptation, not an official Anbernic, BaseOS or PortMaster release.
+See [H700 Ports/Wi-Fi/template instructions](../h700/README.md), [all hotkeys](../../README.md#controls-and-hotkeys), [release validation](../../docs/RELEASE-1.1.16.md) and [sharing/source notices](../../docs/SHARING.md). The common current H700 frontend is under `ports/h700/frontend`; model-specific launchers remain separate.

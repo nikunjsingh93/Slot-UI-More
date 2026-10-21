@@ -1,0 +1,16 @@
+{
+  "target": "Anbernic RG SP",
+  "confirmed_by_owner": "2026-10-21",
+  "frontend": "0.3.6",
+  "frontend_sha256": "2f029971b98898b770b56e40257b222b78066cab0eac5416b9397f456c99c7e0",
+  "n64_parallel_sha256": "169d618a2540eab59070cd57889bd90a19ee853f30d39c6d00952929fad8a7c9",
+  "n64_status": "0.3.5 VBO trial rejected and rolled back. Start chooses Rice/Parallel per game. Do not reintroduce VBO tuning.",
+  "nfs_u2": "Original private adapter and natural 4:3 presentation accepted; unchanged by five-port additions.",
+  "gta_sa_graphics": "Owner confirmed flicker resolved with SDL_BLITTER_DISABLED=1 direct native EGL. Original game effects and binaries preserved. Use this as graphics baseline.",
+  "pending_tests": [
+    "GTA SA separate OpenAL config pin for volume rocker"
+  ],
+  "public_images": "The accepted behavior is carried into release 1.1.16, including the RG35XX SP transfer. New complete-image first boot remains untested; private game engines/data are excluded.",
+  "additional_ports_confirmed": "Owner confirmed GTA III, Vice City, RVGL and SuperTuxKart work.",
+  "nfsmw_removed": "Removed at owner request after final trial. Controller registration progressed to guest relocation, but libapp fstat remained unresolved. No further test planned."
+}

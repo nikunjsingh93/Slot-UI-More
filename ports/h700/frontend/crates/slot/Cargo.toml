@@ -1,0 +1,30 @@
+[package]
+name = "slot"
+version = "1.1.16"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[features]
+default = ["host"]
+host = ["dep:winit", "dep:cpal", "dep:gilrs", "slot-gfx/host"]
+device = ["slot-gfx/device"]
+
+[dependencies]
+slot-gfx = { path = "../slot-gfx", default-features = false }
+slot-input = { path = "../slot-input" }
+slot-power = { path = "../slot-power" }
+slot-retro = { path = "../slot-retro" }
+slot-store = { path = "../slot-store" }
+slot-ui = { path = "../slot-ui" }
+winit = { workspace = true, optional = true }
+cpal = { workspace = true, optional = true }
+gilrs = { workspace = true, optional = true }
+libloading = { workspace = true }
+lz4_flex = { workspace = true }
+png = { workspace = true }
+
+[dev-dependencies]
+gl = "0.14"
+slot-gfx = { path = "../slot-gfx", default-features = false, features = ["test-support"] }
+tempfile = { workspace = true }

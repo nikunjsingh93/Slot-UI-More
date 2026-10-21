@@ -113,6 +113,10 @@ def h700(model):
         assert not (stage/forbidden).exists(),forbidden
     # Current overlays include the native-port supervisor and pinned runtime.
     shutil.copytree(Path(info['frontend_payload'])/'System',stage/'System',dirs_exist_ok=True)
+    tools=stage/'Tools';tools.mkdir(exist_ok=True)
+    studio=Path(__file__).resolve().parent.parent/'studio/Slot-Auto-Artwork-Studio-v5.html'
+    shutil.copyfile(studio,tools/studio.name)
+    (tools/'Slot-Auto-Artwork-Studio-v4.html').unlink(missing_ok=True)
     for p in (stage/'System').glob('*.sh'):p.chmod(0o755)
     (stage/'System/slot').chmod(0o755)
     manifest=json.loads((stage/'System/slot-sp-build.json').read_text())
@@ -144,7 +148,10 @@ The artwork tool is under Tools/Slot-Auto-Artwork-Studio-v5.html.
 
 Controls: hold Menu alone one second to return to Slot. Console save/load
 states: Menu+X / Menu+Y. GB/GBC/GBA: Select+R1 / Select+L1 (prompt chord).
-N64/DC/PSP: Menu+Select toggles D-pad digital/analog; N64 starts analog.
+N64: highlight a game and press Start to choose Rice or Parallel per game.
+N64/DC/PSP and native ports: Menu+Select toggles D-pad digital/analog.
+N64 starts analog. Native-port choices are remembered separately per game.
+Tap Menu at the shelf for Screen Size: Default/Full, saved per system.
 GB/GBC: L1 alternates full-screen stretch and full-height aspect fit;
 R1 restores default. Tap Menu at the shelf to select Shader: Original,
 Sharp Pixels, Smooth, LCD or CRT. The repository README lists all hotkeys.
@@ -157,13 +164,14 @@ System/wifi-example.conf to Config/wifi.conf, fill in your network name/password
 and reboot. Check Config/wifi.log if needed. Game data stays
 in ports/.ports; top-level launch scripts appear under ports. Labels for these
 entries go in Labels/PORTS with matching names. Hold Menu one second to quit.
-The H700 native runtime is new and still requires physical testing. Runtime, image,
+RG SP's earlier runtime was owner-tested; RG35XX SP's transferred changes and
+physical first boot of both freshly packaged images still need testing. Runtime, image,
 installer and rendering checks pass. Physical first boot of this newly packaged
 image still needs validation; no new hardware performance claim is made.
 '''
     for p in stage.glob('*START-HERE.txt'):p.unlink()
     write(stage/guide_name,guide)
-    write(stage/'System/licenses/LATEST-BUILD.txt',f'{label} {version}: corresponding updated frontend and packaging scripts are in the matching source ZIP and repository. BaseOS is official {model} 1.3.0. Existing emulator cores/assets are unchanged; see SOURCES.txt and the v0.1.9.2 corresponding core source release.\n')
+    write(stage/'System/licenses/LATEST-BUILD.txt',f'{label} {version}: corresponding updated H700 frontend, native N64 host and packaging scripts are in the matching source ZIP and repository. BaseOS is official {model} 1.3.0. Core/source hashes and native N64 source references are in slot-sp-build.json and N64/source-references.json. Historical unchanged core sources remain available in release 1.1.15. The compatibility-source ZIP supplies the exact Debian source packages for the bundled SuperTuxKart libraries.\n')
     # Fresh payload manifest describes the image, not the earlier card conversion.
     manifest.update(base_firmware=version,source_archive=name+'-sources.zip',
                     storage='TF1 BASEOS root; finish first-boot expansion before adding games')
@@ -311,7 +319,7 @@ are installed in the image and read back for verification. The G350 {version}
 frontend/system update was validated separately; physical first boot of this
 newly composed fresh image is pending. No new performance claim is made.
 '''
-    validation='PASS verified old fresh-image input and latest SYSTEM input; SYSTEM/MD5 image readbacks; FAT/ext4 checks; original bootloader and empty storage partition unchanged; first-boot resize marker retained; ZIP CRC/decompressed image SHA256. Includes the accepted 0.1.13 frontend/cores and the bundled-manager bootstrap. Fresh physical first boot remains pending.\n'
+    validation='PASS verified fresh-image input and accepted SYSTEM input; SYSTEM/MD5 and KERNEL readbacks; FAT/ext4 checks; original bootloader and empty storage partition unchanged; first-boot resize marker retained; ZIP CRC/decompressed image SHA256. Includes owner-tested threaded Dreamcast audio and optimized N64, Ports, gray SLOT splash and legacy-folder cleanup. Fresh physical first boot remains pending.\n'
     manifest.update(version=version,device='BATLEXP G350',base_fresh_image_sha256=info['base']['sha256'],bootloader_and_initial_storage_unchanged=True,free_boot_clusters_zeroed_bytes=zeroed)
     publish_local('g350',version,image,manifest,guide,validation)
 if args.model in ['g350','all']:g350()

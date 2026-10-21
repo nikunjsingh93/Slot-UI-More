@@ -1,82 +1,103 @@
-# Native Ports for RG SP and RG35XX SP
+# Slot 1.1.16 on RG SP and RG35XX SP
 
-The complete **RG SP 0.3.1** and **RG35XX SP 0.2.3** images include Slot's Ports shelf, a model-aware Menu/volume supervisor, and a pinned H700-compatible PortMaster runtime. They retain the earlier eight emulated systems, nine core binaries, shaders, aspect controls and emulator hotkeys.
+One complete flashable `.img.zip` per exact model:
 
-This is a new, experimental Slot integration. Both frontends compile; platform discovery, frontend/control/panel tests and actual BaseOS Python/HTTPS/SDL imports pass. H700 native-port graphics, sound, volume and quit still need physical testing. A successful container test is not a handheld performance measurement. Existing G350 native games are not automatically certified for these stickless devices.
+- [RG SP 1.1.16](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/rgsp-v1.1.16)
+- [RG35XX SP 1.1.16](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/rg35xxsp-v1.1.16)
 
-## One-image installation
+Extract and flash the `.img` to a 16 GB or larger card. Flashing erases that
+card. Use TF1/OS, keep TF2 empty initially, and finish first-boot expansion before
+adding games. No older image or separate update is needed. Back up existing
+games, labels, BIOS, saves and settings before flashing.
 
-Download the image for the exact handheld:
+Both use the common current frontend in `frontend/`, with their own BaseOS
+1.3.0 boot/kernel/drivers and launcher. RG SP is 720x480; RG35XX SP is 640x480.
+Never interchange their images or copy G350 SYSTEM updates here.
 
-- [RG SP 1.1.15](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/rgsp-v1.1.15): `slot-rgsp-1.1.15.img.zip`.
-- [RG35XX SP 1.1.15](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/rg35xxsp-v1.1.15): `slot-rg35xxsp-1.1.15.img.zip`.
+## Systems, controls and display
 
-Extract the `.img` and flash it to a 16 GB or larger card. Flashing erases the selected card. Put it in TF1/OS; keep TF2 empty initially. Allow first-boot expansion and installation to finish before copying games. No older image or separate update is needed. Use the model's own image; RG SP, RG35XX SP and G350 boot files are incompatible.
+Includes GB/GBC/GBA, SNES, PS1, N64, Dreamcast, PSP, Ports and PortMaster.
+Native Mupen64Plus/Rice is N64's default. Highlight an N64 game and press
+**Start** for the per-game ParaLLEl fallback. Backends use separate state
+formats. The rejected Wave Race VBO trial is excluded. Hold Menu alone about
+one second to quit; native Rice returns to the same N64 shelf/game.
 
-For an existing matching Slot card, use the model's **ports-update ZIP** instead. Merge its `System` folder into the root of BASEOS, replacing matching files. Do not delete or format the card. Keep existing `Games`, `Labels`, `BIOS`, `Saves`, `States` and `Config`; keep the existing emulator cores. The update adds the frontend/launcher/helpers/runtime and a build manifest. Back up any existing manager settings if you installed a different PortMaster manually. This is an update within a model, not a card conversion between models.
+Tap Menu at the shelf for **Screen Size: Default/Full**, saved per system.
+Default preserves the model's intended proportions. PSP uses available width
+while preserving aspect by default. Shader presets apply to libretro sessions;
+native Rice and ports use their own renderer settings. GB/GBC L1 alternates
+stretch/height fit, R1 restores centered default. See [hotkeys](../../README.md#controls-and-hotkeys).
 
-## Wi-Fi for downloads
+## Games, artwork and Wi-Fi
 
-After the first boot, connect the card to your computer. Copy the bundled `System/wifi-example.conf` (also [available here](wifi-example.conf)) to **BASEOS/Config/wifi.conf**, then replace the two example values with your Wi-Fi name and password. Keep the quotes. Safely eject and reboot. Slot starts association and DHCP in the background, allowing up to 25 seconds for BaseOS's radio to appear. Check `Config/wifi.log` if it does not connect. A missing file leaves networking alone; no credentials are bundled. Keep your personal file private.
+After first boot, put games in `BASEOS/Games/<SYSTEM>/` and PNG labels in
+`BASEOS/Labels/<SYSTEM>/`, with matching filename stems. Restore your own BIOS,
+Saves and States if needed. [Artwork Studio online](https://nikunjsingh93.github.io/Slot-UI-More/)
+and the bundled `Tools/Slot-Auto-Artwork-Studio-v5.html` cover the eight emulated
+systems. Native Ports disc prints are added manually under Labels/PORTS.
 
-## Manager and game paths
+Copy `System/wifi-example.conf` to `Config/wifi.conf`, enter network details,
+and reboot. Check `Config/wifi.log` if needed. No credentials are bundled.
+Open Ports → PortMaster to install supported games; internet is needed for
+downloads/missing runtimes. Replacing the pinned H700 manager can break its
+environment. A Windows EXE alone does not run as a native Linux port.
 
-Open **Ports → PortMaster** in Slot. The manager uses the bundled H700 graphics/Python environment; installing an unmodified upstream manager over it can remove required compatibility fixes. Its self-updater is intentionally disabled by the upstream H700 adaptation. The game catalogue and game downloads remain available. An internet connection is needed for downloads and missing runtimes; this package does not include all games or every runtime.
+## Native Ports
 
-```text
-BASEOS/
-  System/
-    slot
-    launch_frontend.sh
-    PortMasterH700/             bundled manager and private libraries
-  ports/
-    My Game.sh                 visible launcher
-    .ports/mygame/             installed port and your required game data
-  Games/PORTS/My Game.port     created automatically by Slot
-  Labels/PORTS/My Game.png     optional square disc print
-  Config/slot-ports/           manager/runtime user settings and logs
-```
+Game directories live in `ports/.ports/mygame/`; copy the game's launcher to
+both `ports/.ports` and `ports`. Slot scans visible top-level launchers at
+startup and when returning from ordinary ports. N64 skips the scan for a faster
+return. Remove a game's launcher and `Games/PORTS/<name>.port` when uninstalling.
+Match `My Game.sh` with `Labels/PORTS/My Game.png`; use a centered square disc
+print. Slot draws the round disc and hub. Commercial scans are not supplied.
 
-The H700 adaptation keeps installed game data in `ports/.ports` and exposes `.sh` launchers in `ports`. To install manually, extract the port's `.sh` and game directory into `ports/.ports`, copy its `.sh` to `ports`, and follow that port's instructions for your purchased data. The adapter rewrites standard PortMaster paths on first launch. Do not copy the G350's entire runtime folder onto these cards: it uses a different graphics/backend environment.
+**Menu alone for one second quits. Menu+Select switches D-pad/left stick** and
+remembers the mode per launcher in `Config/port-input/<launcher>.sh.mode`.
+The manager remains digital. Select alone passes through. Movement is full
+stick deflection; no physical right stick or fine analog pressure exists.
+Volume inherits Slot's speaker/headphone level; hold repeats, both buttons mute.
+Native games use their own save menu, not Slot emulator states/shaders.
 
-Slot imports top-level `.sh` files when it starts and after returning from a port. Use short ASCII names containing letters/numbers, spaces, dots, underscores, hyphens or parentheses, ending in lowercase `.sh`. For artwork, match the launcher's stem exactly: `My Game.sh` → `Labels/PORTS/My Game.png`. A centered, square disc-face PNG such as 512 × 512 works well; Slot clips it to a round CD. Restart Slot after replacing labels. Ports artwork is added manually; the current automatic Studio covers the emulated systems.
+`System/PortTemplates/` contains compatible example launchers for GTA III,
+Vice City, GTA SA, NFS U2, RVGL and SuperTuxKart. After installing the matching
+game/engine and required data, copy its template to both launcher locations,
+replacing that game's launcher. Keep exact names for named controller profiles.
+Generic custom launchers are not overwritten automatically.
 
-## Controls and limits
+- GTA III/VC need matching native GLES engines and classic PC data; see
+  [build and per-port requirements](ADDITIONAL-PORTS.md). Their executables/data
+  are not bundled with firmware.
+- GTA SA needs the compatible separately supplied wrapper and Android data.
+  Its template uses the owner-confirmed direct-EGL fix and audio config guard.
+- NFS U2 needs the matching separately supplied recompiled engine and PC data.
+  Original 4:3 proportions are retained; Menu+X opens its R3 name keyboard.
+- RVGL and SuperTuxKart use their PortMaster packages. SuperTuxKart's template
+  uses the added libraries under `System/PortCompat/supertuxkart/`; notices,
+  provenance and corresponding Debian sources are supplied separately.
+- Most Wanted Mobile is excluded after failed trials.
 
-Hold **Menu alone for one second** to return to Slot. Use native games' own save functions; Slot emulator states and shaders do not apply. Volume buttons use Slot's saved speaker/headphone levels, with held repeat and both buttons together for mute. These paths have synthetic input tests; their physical H700 behavior is pending. The separate NextUI volume HUD/power helper and suspend-audio override are disabled so they do not compete with Slot's supervisor. Native-port lid/sleep behavior is not validated.
+Logs: Config/ports.log, Config/slot-ports/logs/PortMasterH700.txt and each game's
+own log. Compatibility, sleep/lid handling and performance vary by port.
 
-The handhelds have no analog sticks. The stable 1.1.15 full images keep Menu+Select limited to emulators. **A separate native-input test update is now available for RG SP and RG35XX SP; physical testing remains pending.** It replaces only `System/slot-portwatch` and that model's `System/launch_frontend.sh`. Do not mix models or replace the full System folder.
+## Validation and sources
 
-With that test installed, hold **Menu then press Select** inside a native game to switch D-pad / left stick. Release both buttons afterward. The default is D-pad for ordinary ports, analog for the named GTA SA/NFS U2 launchers; each launcher's choice is saved independently in `Config/port-input/<launcher>.sh.mode` (`0` digital, `1` analog). Rename a launcher and it receives a new default mode; remove its mode file while powered off to reset it. The manager always keeps ordinary controls. Select alone is passed through; Menu+Select is consumed and cannot trigger the Menu-alone quit timer. Hold Menu **alone** for one second to quit. Full stick deflection is simulated; there is no fine analog movement, mouse mode or right-stick mode.
+RG SP's predecessor N64/Dreamcast/PSP improvements, GTA SA flicker fix, NFS U2,
+GTA III, Vice City, RVGL and SuperTuxKart were owner-tested. **RG35XX SP's
+transferred changes and first boot of both new images still need hardware
+validation.** See [release checks](../../docs/RELEASE-1.1.16.md).
 
-The supervisor copies the built-in pad into a Linux uinput device, forwards face/shoulder buttons unchanged, and routes D-pad events to either hats or left X/Y axes. A private mount namespace exposes that copy at the original evdev/joydev paths only inside the port's process tree, hiding the duplicate node. This supports ordinary device reads without depending on a 32/64-bit game library preload. The host retains its original paths; grabs and the virtual device are released when the port ends. External controllers are not remapped. Kernel uinput and mount-namespace support are required; a failed setup returns to Slot before the game starts.
+Build `ports/h700/frontend` in ARM64 Bullseye with Rust:
+`cargo build --locked --profile device --bin slot --no-default-features --features device`.
+Use a separate Cargo target directory from G350; their same-named crates use
+different backends. Native N64's build recipe/pins are in `n64-native/`, and the
+source ZIP includes its exact source archives. The host is
+`firmware/ports/slot-native-n64.py`. Image composition/installer checks use
+`scripts/build_latest_images.py` with verified artifact paths/hashes.
 
-The named `Grand Theft Auto San Andreas.sh` launcher receives a `GTASA-Gamepad` virtual layout matching the owner's existing wrapper. The named `Need for Speed Underground 2.sh` receives a GO-Super virtual layout matching its internal controller table. These translate the SP's face/shoulder/Select/Start keys by physical position. GTA's actual normalized-profile dispatch was exercised with synthetic events; physical auto-detection remains pending. No game binary is modified. For NFS U2 only, **Menu+X** synthesizes R3 to open its native name-entry keyboard. Launcher names identify these profiles, so keep those two names unchanged. The physical SP Select code is 310; 314 is L2. Menu echo code 354 is consumed. Individual keyboard-style ports may still need game-specific `.gptk` mappings for analog mode. Ports that bypass standard device paths or change namespaces require their own adaptation. No promise of full-speed NFS U2/GTA or universal PortMaster compatibility is made.
-
-Build the test ZIPs with `python3 scripts/package_sp_native_input.py --outputs /outputs` in the ARM64 Bullseye builder. Run `firmware/ports/test_port_input.py`, `test_portwatch.py` and `test_port_volume.py` against the compiled supervisor. The separate `test_port_input_namespace.py` exercises actual kernel mount isolation using temporary files in a disposable privileged container. Synthetic input/volume and real namespace tests pass; creation of a uinput pad, controller enumeration and actual games on both handhelds remain unverified. Stable full-image downloads have not been replaced by these test packages.
-
-Logs: `Config/ports.log` for the Slot supervisor and `Config/slot-ports/logs/PortMasterH700.txt` for the H700 adapter, plus the game's own log. The automatic scanner adds entries but does not remove stale ones; remove the `.sh` and its `Games/PORTS/*.port` descriptor when uninstalling a game. Save locations vary by port; back up its game directory and relevant runtime settings before deleting anything.
-
-## Source and provenance
-
-The runtime uses [nextui-portmaster-h700 v0.4.0](https://github.com/Logarythms/nextui-portmaster-h700/releases/tag/v0.4.0) and the H700 SDL libraries from [NextUI h700-rc11](https://github.com/pvaibhav/NextUI/releases/tag/h700-rc11), rather than G350/KMSDRM libraries. GPU/kernel drivers remain the official model-specific BaseOS drivers. `runtime-pins.json` records exact download hashes and the adapter source commit; `runtime-adapter.patch` records Slot's path/control changes. `prepare_runtime.py` verifies and stages those inputs, omitting optional game-specific binary fixes. Upstream recipes, notices and each bundled component's licenses must be retained when redistributing.
-
-The matching source ZIP contains the full updated model frontend. Build it in ARM64 Bullseye with Rust using `cargo build --profile device --bin slot --no-default-features --features device`. Compile the common supervisor with `-lasound -lm`, and the input-sharing helper with `-shared -fPIC -ldl`. Add the runtime/launch files to the previous clean model payload, update its frontend manifest/hash and include PORTS in its system list. `scripts/build_latest_images.py` packages and verifies the image with the updated first-boot installer. It never writes a physical SD card.
-
-The selected NextUI library build carries upstream noncommercial terms and MinUI-derived notices. The adapter is MIT, but those libraries keep their own terms; copies are in licenses/ and the packaged System/licenses/portmaster-h700 directory. See the repository sharing notes before redistribution.
-
-
-## Optional Controls Test
-
-`native-input-probe.c` is a small original SDL2 diagnostic with no game data. Build in ARM64 Bullseye with `gcc -O2 -Wall -Wextra -Werror native-input-probe.c -o slot-controls-test $(sdl2-config --cflags --libs)` (SDL2 development headers required). A `SDL_VIDEODRIVER=dummy ./slot-controls-test --self-test` smoke test runs five frames without hardware. That checks application startup/render calls, not physical input or the vendor video driver.
-
-Install its binary in `ports/.ports/slot-controls-test/slot-controls-test` and copy the adjacent `Slot Controls Test.sh` to both `ports/.ports` and `ports`. Restart Slot to scan it, or add a `Games/PORTS/Slot Controls Test.port` descriptor containing `script:Slot Controls Test.sh`. No game, BIOS, Wi-Fi or additional download is required.
-
-Open **Ports → Slot Controls Test**. Hold a direction: in digital mode the DPAD HAT number changes while LEFT STICK X/Y stay zero. Hold Menu, tap Select, release both and hold a direction again: X/Y should change while HAT stays zero. Check face/shoulder buttons, then hold Menu alone one second to return. Launch it again to check that its mode is remembered. The mode for this diagnostic is separate from every game. Reconnect the card after testing to inspect `Config/ports.log` and the H700 adapter log if anything fails. Actual on-device testing is pending.
-
-
-## Owner-supplied GTA SA and NFS U2
-
-The example launchers in `launchers/` use the H700 fbdev/Mali environment and Slot's inherited audio/quit handling. They do not include games or runtimes. Copy a matching launcher to `ports` and `ports/.ports`, put your verified game runtime/data in `ports/.ports/gtasa` or `ports/.ports/nfsu2`, and let Slot scan the launcher. For GTA, the tested private wrapper supports the `GTASA-Gamepad` normalized input profile; other wrapper versions may differ. The private PC EXE must match the NFS runtime; see the existing private-build notes. Never commit or upload those game-linked binaries, APK/OBB or commercial assets.
-
-NFS starts at 320x240 rendering, 30 FPS cap and the existing low graphics profile. That is a starting configuration, not a handheld speed guarantee. Both named games start with D-pad driving the left stick; Menu+Select changes mode and remembers it. NFS Menu+X opens its native on-screen keyboard; use digital mode to navigate that keyboard if needed. GTA has no separate camera stick on these devices; its normal auto-camera/targeting remain. Long-press Menu alone returns to Slot. No game-specific physical run has yet been performed on either SP.
+The manager uses [nextui-portmaster-h700 v0.4.0](https://github.com/Logarythms/nextui-portmaster-h700/releases/tag/v0.4.0)
+and [NextUI h700-rc11](https://github.com/pvaibhav/NextUI/releases/tag/h700-rc11)
+libraries. Runtime pins, preparation script, adapter patch and notices remain
+in this directory. The selected libraries retain noncommercial/MinUI-derived
+terms; this combined firmware is not unrestricted GPL-only software. Preserve
+component notices and corresponding sources. See [credits](../../CREDITS.md)
+and [sharing notes](../../docs/SHARING.md). No commercial game files are supplied.

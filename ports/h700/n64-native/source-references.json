@@ -1,0 +1,32 @@
+[
+  {
+    "component": "core",
+    "upstream_revision": "6dca4c15370ac3e2171ce7b31426695f8f39b460",
+    "source_sha256": "a91f46761ab476aa1b525bd3117bc6b89deb74656905609cffe0414d6d2dd858",
+    "recipe_url": "https://github.com/AmberELEC/AmberELEC/blob/main/packages/games/emulators/mupen64plussa/mupen64plussa-core/package.mk"
+  },
+  {
+    "component": "video-rice",
+    "upstream_revision": "038882dd2e7cb660fd7512c0745032f17edd0bfa",
+    "source_sha256": "78da24ea9e66af612a09ffdc29fccd3b1fa6ea68a9bd19d1474c71e7ac440d0d",
+    "recipe_url": "https://github.com/AmberELEC/AmberELEC/blob/main/packages/games/emulators/mupen64plussa/mupen64plussa-video-rice/package.mk"
+  },
+  {
+    "component": "audio-sdl",
+    "upstream_revision": "2faed1c7e62c5f292948e7cd2398c184970cf794",
+    "source_sha256": "36d3106fa0f3af34af27f09f5be5b1c1465deb17021fffe1e7e048576cc575b8",
+    "recipe_url": "https://github.com/AmberELEC/AmberELEC/blob/main/packages/games/emulators/mupen64plussa/mupen64plussa-audio-sdl/package.mk"
+  },
+  {
+    "component": "input-sdl",
+    "upstream_revision": "842c39e89749aa3a8d02202b2afddd20b29cdfdb",
+    "source_sha256": "7d69413251ed2e772098a73ba1815c9310243f3ccc7e99ecbda33dc4d7b5d283",
+    "recipe_url": "https://github.com/AmberELEC/AmberELEC/blob/main/packages/games/emulators/mupen64plussa/mupen64plussa-input-sdl/package.mk"
+  },
+  {
+    "component": "rsp-hle",
+    "upstream_revision": "8a7a472a7172eb2c8725b305eae26818ed7b51a2",
+    "source_sha256": "c4476076b7f6551bfb7963fb71178c71544ec891be970c7b010135631dc54543",
+    "recipe_url": "https://github.com/AmberELEC/AmberELEC/blob/main/packages/games/emulators/mupen64plussa/mupen64plussa-rsp-hle/package.mk"
+  }
+]
