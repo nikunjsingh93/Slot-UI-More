@@ -17,6 +17,11 @@ pub enum Core {
     ParallelN64,
     Flycast,
     Ppsspp,
+    Fceumm,
+    GenesisPlusGx,
+    BeetlePceFast,
+    Fbneo,
+
 }
 
 impl Core {
@@ -33,6 +38,10 @@ impl Core {
             Core::ParallelN64 => "parallel_n64",
             Core::Flycast => "flycast",
             Core::Ppsspp => "ppsspp",
+            Core::Fceumm => "fceumm",
+            Core::GenesisPlusGx => "genesis_plus_gx",
+            Core::BeetlePceFast => "mednafen_pce_fast",
+            Core::Fbneo => "fbneo",
         }
     }
 
@@ -51,6 +60,10 @@ impl Core {
             Core::ParallelN64 => "ParaLLEl N64",
             Core::Flycast => "Flycast",
             Core::Ppsspp => "PPSSPP",
+            Core::Fceumm => "FCEUmm",
+            Core::GenesisPlusGx => "Genesis Plus GX",
+            Core::BeetlePceFast => "Beetle PCE Fast",
+            Core::Fbneo => "FinalBurn Neo",
         }
     }
 
@@ -65,6 +78,10 @@ impl Core {
             "parallel_n64" => Some(Core::ParallelN64),
             "flycast" => Some(Core::Flycast),
             "ppsspp" => Some(Core::Ppsspp),
+            "fceumm" => Some(Core::Fceumm),
+            "genesis_plus_gx" => Some(Core::GenesisPlusGx),
+            "mednafen_pce_fast" => Some(Core::BeetlePceFast),
+            "fbneo" => Some(Core::Fbneo),
             _ => None,
         }
     }
@@ -78,6 +95,10 @@ impl Core {
             Core::Flycast => platform == Platform::Dreamcast,
             Core::Ppsspp => platform == Platform::Psp,
             Core::Gpsp => platform == Platform::Gba,
+            Core::Fceumm => platform == Platform::Nes,
+            Core::GenesisPlusGx => matches!(platform, Platform::MegaDrive | Platform::MasterSystem | Platform::GameGear),
+            Core::BeetlePceFast => platform == Platform::PcEngine,
+            Core::Fbneo => platform == Platform::Arcade,
         }
     }
 
@@ -89,6 +110,12 @@ impl Core {
             Platform::N64 => Core::ParallelN64,
             Platform::Dreamcast => Core::Flycast,
             Platform::Psp => Core::Ppsspp,
+            Platform::Nes => Core::Fceumm,
+            Platform::MegaDrive => Core::GenesisPlusGx,
+            Platform::MasterSystem => Core::GenesisPlusGx,
+            Platform::GameGear => Core::GenesisPlusGx,
+            Platform::PcEngine => Core::BeetlePceFast,
+            Platform::Arcade => Core::Fbneo,
             Platform::Ports => Core::Mgba, // External launcher; no core is opened.
         }
     }

@@ -10,7 +10,7 @@ Slot, its contributors and Markus's upstream artwork; preserve component notices
 - Repository: https://github.com/nikunjsingh93/Slot-UI-More
 - Artwork Studio: https://nikunjsingh93.github.io/Slot-UI-More/
 - Main references: `README.md`, `CREDITS.md`, `docs/SHARING.md`.
-- Release evidence: `docs/releases/`, `docs/RELEASE-1.1.16.md`.
+- Release evidence: `docs/releases/`, `docs/RELEASE-1.1.17.md` and the earlier 1.1.16 notes.
 - Accepted runtime evidence: `docs/RGSP-ACCEPTED-20261021.json` and
   `docs/G350-2026-10-19-N64-VALIDATION.json`.
 
@@ -61,6 +61,18 @@ Under the Slot root: `Games/<SYSTEM>`, `Labels/<SYSTEM>`, `BIOS`, `Saves`,
 `GB`, `GBC`, `GBA`, `SNES`, `PS1`, `N64`, `DC`, `PSP`, `PORTS`.
 Labels use the exact game/launcher filename stem plus `.png`. Preserve normal
 game saves separately from emulator state snapshots.
+
+The 2026-10-22 working tree for **1.1.17 testing** appends `NES`, `MD`, `SMS`,
+`GG`, `PCE`, `ARCADE` to both Platform enums (never reorder the existing IDs,
+which index H700 persisted screen settings). These are not yet in public 1.1.16
+images. New core/source pins, exact arcade-set requirements and component-license
+notes are in `docs/ADDITIONAL-SYSTEMS.md` and `docs/additional-core-sources.json`.
+Sega here means Genesis/Master System/Game Gear; Sega CD/32X/Saturn are outside
+this addition. PCE Fast covers HuCards, not SuperGrafx. FBNeo archives must match
+the pinned DAT; keep ZIP names, hide recognized BIOS archives, and use local DAT
+names for artwork matching. New digital systems must not enter H700's 3D-only
+analog mode. Arcade rotation/letterboxing is isolated in the libretro bridge;
+the accepted PS1/SNES/N64/DC/PSP paths are preserved. See HANDOFF for delivery state.
 
 ## Runtime architecture and implemented behavior
 
@@ -139,6 +151,12 @@ under `System/PortCompat/supertuxkart` apart from game data.
 10. **Build caching:** reusing one Cargo target directory across the two
     same-named but different frontend workspaces caused incorrect dependency
     reuse. Build them in separate target directories.
+    Compose disk images on native Linux storage, not the Windows-mapped output
+    folder: a 1.1.17 G350 mtools update there failed SYSTEM readback, while the
+    native-filesystem rebuild passed. The failed artifact was not published.
+    Copy verified ZIPs out sequentially and compare hashes. The image composer
+    keeps working images under its work directory and checks the final embedded
+    H700 rootfs region too; use a native `/tmp` work directory.
 11. **Hardware diagnosis:** a four-second G350 power-off once proved to be a
     low-battery issue, not firmware corruption. Check power before reflashing.
 

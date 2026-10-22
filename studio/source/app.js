@@ -1,8 +1,8 @@
 'use strict';
 const $=id=>document.getElementById(id);
-const REPOS={GB:'Nintendo_-_Game_Boy',GBC:'Nintendo_-_Game_Boy_Color',GBA:'Nintendo_-_Game_Boy_Advance',SNES:'Nintendo_-_Super_Nintendo_Entertainment_System',PS1:'Sony_-_PlayStation',N64:'Nintendo_-_Nintendo_64',DC:'Sega_-_Dreamcast',PSP:'Sony_-_PlayStation_Portable'};
+const REPOS={GB:'Nintendo_-_Game_Boy',GBC:'Nintendo_-_Game_Boy_Color',GBA:'Nintendo_-_Game_Boy_Advance',SNES:'Nintendo_-_Super_Nintendo_Entertainment_System',PS1:'Sony_-_PlayStation',N64:'Nintendo_-_Nintendo_64',DC:'Sega_-_Dreamcast',PSP:'Sony_-_PlayStation_Portable',NES:"Nintendo_-_Nintendo_Entertainment_System",MD:"Sega_-_Mega_Drive_-_Genesis",SMS:"Sega_-_Master_System_-_Mark_III",GG:"Sega_-_Game_Gear",PCE:"NEC_-_PC_Engine_-_TurboGrafx_16",ARCADE:"FBNeo_-_Arcade_Games"};
 const CATALOG=JSON.parse($('catalog').textContent);
-const EXTS={GB:['gb'],GBC:['gbc','gb'],GBA:['gba'],SNES:['sfc','smc'],PS1:['chd','cue','m3u','pbp','exe'],N64:['z64','n64','v64'],DC:['chd','gdi','cdi','cue','m3u'],PSP:['iso','cso','pbp']};
+const EXTS={GB:['gb'],GBC:['gbc','gb'],GBA:['gba'],SNES:['sfc','smc'],PS1:['chd','cue','m3u','pbp','exe'],N64:['z64','n64','v64'],DC:['chd','gdi','cdi','cue','m3u'],PSP:['iso','cso','pbp'],NES:['nes','unf','unif'],MD:['md','gen','bin','smd'],SMS:['sms'],GG:['gg'],PCE:['pce'],ARCADE:['zip']};
 const MEDIA={logo:'Named_Logos',cover:'Named_Boxarts'};
 let games=[],rootHandle=null,generation=0,busy=false,stop=false,activity='';
 const imageCache=new Map(),indices={};
@@ -15,7 +15,7 @@ for(const p of Object.keys(REPOS)){
  indices[p]=CATALOG.platforms[p].games.map(row=>({title:row[0],mask:row[1],key:normal(row[0])}));
 }
 function candidates(platform,query){const key=normal(query);if(!key)return [];const region=(query.match(/\((USA|Europe|Japan|World)[^)]*\)/i)||[])[1]?.toLowerCase();const ranked=indices[platform].map(entry=>{let score=dice(key,entry.key);if(numbers(key)!==numbers(entry.key))score*=.65;const exact=key===entry.key;let tie=0;if(entry.title.normalize('NFC').toLowerCase()===query.normalize('NFC').trim().toLowerCase())tie+=.1;if(region&&entry.title.toLowerCase().includes('('+region))tie+=.03;if(entry.title.includes('(USA)'))tie+=.01;if(/\((?:Rev|Virtual|Beta|Proto)/i.test(entry.title))tie-=.001;if(!/\(Disc [2-9]/.test(entry.title))tie+=.002;if(entry.mask&1)tie+=.001;return {...entry,score,exact,tie};}).filter(e=>e.score>.28).sort((a,b)=>b.score-a.score||b.tie-a.tie||a.title.localeCompare(b.title));return ranked;}
-function autoMatch(g){const list=candidates(g.platform,g.stem);g.options=list.slice(0,16);const best=list[0],other=list.find(x=>x.key!==best?.key);const confident=best&&(best.exact||(best.score>=.92&&(!other||best.score-other.score>=.09)));g.match=confident?best:null;g.state=confident?'Waiting for artwork':'Needs a match';g.detail=confident?(best.exact?'Name match':'Close name match'):'Choose a title below';}
+function autoMatch(g){const query=g.platform==='ARCADE'?(CATALOG.arcade_aliases?.[g.stem.toLowerCase()]||g.stem):g.stem;const list=candidates(g.platform,query);g.options=list.slice(0,16);const best=list[0],other=list.find(x=>x.key!==best?.key);const confident=best&&(best.exact||(best.score>=.92&&(!other||best.score-other.score>=.09)));g.match=confident?best:null;g.state=confident?'Waiting for artwork':'Needs a match';g.detail=confident?(best.exact?'Name match':'Close name match'):'Choose a title below';}
 function readyRows(){return games.filter(g=>g.blob&&!g.saved&&(!g.existing||$('replace').checked));}
 function setStatus(s){$('status').textContent=s;}
 function updateSummary(){const ready=readyRows().length,existing=games.filter(g=>g.existing&&!g.blob).length,needs=games.filter(g=>!g.match&&!g.existing).length;const saved=games.filter(g=>g.saved).length;$('summary').textContent=games.length?`${games.length} games · ${ready} ready · ${existing} existing labels kept · ${needs} need a match${saved?' · '+saved+' saved':''}`:'No folder selected';$('save').disabled=busy||!ready||!rootHandle;$('zip').disabled=busy||!ready;$('retry').disabled=busy||!games.length;$('pick').disabled=busy;$('folder').disabled=busy;$('style').disabled=busy;$('replace').disabled=busy;$('cancel').hidden=activity!=='download';for(const g of games){if(g.tile){g.tile.querySelectorAll('.scan-crop input,.scan-crop button').forEach(e=>e.disabled=busy);g.tile.querySelector('select').disabled=busy||g.fetching;g.tile.querySelector('input').disabled=busy||g.fetching;g.tile.querySelector('.fetch-one').disabled=busy||g.fetching||!g.match||(g.existing&&!$('replace').checked);}}}
@@ -24,8 +24,64 @@ async function fetchImage(platform,folder,title){const key=platform+'/'+folder+'
 function backdrop(title){let h=0;for(const ch of title)h=(h*31+ch.charCodeAt(0))>>>0;return `hsl(${h%360} 40% 35%)`;}
 function isDisc(platform){return ['PS1','DC','PSP'].includes(platform);}
 function physicalKey(platform,title){const key=normal(title);return platform==='DC'&&key==='virtua tennis sega professional tennis'?'virtua tennis':key;}
-function labelSize(platform){return isDisc(platform)?[312,312]:platform==='N64'?[180,190]:platform==='GBA'?[266,138]:['GB','GBC'].includes(platform)?[220,195]:[224,139];}
-function scanCrop(g,result){if(g.platform==='GBA')return [.135,.231,.740,.651];if(['GB','GBC'].includes(g.platform))return [.147,.291,.707,.577];if(g.platform==='PSP')return [.055,.055,.89,.89];if(isDisc(g.platform))return [0,0,1,1];if(g.platform==='N64')return [.25,.08,.50,.84];return /Japan/i.test(result.region)?[.19,.19,.62,.63]:[.195,.008,.62,.44];}
+const LEGACY_CARTS={
+  "NES": [
+    300,
+    350,
+    80,
+    20,
+    190,
+    245,
+    144
+  ],
+  "MD": [
+    360,
+    220,
+    48,
+    22,
+    264,
+    151,
+    38
+  ],
+  "SMS": [
+    300,
+    310,
+    24,
+    24,
+    252,
+    230,
+    42
+  ],
+  "GG": [
+    250,
+    260,
+    22,
+    38,
+    206,
+    168,
+    42
+  ],
+  "PCE": [
+    300,
+    190,
+    12,
+    12,
+    276,
+    139,
+    231
+  ],
+  "ARCADE": [
+    360,
+    260,
+    78,
+    33,
+    204,
+    124,
+    48
+  ]
+};
+function labelSize(platform){if(LEGACY_CARTS[platform])return LEGACY_CARTS[platform].slice(4,6);return isDisc(platform)?[312,312]:platform==='N64'?[180,190]:platform==='GBA'?[266,138]:['GB','GBC'].includes(platform)?[220,195]:[224,139];}
+function scanCrop(g,result){if(LEGACY_CARTS[g.platform]){const [w,h,x,y,lw,lh]=LEGACY_CARTS[g.platform];return [x/w,y/h,lw/w,lh/h];}if(g.platform==='GBA')return [.135,.231,.740,.651];if(['GB','GBC'].includes(g.platform))return [.147,.291,.707,.577];if(g.platform==='PSP')return [.055,.055,.89,.89];if(isDisc(g.platform))return [0,0,1,1];if(g.platform==='N64')return [.25,.08,.50,.84];return /Japan/i.test(result.region)?[.19,.19,.62,.63]:[.195,.008,.62,.44];}
 function labelCanvas(g,img,kind){const ps=isDisc(g.platform),c=document.createElement('canvas');[c.width,c.height]=labelSize(g.platform);const x=c.getContext('2d');
  if(kind==='physical'){
   if(ps){const [a,b,w,h]=g.crop||scanCrop(g,g.art),sw=img.width*w,sh=img.height*h,scale=Math.min(c.width/sw,c.height/sh);x.drawImage(img,img.width*a,img.height*b,sw,sh,(c.width-sw*scale)/2,(c.height-sh*scale)/2,sw*scale,sh*scale);x.globalCompositeOperation='destination-in';x.beginPath();x.arc(156,156,155.5,0,Math.PI*2);x.fill();if(g.platform!=='PSP'){x.globalCompositeOperation='destination-out';x.beginPath();x.arc(156,156,19.5,0,Math.PI*2);x.fill();}x.globalCompositeOperation='source-over';}
@@ -38,12 +94,20 @@ function labelCanvas(g,img,kind){const ps=isDisc(g.platform),c=document.createEl
  if(kind==='logo'){const box=ps?{x:32,y:48,w:248,h:91}:{x:12,y:15,w:c.width-24,h:c.height-30};const scale=Math.min(box.w/img.width,box.h/img.height);const w=img.width*scale,h=img.height*scale;x.drawImage(img,box.x+(box.w-w)/2,box.y+(box.h-h)/2,w,h);}
  else{const scale=Math.max(c.width/img.width,c.height/img.height);const w=img.width*scale,h=img.height*scale;x.drawImage(img,(c.width-w)/2,(c.height-h)/2,w,h);}return c;
 }
-function faceCanvas(platform,label){const ps=isDisc(platform),n64=platform==='N64',c=document.createElement('canvas');c.width=ps?312:360;c.height=ps?312:n64?232:220;const x=c.getContext('2d');
+function faceCanvas(platform,label){if(LEGACY_CARTS[platform])return legacyCanvas(platform,label);const ps=isDisc(platform),n64=platform==='N64',c=document.createElement('canvas');c.width=ps?312:360;c.height=ps?312:n64?232:220;const x=c.getContext('2d');
  if(['GB','GBC','GBA'].includes(platform))return gameboyCanvas(platform,label);
  if(platform==='PSP')return umdCanvas(label);
  if(ps){const a=document.createElement('canvas');a.width=312;a.height=312;a.getContext('2d').drawImage(label,0,0,312,312);const source=a.getContext('2d').getImageData(0,0,312,312).data,out=x.createImageData(312,312),scan=source[3]<8&&source[(156*312+156)*4+3]<8;for(let y=0;y<312;y++)for(let z=0;z<312;z++){const dx=z+.5-156,dy=y+.5-156,r=Math.hypot(dx,dy),o=(y*312+z)*4;if(r<19.5||r>=155.5)continue;if(r<(scan?27:47)||r>(scan?153:148)){const v=(r<27?155:210)+Math.sin(Math.atan2(dx,dy)*3)*18;out.data[o]=v;out.data[o+1]=v+4;out.data[o+2]=v+8;}else{out.data[o]=source[o];out.data[o+1]=source[o+1];out.data[o+2]=source[o+2];}out.data[o+3]=Math.max(0,Math.min(1,155.5-r,r-19.5))*255;}x.putImageData(out,0,0);if(platform==='PSP')return umdCanvas(c);}
  else if(n64){x.fillStyle='#48494b';x.fillRect(74,209,212,23);x.fillStyle='#adadb0';x.beginPath();x.moveTo(3,33);x.quadraticCurveTo(180,-17,357,33);x.lineTo(357,209);x.lineTo(3,209);x.closePath();x.fill();x.drawImage(label,90,18,180,190);x.fillStyle='#b49747';for(let z=74;z<286;z+=12)x.fillRect(z,217,7,15);}
  else{x.fillStyle='#555558';x.fillRect(66,192,228,28);x.fillStyle='#b7b7ba';x.beginPath();x.roundRect(0,0,360,202,12);x.fill();x.drawImage(label,68,24,224,139);x.fillStyle='#8f8f92';for(let y=38;y<164;y+=12){x.fillRect(8,y,42,3);x.fillRect(309,y,43,3);}x.fillStyle='#b3974f';for(let z=72;z<288;z+=12)x.fillRect(z,206,7,14);}return c;
+}
+function legacyCanvas(platform,label){
+ const [w,h,lx,ly,lw,lh,shade]=LEGACY_CARTS[platform],c=document.createElement('canvas');c.width=w;c.height=h;
+ const x=c.getContext('2d');x.fillStyle=platform==='ARCADE'?'#1b5b41':`rgb(${shade},${shade},${shade})`;
+ x.beginPath();x.roundRect(0,0,w,h-18,5);x.fill();x.strokeStyle='#7778';x.lineWidth=3;x.stroke();
+ x.fillStyle='#2a2a2a';x.fillRect(w/5,h-18,w*3/5,18);x.fillStyle='#b79748';for(let a=Math.ceil(w/5/12)*12;a<w*4/5;a+=12)x.fillRect(a,h-18,7,18);
+ if(platform==='NES'){x.fillStyle='#6f6f6f';for(let a=0;a<62;a+=10)x.fillRect(a,16,3,h-48);}
+ x.drawImage(label,lx,ly,lw,lh);return c;
 }
 // Shell outlines come from the same GPL Slot SVG assets as the device frontend.
 const CART_SHELLS=JSON.parse($('cart-shells').textContent);
@@ -86,7 +150,7 @@ const physicalIndices={};
 for(const p of Object.keys(REPOS).filter(p=>p!=='PS1'))physicalIndices[p]=CATALOG.physical[p].map(row=>({title:row[0],key:physicalKey(p,row[0]),images:row[1]}));
 physicalIndices.PS1=CATALOG.physical.PS1.map(title=>({title,key:normal(title),disc:Number((title.match(/\(Disc (\d+)/i)||[])[1]||1)}));
 function desiredRegion(g){return /\((?:Japan|Japan,)/i.test(g.stem)?'Japan':/\((?:Europe|France|Germany|Spain|Italy)/i.test(g.stem)?'Europe':/\(USA/i.test(g.stem)?'North America':null;}
-function physicalChoice(g){const key=physicalKey(g.platform,g.match.title),region=desiredRegion(g);let choices=physicalIndices[g.platform].filter(x=>x.key===key);
+function physicalChoice(g){if(g.platform==='ARCADE')return null;const key=physicalKey(g.platform,g.match.title),region=desiredRegion(g);let choices=physicalIndices[g.platform].filter(x=>x.key===key);
  if(g.platform==='PS1'){const disc=Number((g.stem.match(/(?:disc|disk|cd)[ _-]*(\d+)/i)||[])[1]||1);choices=choices.filter(x=>x.disc===disc);choices.sort((a,b)=>{const score=x=>region?Number(x.title.includes(region==='North America'?'(USA)':`(${region}`))*2:Number(x.title.includes('(USA)'));return score(b)-score(a);});const entry=choices[0];if(!entry)return null;return {title:entry.title,url:'https://raw.githubusercontent.com/UnluckyForSome/PSX1G1B1C1D/main/library/disc/'+encodeURIComponent(entry.title+'.png'),region:region||'From disc scan',kind:'physical'};}
  const entry=choices[0];if(!entry)return null;const images=[...entry.images].sort((a,b)=>{const score=x=>(region?Number(x[1]===region)*4:0)+Number(x[1]==='North America')*2+Number(!x[1]);return score(b)-score(a);});const chosen=images[0];const original='https://images.launchbox-app.com/'+chosen[0];return {title:entry.title,url:'https://wsrv.nl/?url='+encodeURIComponent('images.launchbox-app.com/'+chosen[0])+'&w=1000&output=png',source:original,region:chosen[1],kind:'physical'};
 }
@@ -100,13 +164,13 @@ async function fetchOne(g,token){if(!g.match||g.fetching||(g.existing&&!$('repla
 
 async function fill(){if(busy)return;busy=true;activity='download';stop=false;const token=generation;updateSummary();const queue=games.filter(g=>(!g.existing||$('replace').checked)&&g.match&&!g.saved&&!g.blob);const total=queue.length;let done=0;async function worker(){while(queue.length&&!stop&&token===generation){const g=queue.shift();await fetchOne(g,token);done++;if(token===generation)setStatus(`Processed ${done} of ${total} requested labels…`);}}await Promise.all([worker(),worker(),worker()]);busy=false;activity='';updateSummary();games.forEach(paint);setStatus(stop?'Stopped. Finished labels are ready to save.':'Artwork lookup finished. Save the ready labels or correct any unmatched titles.');}
 function relativePath(base,value){if(/^(?:[a-z]+:|[\\/])/i.test(value))return null;const parts=[...base.split('/').slice(0,-1),...value.replace(/\\/g,'/').split('/')];const out=[];for(const part of parts){if(part==='..'){if(!out.length)return null;out.pop();}else if(part&&part!=='.')out.push(part);}return out.join('/').normalize('NFC').toLowerCase();}
-async function scanFiles(entries,knownPrefix){const keys=[...entries.keys()];let prefix=knownPrefix??(keys.some(p=>/^Games\//i.test(p))?'':null);if(prefix===null){const candidate=keys.find(p=>/^(?:[^/]+\/)+Games\/(SNES|PS1|N64|DC|PSP|GBA|GB|GBC)\/[^/]+$/i.test(p));if(candidate)prefix=candidate.slice(0,candidate.toLowerCase().indexOf('games/'));}if(prefix===null)throw new Error('Choose the Slot folder that contains Games and Labels.');const selected=[];for(const [path,getFile] of entries){const rel=path.slice(prefix.length);const match=rel.match(/^Games\/(GB|GBC|GBA|SNES|PS1|N64|DC|PSP)\/([^/]+)$/i);if(!match||match[2].startsWith('.'))continue;const platform=match[1].toUpperCase(),filename=match[2];if(EXTS[platform].includes(ext(filename)))selected.push({platform,filename,stem:stem(filename),path,getFile,options:[],state:'Scanning'});}
+async function scanFiles(entries,knownPrefix){const keys=[...entries.keys()];let prefix=knownPrefix??(keys.some(p=>/^Games\//i.test(p))?'':null);if(prefix===null){const candidate=keys.find(p=>/^(?:[^/]+\/)+Games\/(SNES|PS1|N64|DC|PSP|GBA|GB|GBC|NES|MD|SMS|GG|PCE|ARCADE)\/[^/]+$/i.test(p));if(candidate)prefix=candidate.slice(0,candidate.toLowerCase().indexOf('games/'));}if(prefix===null)throw new Error('Choose the Slot folder that contains Games and Labels.');const selected=[];for(const [path,getFile] of entries){const rel=path.slice(prefix.length);const match=rel.match(/^Games\/(GB|GBC|GBA|SNES|PS1|N64|DC|PSP|NES|MD|SMS|GG|PCE|ARCADE)\/([^/]+)$/i);if(!match||match[2].startsWith('.'))continue;const platform=match[1].toUpperCase(),filename=match[2];if(platform==='ARCADE'&&(CATALOG.arcade_bios||[]).includes(stem(filename).toLowerCase()))continue;if(EXTS[platform].includes(ext(filename)))selected.push({platform,filename,stem:stem(filename),path,getFile,options:[],state:'Scanning'});}
  const referenced=new Set();for(const g of selected.filter(g=>['PS1','DC'].includes(g.platform)&&ext(g.filename)==='m3u')){try{const f=await g.getFile();if(f.size>1024*1024)throw new Error('Playlist is unexpectedly large');for(const line of (await f.text()).split(/\r?\n/).map(s=>s.trim()).filter(s=>s&&!s.startsWith('#'))){const p=relativePath(g.path,line);if(p)referenced.add(p);}}catch(e){g.playlistWarning='Playlist could not be read: '+e.message;}}
  const rows=selected.filter(g=>!['PS1','DC'].includes(g.platform)||ext(g.filename)==='m3u'||!referenced.has(g.path.normalize('NFC').toLowerCase()));const labels=new Map(keys.filter(p=>/\.png$/i.test(p)).map(p=>[p.normalize('NFC').toLowerCase(),entries.get(p)]));for(const g of rows){const labelPath=prefix+'Labels/'+g.platform+'/'+g.stem+'.png';g.existing=labels.has(labelPath.normalize('NFC').toLowerCase());g.existingFile=labels.get(labelPath.normalize('NFC').toLowerCase());autoMatch(g);if(g.existing){g.state='Existing label kept';g.detail='Not overwritten unless you enable replacement';}}
  return rows.sort((a,b)=>a.platform.localeCompare(b.platform)||a.stem.localeCompare(b.stem));}
 async function optionalDir(parent,name){try{return await parent.getDirectoryHandle(name);}catch(e){if(e.name==='NotFoundError')return null;throw e;}}
 async function scanHandle(handle){let root=handle;if(!await optionalDir(root,'Games')){const nested=await optionalDir(root,'Slot');if(nested&&await optionalDir(nested,'Games'))root=nested;else throw new Error('Choose Slot, or the card folder containing Slot.');}const entries=new Map();for(const parentName of ['Games','Labels']){const parent=await optionalDir(root,parentName);if(!parent)continue;for(const p of Object.keys(REPOS)){let dir=await optionalDir(parent,p);if(!dir)continue;for await(const [name,item] of dir.entries()){if(item.kind==='file')entries.set(parentName+'/'+p+'/'+name,()=>item.getFile());}}}return {root,rows:await scanFiles(entries,'')};}
-async function loadRows(rows,root,name){generation++;busy=true;activity="scan";rootHandle=root;games=rows;$('grid').replaceChildren(...games.map(makeTile));$('empty').hidden=!!games.length;$('empty').textContent=games.length?'':'No supported games found. Use Games/GB, GBC, GBA, SNES, PS1, N64, DC or PSP inside Slot (or your BASEOS card folder).';setStatus(`${name}: ${games.length} games found. Looking up artwork…`);updateSummary();const token=generation;await Promise.all(games.filter(g=>g.existing).map(async g=>{try{const f=await g.existingFile(),img=await createImageBitmap(f);if(token!==generation){img.close();return;}const c=document.createElement('canvas');c.width=labelSize(g.platform)[0];c.height=labelSize(g.platform)[1];c.getContext('2d').drawImage(img,0,0,c.width,c.height);img.close();g.label=c;paint(g);}catch{g.detail='Existing PNG could not be previewed; file is kept';paint(g);}}));if(token===generation){busy=false;await fill();}}
+async function loadRows(rows,root,name){generation++;busy=true;activity="scan";rootHandle=root;games=rows;$('grid').replaceChildren(...games.map(makeTile));$('empty').hidden=!!games.length;$('empty').textContent=games.length?'':'No supported games found. Use Games/GB, GBC, GBA, SNES, PS1, N64, DC, PSP, NES, MD, SMS, GG, PCE or ARCADE inside Slot (or your BASEOS card folder).';setStatus(`${name}: ${games.length} games found. Looking up artwork…`);updateSummary();const token=generation;await Promise.all(games.filter(g=>g.existing).map(async g=>{try{const f=await g.existingFile(),img=await createImageBitmap(f);if(token!==generation){img.close();return;}const c=document.createElement('canvas');c.width=labelSize(g.platform)[0];c.height=labelSize(g.platform)[1];c.getContext('2d').drawImage(img,0,0,c.width,c.height);img.close();g.label=c;paint(g);}catch{g.detail='Existing PNG could not be previewed; file is kept';paint(g);}}));if(token===generation){busy=false;await fill();}}
 $('pick').addEventListener('click',async()=>{if(!window.showDirectoryPicker){$('folder').click();return;}try{const chosen=await showDirectoryPicker({id:'slot-artwork',mode:'readwrite'});setStatus('Scanning folder…');const found=await scanHandle(chosen);await loadRows(found.rows,found.root,found.root.name);}catch(e){if(e.name!=='AbortError')setStatus(e.message);}});
 $('folder').addEventListener('change',async()=>{try{const entries=new Map();for(const f of $('folder').files){const parts=f.webkitRelativePath.split('/');parts.shift();entries.set(parts.join('/'),()=>Promise.resolve(f));}await loadRows(await scanFiles(entries),null,'Selected folder');}catch(e){setStatus(e.message);}finally{$('folder').value='';}});
 $('browse').addEventListener('click',()=>$('folder').click());

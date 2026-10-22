@@ -42,6 +42,9 @@ struct Host {
     hardware: Option<crate::hardware::Hardware>,
     hw_request: Option<HwRenderCallback>,
     console_video: bool,
+    arcade: bool,
+    rotation: u32,
+    arcade_aspect: f32,
     disk: Option<DiskControlCallback>,
     disc_file: Option<std::path::PathBuf>,
     audio: Vec<i16>,
@@ -203,6 +206,14 @@ unsafe extern "C" fn environment(cmd: c_uint, data: *mut c_void) -> bool {
                 _ => return false,
             };
             with_host(|h| h.format = want).is_some()
+        }
+        SET_ROTATION => {
+            if data.is_null() {return false;}
+            with_host(|h| {
+                if !h.arcade { return false; }
+                h.rotation = *(data as *const u32) & 3;
+                true
+            }).unwrap_or(false)
         }
         GET_SYSTEM_DIRECTORY | GET_SAVE_DIRECTORY => {
             if data.is_null() {
@@ -510,6 +521,10 @@ unsafe extern "C" fn video_refresh(
         } else {
             pitch
         };
+        if h.arcade {
+            arcade_frame(h, data, width, height, pitch);
+            return;
+        }
         if h.ps1 || h.console_video {
             // Fit the entire PS1 frame to its 4:3 display; never crop to GBA dimensions.
             let bpp = if h.format == PixelFormat::Xrgb8888 {
@@ -604,6 +619,32 @@ unsafe extern "C" fn video_refresh(
             }
         }
     });
+}
+
+
+fn rotated_source(x: usize,y: usize,w: usize,h: usize,rotation: u32) -> (usize,usize) {
+    match rotation & 3 {1=>(w-1-y,x),2=>(w-1-x,h-1-y),3=>(y,h-1-x),_=>(x,y)}
+}
+unsafe fn arcade_frame(h: &mut Host,data: *const c_void,width: u32,height: u32,pitch: usize) {
+    let bpp=if h.format==PixelFormat::Xrgb8888 {4} else {2};
+    if width==0 || height==0 || width>2048 || height>2048 || pitch<width as usize*bpp {return;}
+    let (w,ht)=(width as usize,height as usize);
+    let (rw,rh)=if h.rotation%2==1 {(ht,w)} else {(w,ht)};
+    let aspect=if h.arcade_aspect.is_finite() && h.arcade_aspect>0.1 && h.arcade_aspect<10.0 {h.arcade_aspect} else {rw as f32/rh as f32};
+    let (dw,dh)=if aspect>=4.0/3.0 {(640,(640.0/aspect).round() as usize)} else {((480.0*aspect).round() as usize,480)};
+    let (dw,dh)=(dw.clamp(1,640),dh.clamp(1,480));
+    let (ox,oy)=((640-dw)/2,(480-dh)/2);
+    h.video.resize(640*480*4,0);h.video.fill(0);
+    for y in 0..dh { for x in 0..dw {
+        let (sx,sy)=rotated_source(x*rw/dw,y*rh/dh,w,ht,h.rotation);
+        let src=(data as *const u8).add(sy*pitch+sx*bpp);
+        let o=((y+oy)*640+x+ox)*4;
+        if bpp==4 {ptr::copy_nonoverlapping(src,h.video.as_mut_ptr().add(o),4);} else {
+            let p=ptr::read_unaligned(src as *const u16);
+            let (r,g,b)=(((p>>11)&31) as u8,((p>>5)&63) as u8,(p&31) as u8);
+            h.video[o..o+4].copy_from_slice(&[(b<<3)|(b>>2),(g<<2)|(g>>4),(r<<3)|(r>>2),0]);
+        }
+    }}
 }
 
 unsafe extern "C" fn audio_sample(left: i16, right: i16) {
@@ -797,6 +838,9 @@ impl LibretroCore {
             hardware: None,
             hw_request: None,
             console_video: false,
+            arcade: false,
+            rotation: 0,
+            arcade_aspect: 4.0 / 3.0,
             disk: None,
             disc_file: None,
             audio: Vec::new(),
@@ -819,7 +863,10 @@ impl LibretroCore {
             .is_some_and(|n| n.to_string_lossy().contains("pcsx_rearmed"));
         host.console_video = dylib
             .file_name()
-            .is_some_and(|n| n.to_string_lossy().contains("snes9x"));
+            .is_some_and(|n| { let n=n.to_string_lossy();
+                ["snes9x", "fceumm", "genesis_plus_gx", "mednafen_pce_fast", "fbneo"].iter().any(|core| n.contains(core))
+            });
+        host.arcade=dylib.file_name().is_some_and(|n|n.to_string_lossy().contains("fbneo"));
         host.n64 = dylib.file_name().is_some_and(|n| {
             let name = n.to_string_lossy();
             name.contains("mupen64plus") || name.contains("parallel_n64")
@@ -1089,6 +1136,7 @@ impl RetroCore for LibretroCore {
         }
         let mut av = SystemAvInfo::default();
         unsafe { (self.api.get_system_av_info)(&mut av) };
+        if self.host.arcade { self.host.arcade_aspect=av.geometry.aspect_ratio; }
         self.av = AvInfo {
             fps: av.timing.fps,
             sample_rate: av.timing.sample_rate,
@@ -1274,6 +1322,36 @@ impl RetroCore for LibretroCore {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn arcade_rotation_bounds_and_portrait_letterbox() {
+        for rotation in 0..4 {
+            let (rw,rh)=if rotation%2==1 {(3,2)} else {(2,3)};
+            let mut coords=std::collections::HashSet::new();
+            for y in 0..rh { for x in 0..rw {
+                let (sx,sy)=rotated_source(x,y,2,3,rotation);
+                assert!(sx<2 && sy<3);coords.insert((sx,sy));
+            }}
+            assert_eq!(coords.len(),6);
+        }
+        assert_eq!(rotated_source(0,0,2,3,1),(1,0));
+        assert_eq!(rotated_source(2,1,2,3,1),(0,2));
+        let mut host=host_with(HashMap::new(),false);
+        host.arcade=true;host.console_video=true;host.rotation=1;host.arcade_aspect=0.75;
+        host.format=PixelFormat::Rgb565;
+        let pixels=[0xf800u16,0x001f,0x7777,0xf800,0x001f,0x7777,0xf800,0x001f,0x7777];
+        let active=Active::bind(&mut host);
+        unsafe {video_refresh(pixels.as_ptr() as *const c_void,2,3,6);}
+        drop(active);
+        assert_eq!(host.video.len(),640*480*4);
+        assert_eq!(&host.video[0..4],&[0,0,0,0]);
+        assert_eq!(&host.video[140*4..141*4],&[255,0,0,0]);
+        let corner=(479*640+499)*4;
+        assert_eq!(&host.video[corner..corner+4],&[0,0,255,0]);
+        let before=host.video.clone();let active=Active::bind(&mut host);
+        unsafe {video_refresh(ptr::null(),2,3,6);}
+        drop(active);assert_eq!(host.video,before);
+    }
+
     use std::cell::RefCell;
     use std::collections::HashMap;
     use std::ffi::CStr;
@@ -1336,6 +1414,9 @@ mod tests {
             hardware: None,
             hw_request: None,
             console_video: false,
+            arcade: false,
+            rotation: 0,
+            arcade_aspect: 4.0 / 3.0,
             disk: None,
             disc_file: None,
             audio: Vec::new(),

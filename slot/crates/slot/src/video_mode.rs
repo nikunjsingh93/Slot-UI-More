@@ -45,6 +45,9 @@ pub fn fills_height(platform: Platform, mode: VideoMode) -> bool {
 
 /// Width of the game within the G350's 4:3 panel, independent of the 720x480 UI canvas.
 pub fn width_fraction(platform: Platform, mode: VideoMode) -> f32 {
+    if platform == Platform::GameGear {
+        return (10.0 / 9.0) / (4.0 / 3.0);
+    }
     if fills_height(platform, mode) && mode == VideoMode::HeightFit {
         let (w, h) = platform.picture();
         (w as f32 / h as f32 / (4.0 / 3.0)).min(1.0)
@@ -67,7 +70,7 @@ pub fn write_video_mode(root: &Path, stem: &str, mode: VideoMode) -> std::io::Re
 pub fn source_rect(platform: Platform, mode: VideoMode) -> [f32; 4] {
     if matches!(
         platform,
-        Platform::Ps1 | Platform::Snes | Platform::N64 | Platform::Dreamcast | Platform::Psp
+        Platform::Ps1 | Platform::Snes | Platform::N64 | Platform::Dreamcast | Platform::Psp | Platform::Nes | Platform::MegaDrive | Platform::MasterSystem | Platform::GameGear | Platform::PcEngine | Platform::Arcade
     ) {
         return WHOLE_TEXTURE;
     }

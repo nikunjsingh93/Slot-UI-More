@@ -1,0 +1,234 @@
+{
+  "date": "2026-10-22",
+  "version": "1.1.17",
+  "status": "Software validation for 1.1.17; release publication tracked separately",
+  "hardware_tested": false,
+  "targeted_rust_tests_passed": 46,
+  "tests": {
+    "g350_store_platform_and_bios": 6,
+    "h700_store_platform_and_bios": 6,
+    "g350_cart_geometry": 1,
+    "h700_cart_geometry": 1,
+    "g350_arcade_rotation": 1,
+    "h700_arcade_rotation": 1,
+    "h700_quick_menu_including_new_system_persistence": 23,
+    "h700_shader_menu_rendering": 1,
+    "g350_console_controls": 2,
+    "h700_console_controls": 2,
+    "h700_analog_and_added_digital_controls": 2
+  },
+  "real_core_smoke": {
+    "original_generated_test_roms": [
+      "NES",
+      "MD",
+      "SMS",
+      "GG",
+      "PCE"
+    ],
+    "checks": [
+      "120 frames",
+      "640x480 bridge output",
+      "PCM samples",
+      "50/60Hz AV timing range",
+      "save state roundtrip",
+      "GBA turbo/rewind disabled"
+    ],
+    "arcade": "invalid archive handled without crashing; real game untested"
+  },
+  "studio": {
+    "passed": true,
+    "reads": [],
+    "rows": [
+      {
+        "p": "ARCADE",
+        "name": "sf2",
+        "state": "Ready",
+        "match": "Street Fighter II - The World Warrior (910129 World)",
+        "size": [
+          204,
+          124
+        ],
+        "face": [
+          360,
+          260
+        ]
+      },
+      {
+        "p": "GG",
+        "name": "Sonic The Hedgehog (USA, Europe, Brazil)",
+        "state": "Ready",
+        "match": "Sonic The Hedgehog (Japan, USA) (En)",
+        "size": [
+          206,
+          168
+        ],
+        "face": [
+          250,
+          260
+        ]
+      },
+      {
+        "p": "MD",
+        "name": "Sonic The Hedgehog (USA, Europe)",
+        "state": "Ready",
+        "match": "Sonic The Hedgehog (USA, Europe)",
+        "size": [
+          264,
+          151
+        ],
+        "face": [
+          360,
+          220
+        ]
+      },
+      {
+        "p": "NES",
+        "name": "Super Mario Bros. (World)",
+        "state": "Ready",
+        "match": "Super Mario Bros. (World)",
+        "size": [
+          190,
+          245
+        ],
+        "face": [
+          300,
+          350
+        ]
+      },
+      {
+        "p": "PCE",
+        "name": "Bonk 3 - Bonk's Big Adventure (USA)",
+        "state": "Ready",
+        "match": "Bonk 3 - Bonk's Big Adventure (USA)",
+        "size": [
+          276,
+          139
+        ],
+        "face": [
+          300,
+          190
+        ]
+      },
+      {
+        "p": "SMS",
+        "name": "Alex Kidd in Miracle World (USA, Europe)",
+        "state": "Ready",
+        "match": "Alex Kidd in Miracle World (USA, Europe)",
+        "size": [
+          252,
+          230
+        ],
+        "face": [
+          300,
+          310
+        ]
+      }
+    ],
+    "checks": [
+      "six-system automatic matching",
+      "FBNeo short names",
+      "BIOS hidden",
+      "no ROM reads",
+      "PNG dimensions",
+      "exact ZIP names",
+      "direct save",
+      "existing labels preserved",
+      "new-system-only nested prefix",
+      "mobile layout"
+    ]
+  },
+  "live_artwork": [
+    {
+      "platform": "NES",
+      "state": "Ready",
+      "kind": "logo",
+      "source": "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_Entertainment_System/master/Named_Logos/Super%20Mario%20Bros.%20(World).png",
+      "detail": "Super Mario Bros. (World) \u00b7 logo",
+      "size": [
+        190,
+        245
+      ]
+    },
+    {
+      "platform": "MD",
+      "state": "Ready",
+      "kind": "logo",
+      "source": "https://raw.githubusercontent.com/libretro-thumbnails/Sega_-_Mega_Drive_-_Genesis/master/Named_Logos/Sonic%20The%20Hedgehog%20(USA%2C%20Europe)%20(Sonic%20Classic%20Collection).png",
+      "detail": "Sonic The Hedgehog (USA, Europe) \u00b7 logo",
+      "size": [
+        264,
+        151
+      ]
+    },
+    {
+      "platform": "SMS",
+      "state": "Ready",
+      "kind": "logo",
+      "source": "https://raw.githubusercontent.com/libretro-thumbnails/Sega_-_Master_System_-_Mark_III/master/Named_Logos/Alex%20Kidd%20in%20Miracle%20World%20(USA%2C%20Europe).png",
+      "detail": "Alex Kidd in Miracle World (USA, Europe) \u00b7 logo",
+      "size": [
+        252,
+        230
+      ]
+    },
+    {
+      "platform": "GG",
+      "state": "Ready",
+      "kind": "logo",
+      "source": "https://raw.githubusercontent.com/libretro-thumbnails/Sega_-_Game_Gear/master/Named_Logos/Sonic%20The%20Hedgehog%20(Japan%2C%20Europe%2C%20Brazil)%20(En)%20(Rev%201).png",
+      "detail": "Sonic The Hedgehog (Japan, USA) (En) \u00b7 logo",
+      "size": [
+        206,
+        168
+      ]
+    },
+    {
+      "platform": "PCE",
+      "state": "Ready",
+      "kind": "logo",
+      "source": "https://raw.githubusercontent.com/libretro-thumbnails/NEC_-_PC_Engine_-_TurboGrafx_16/master/Named_Logos/Bonk%203%20-%20Bonk's%20Big%20Adventure%20(USA).png",
+      "detail": "Bonk 3 - Bonk's Big Adventure (USA) \u00b7 logo",
+      "size": [
+        276,
+        139
+      ]
+    },
+    {
+      "platform": "ARCADE",
+      "state": "Ready",
+      "kind": "logo",
+      "source": "https://images.launchbox-app.com/b60b7368-fb61-40ec-8cb5-b370444555e2.png",
+      "detail": "Street Fighter II - The World Warrior (910129 World) \u00b7 logo",
+      "size": [
+        204,
+        124
+      ]
+    }
+  ],
+  "baseline_eight_artwork_catalogs_preserved_exactly": true,
+  "g350_nine_accepted_core_hashes_preserved": {
+    "mgba_libretro.so": "962ab910d17db1298c6b41be1955b582d15e76b149c4d4ae3a7f2cb02ebc749b",
+    "parallel_n64_libretro.so": "169d618a2540eab59070cd57889bd90a19ee853f30d39c6d00952929fad8a7c9",
+    "ppsspp_libretro.so": "75b4972a0018addc3359b68b26136d5b75d9e7558bebbec6401b1421b1654969",
+    "flycast_libretro.so": "a796659516812f23c6fb8ad575f927d66517f1f0c1624f43dc6f6f0f9eb541f4",
+    "gpsp_libretro.so": "96a13edea672637ef5bf9705ac0b5887a4c6934937ffa163fc9560bec692ce12",
+    "snes9x2005_plus_libretro.so": "87ab323dc307ecf230e71d0c79c791ae850923f3225ce8547915b30748f4e79e",
+    "snes9x_libretro.so": "798f9862939fad25fd664b21a826f12c4d4f023ac6a091a2b55ebb88974f193f",
+    "pcsx_rearmed_libretro.so": "8eac8b03343943745e4bf1a2f97eb400b28631ad07b04405d86a342dcb5ad9af",
+    "mupen64plus_next_libretro.so": "4a258260f7dbb26057a6f17df19f1d27969bac14bd56fc20d7254b8de8f4ebd9"
+  },
+  "g350_device_entrypoint": "KMSDRM selected; expected no-device failure in container",
+  "packaging": [
+    "G350 SquashFS superblock and frontend/all 13 core readback hashes",
+    "archive CRCs",
+    "H700 frontend and four core hashes verified inside both ZIPs",
+    "source archives SHA-256 checked",
+    "no games/BIOS/personal files included"
+  ],
+  "limitations": [
+    "No physical card written",
+    "No handheld boot, gameplay, audio quality, or performance test",
+    "No real arcade game tested",
+    "No full flash image composed or published"
+  ]
+}

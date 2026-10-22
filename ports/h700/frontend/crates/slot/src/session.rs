@@ -39,6 +39,26 @@ mod sp_controls_tests {
     use slot_retro::ButtonMask;
 
     #[test]
+    fn added_digital_systems_keep_select_as_a_game_button() {
+        for platform in [Platform::Nes,Platform::MegaDrive,Platform::MasterSystem,Platform::GameGear,Platform::PcEngine,Platform::Arcade] {
+            let d=tempfile::tempdir().unwrap();crate::root::ensure(d.path());
+            let mut s=Session::boot(d.path().to_path_buf());s.stickless=true;
+            s.app=App::new(["Probe","Second"].into_iter().map(|stem|slot_store::Cart{platform,stem:stem.into(),title:stem.into(),rom:"unused".into(),label:None,code:String::new(),shell:None}).collect());
+            s.app.set_core(slot_store::Core::default_for(platform));s.app.set_platform(platform);
+            s.app.apply(Action::Insert);s.app.on_core_ready();
+            for _ in 0..120 {s.app.update(1.0/60.0);}
+            assert!(matches!(s.app.phase(),Phase::Playing{..}));
+            s.feed([RawEvent::Down(Btn::Menu),RawEvent::Down(Btn::Select)],2100);
+            assert!(!s.dpad_analog,"{platform:?}: digital game entered analog mode");
+            assert_ne!(s.pad.mask().0 & ButtonMask::SELECT,0,"{platform:?}: game lost Select/coin");
+            s.feed([RawEvent::Up(Btn::Select),RawEvent::Up(Btn::Menu)],2200);
+            // Separate this hold from the preceding Menu tap's double-tap window.
+            s.feed([RawEvent::Down(Btn::Menu)],4000);s.feed([],5001);
+            assert!(!matches!(s.app.phase(),Phase::Playing{..}));
+        }
+    }
+
+    #[test]
     fn sp_analog_chord_is_consumed_and_menu_hold_still_exits_each_console() {
         for (platform, core) in [
             (Platform::N64, slot_store::Core::ParallelN64),
@@ -221,6 +241,10 @@ impl Session {
                     | slot_store::Core::ParallelN64
                     | slot_store::Core::Flycast
                     | slot_store::Core::Ppsspp
+                    | slot_store::Core::Fceumm
+                    | slot_store::Core::GenesisPlusGx
+                    | slot_store::Core::BeetlePceFast
+                    | slot_store::Core::Fbneo
             ) && matches!(self.app.phase(), Phase::Playing { .. })
             {
                 use slot_input::Btn;
@@ -631,6 +655,13 @@ mod ps1_controls {
             (Platform::N64, slot_store::Core::Mupen64plus, "Cart.n64"),
             (Platform::Dreamcast, slot_store::Core::Flycast, "Disc.chd"),
             (Platform::Psp, slot_store::Core::Ppsspp, "Disc.iso"),
+            (Platform::Nes, slot_store::Core::Fceumm, "Cart.nes"),
+            (Platform::MegaDrive, slot_store::Core::GenesisPlusGx, "Cart.md"),
+            (Platform::MasterSystem, slot_store::Core::GenesisPlusGx, "Cart.sms"),
+            (Platform::GameGear, slot_store::Core::GenesisPlusGx, "Cart.gg"),
+            (Platform::PcEngine, slot_store::Core::BeetlePceFast, "Cart.pce"),
+            (Platform::Arcade, slot_store::Core::Fbneo, "Cart.zip"),
+
         ] {
             let root = tempfile::tempdir().unwrap();
             let mut session = Session::boot(root.path().to_path_buf());

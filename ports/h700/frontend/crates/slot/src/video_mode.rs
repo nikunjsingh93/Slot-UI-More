@@ -47,9 +47,12 @@ pub fn fills_height(platform: Platform, mode: VideoMode) -> bool {
 pub fn width_fraction(platform: Platform, mode: VideoMode) -> f32 {
     let rgsp = std::env::var("SLOT_DEVICE").as_deref() == Ok("rgsp");
     let panel_aspect = if rgsp { 3.0 / 2.0 } else { 4.0 / 3.0 };
-    if rgsp && matches!(platform, Platform::Ps1 | Platform::Snes | Platform::N64 | Platform::Dreamcast) {
+    if rgsp && matches!(platform, Platform::Ps1 | Platform::Snes | Platform::N64 | Platform::Dreamcast | Platform::Nes | Platform::MegaDrive | Platform::MasterSystem | Platform::PcEngine | Platform::Arcade) {
         // Keep 4:3 consoles centered within the 3:2 panel. PSP uses full width.
         return (4.0 / 3.0) / panel_aspect;
+    }
+    if platform == Platform::GameGear {
+        return (10.0 / 9.0) / panel_aspect;
     }
     if fills_height(platform, mode) && mode == VideoMode::HeightFit {
         let (w, h) = platform.picture();
@@ -73,7 +76,7 @@ pub fn write_video_mode(root: &Path, stem: &str, mode: VideoMode) -> std::io::Re
 pub fn source_rect(platform: Platform, mode: VideoMode) -> [f32; 4] {
     if matches!(
         platform,
-        Platform::Ps1 | Platform::Snes | Platform::N64 | Platform::Dreamcast | Platform::Psp
+        Platform::Ps1 | Platform::Snes | Platform::N64 | Platform::Dreamcast | Platform::Psp | Platform::Nes | Platform::MegaDrive | Platform::MasterSystem | Platform::GameGear | Platform::PcEngine | Platform::Arcade
     ) {
         return WHOLE_TEXTURE;
     }

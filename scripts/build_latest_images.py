@@ -29,6 +29,14 @@ def run(*cmd):
 def checked(item):
     p=Path(item['path']);assert sha(p)==item['sha256'],p
     return p
+
+def region_sha(path,offset,size):
+    h=hashlib.sha256()
+    with path.open('rb') as f:
+        f.seek(offset)
+        while size:
+            b=f.read(min(4<<20,size));assert b;h.update(b);size-=len(b)
+    return h.hexdigest()
 def dump(root,internal,p):
     p.unlink(missing_ok=True)
     run('debugfs','-R',f'dump {internal} {p}',str(root));assert p.exists(),internal
@@ -138,8 +146,8 @@ Do not copy games before this completes: first boot formats the empty data
 partition. A restart or a longer first boot is expected. Keep power available.
 After reaching Slot, shut down and connect the card to your computer.
 
-At the BASEOS root, add games to Games/GB, Games/GBC, Games/GBA, Games/SNES,
-Games/PS1, Games/N64, Games/DC and Games/PSP. Artwork goes under Labels in
+At the BASEOS root, add games to Games/<SYSTEM>. Available system folders:
+{', '.join(manifest['systems'])}. Artwork goes under Labels in
 the corresponding system folders, with matching game filename stems.
 Copy your existing BIOS, Saves, States and Config folders back if restoring.
 Keep this image's System folder. G350 SYSTEM updates are incompatible.
@@ -156,7 +164,7 @@ GB/GBC: L1 alternates full-screen stretch and full-height aspect fit;
 R1 restores default. Tap Menu at the shelf to select Shader: Original,
 Sharp Pixels, Smooth, LCD or CRT. The repository README lists all hotkeys.
 
-This fresh image contains the current frontend and eight emulated systems and Ports directly;
+This fresh image contains the current frontend and all configured system shelves directly;
 no older base image or follow-up System update is required.
 PortMaster is bundled in System/PortMasterH700. Open the Ports shelf to install
 games; internet is needed for downloads and missing runtimes. For Wi-Fi, copy
@@ -224,6 +232,7 @@ fi
     marker=sandbox/'clean/System'/('.'+name);assert marker.exists()
     for f,h in manifest['cores'].items():assert sha(sandbox/'clean/System'/f)==h
     assert sha(sandbox/'clean/System/slot')==manifest['frontend_sha256']
+    assert sha(sandbox/'clean/Tools'/studio.name)==sha(studio)
     for category in ['Games','Labels','Saves','States']:
         for system in manifest['systems']:assert (sandbox/'clean'/category/system).is_dir()
     assets=list((stage/'System/PPSSPP').rglob('*'));assets=[p for p in assets if p.is_file()];assert len(assets)==189
@@ -236,14 +245,17 @@ fi
     assert not (sandbox/'retry/System'/('.'+name)).exists()
     assert install('retry').returncode==0
     assert sentinel.read_bytes()==b'original diagnostic placeholder'
-    write(d/'installer-validation.log','PASS clean install; eight platform folders; exact frontend and nine cores; 189 assets; idempotence; corruption rejected before completion; interrupted retry preserves game sentinel.\n')
-    image=OUT/(name+'.img');shutil.copyfile(base,image)
+    write(d/'installer-validation.log',f"PASS clean install; {len(manifest['systems'])} system folders; exact frontend and {len(manifest['cores'])} cores; 189 PSP assets; idempotence; corruption rejected before completion; interrupted retry preserves game sentinel.\n")
+    # Compose on the builder's native filesystem; mapped Windows random-write
+    # images once passed writes but failed the G350 SYSTEM readback hash.
+    image=d/(name+'.img');shutil.copyfile(base,image)
     with image.open('r+b') as dst,root.open('rb') as src:dst.seek(start);shutil.copyfileobj(src,dst,4<<20)
+    assert region_sha(image,start,size)==sha(root),'Final embedded rootfs differs'
     gpt=run('sgdisk','-v',str(image));assert 'No problems found' in gpt,gpt
     ranges_equal(image,base,[(0,start),(end,base.stat().st_size)])
     manifest.update(version=version,device=label,baseos_archive_sha256=info['base']['sha256'],
                     vendor_boot_regions_byte_identical=True,installer_embedded=True)
-    validation=f'{label} {version}\nPASS official base archive SHA256; target identity; rootfs e2fsck; all added-file readbacks; real BusyBox installer and interrupted/corrupt install checks; exact frontend/nine cores/189 assets; GPT consistency; all non-rootfs regions byte-identical to official image; ZIP CRC and decompressed image SHA256.\nPreviously validated frontend rendering/control tests remain applicable because the installed executable is byte-identical. Physical boot of this fresh image is pending.\n'
+    validation=f"{label} {version}\nPASS official base archive SHA256; target identity; rootfs e2fsck; all added-file readbacks; real BusyBox installer and interrupted/corrupt install checks; exact frontend/{len(manifest['cores'])} cores/189 PSP assets; GPT consistency; all non-rootfs regions byte-identical to official image; ZIP CRC and decompressed image SHA256.\nPreviously validated frontend rendering/control tests remain applicable because the installed executable is byte-identical. Physical boot of this fresh image is pending.\n"
     publish_local(model,version,image,manifest,guide,validation)
 def g350():
     info=inputs['g350'];version=info['version'];name=f'slot-g350-{version}'
@@ -262,7 +274,7 @@ def g350():
     manifest=json.loads(Path(info['system_manifest']).read_text())
     assert sha(system)==manifest['system_sha256']
     assert (d/'SYSTEM.md5').read_text().strip()==sha(system,'md5')+'  target/SYSTEM'
-    image=OUT/(name+'.img');shutil.copyfile(base,image)
+    image=d/(name+'.img');shutil.copyfile(base,image)
     fat=f'{image}@@16777216'
     run('mdel','-i',fat,'::SYSTEM');run('mdel','-i',fat,'::SYSTEM.md5')
     run('mcopy','-o','-i',fat,str(system),'::SYSTEM');run('mcopy','-o','-i',fat,str(d/'SYSTEM.md5'),'::SYSTEM.md5')
@@ -298,14 +310,15 @@ Let the first boot expand the empty data partition and finish its restart.
 After reaching Slot, shut down before adding games. No older SYSTEM update
 is needed: this image already contains the current {version} SYSTEM and KERNEL pairs, including the gray SLOT splash.
 
-On GAMES, put games under Slot/Games/GB, GBC, GBA, SNES, PS1, N64, DC or PSP.
+On GAMES, put games under Slot/Games/<SYSTEM>. System folders:
+{', '.join(manifest.get('systems',['GB','GBC','GBA','SNES','PS1','N64','DC','PSP','PORTS']))}.
 Native Ports are integrated, and PortMaster installs automatically on first
 boot. Open it from the Ports shelf; downloads need internet. User game files
 and extra runtimes remain separate. Ports artwork uses Slot/Labels/PORTS.
 Labels go in matching Slot/Labels folders, with matching filename stems.
 Restore Slot/BIOS, Saves, States, Config and Wallpapers if you have a backup.
 No games or proprietary BIOS are included. PPSSPP's free assets are bundled.
-The repository's studio/ directory contains Artwork Studio v5.
+Artwork Studio is installed under Slot/Tools/Slot-Auto-Artwork-Studio-v5.html.
 
 Hold Menu alone one second to return to Slot. Console states: Menu+X saves,
 Menu+Y loads. GB/GBC/GBA: Select+R1 saves; Select+L1 loads (prompt chord).

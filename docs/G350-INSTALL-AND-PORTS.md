@@ -1,6 +1,6 @@
 # G350 installation, ports and labels
 
-For BATLEXP G350 only. RG SP, RG35XX SP and R36S use different boot images. This guide describes the complete 1.1.16 image, which contains firmware and integration code but no commercial game files or disc scans.
+For BATLEXP G350 only. RG SP, RG35XX SP and R36S use different boot images. This guide describes the complete 1.1.17 image, which contains firmware and integration code but no commercial game files or disc scans.
 
 ## What Slot and PortMaster do
 
@@ -8,18 +8,18 @@ Slot is the home screen and launches emulators or native Linux ports. PortMaster
 
 ## First installation on a new card
 
-1. Download **slot-g350-1.1.16.img.zip** from [the complete G350 release](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/g350-v1.1.16).
+1. Download **slot-g350-1.1.17.img.zip** from [the complete G350 release](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/g350-v1.1.17).
 2. Extract its `.img` and flash it directly to a 16 GB or larger card. Flashing erases the selected card; back up anything you need and select the correct removable drive.
 3. Put it in G350 TF1/OS with TF2 empty initially. Charge the device, boot, and allow partition expansion/restart and manager installation to finish.
 4. Once Slot appears, shut down using the power menu. Reconnect the card to copy games and labels to GAMES. Cancel any Windows offer to format an unreadable Linux partition.
 
-The image already includes the latest system, gray SLOT boot/splash, all eight emulated systems, Ports integration and automatic PortMaster installation. **Do not flash 0.1.10 or install 0.1.13 first.** It is one complete image. Individual games and additional downloadable port runtimes are separate.
+The image already includes the latest system, gray SLOT boot/splash, all fourteen emulated systems, Ports integration and automatic PortMaster installation. **Do not flash 0.1.10 or install 0.1.13 first.** It is one complete image. Individual games and additional downloadable port runtimes are separate.
 
 Revision 2 no longer creates the 117 unused legacy system folders at the GAMES root. Use `Slot/Games/<SYSTEM>/` for emulated games. Auxiliary folders such as `ports`, `bios` and `gamedata` remain for native-port compatibility. Existing user folders are preserved.
 
 ## Updating an existing Slot G350 card
 
-The 1.1.16 release provides a complete flashable image. Back up your games, labels, BIOS and saves, flash the matching `.img`, finish first boot, then restore your content. The image is self-contained; do not mix SYSTEM/KERNEL pairs from older releases. Keep a copy of your old card until the replacement boots successfully.
+The 1.1.17 release provides a complete flashable image. Back up your games, labels, BIOS and saves, flash the matching `.img`, finish first boot, then restore your content. The image is self-contained; do not mix SYSTEM/KERNEL pairs from older releases. Keep a copy of your old card until the replacement boots successfully.
 
 ## Games and folders
 
@@ -41,7 +41,7 @@ Recognized does not mean every game or file variant is supported by its emulator
 
 ## Bundled PortMaster
 
-On the complete 1.1.16 image, PortMaster is installed automatically when missing. Open it from the Ports shelf; an existing working manager is preserved. The following manual steps are only for repairing a missing installation or using an earlier update. The bundled catalogue permits offline browsing; downloads and missing runtimes still need internet.
+On the complete 1.1.17 image, PortMaster is installed automatically when missing. Open it from the Ports shelf; an existing working manager is preserved. The following manual steps are only for repairing a missing installation or using an earlier update. The bundled catalogue permits offline browsing; downloads and missing runtimes still need internet.
 
 
 1. Download **PortMaster.zip** from [the pinned upstream release](https://github.com/PortsMaster/PortMaster-GUI/releases/tag/2026.10.18-0059). This is the version used for this integration; future releases may need retesting. Do not use the muOS/TrimUI variant.
@@ -97,7 +97,7 @@ Use the same capitalization, spaces and punctuation. Enable filename extensions 
 
 For Ports, PS1 and Dreamcast, a square image with the disc print centered (512 × 512 is suitable) works well. Slot clips Ports artwork to a circle and draws the hub; use disc-face artwork rather than a photographed case if you want that appearance. A missing Ports label uses the generic disc. PSP uses a UMD shell; SNES/N64 use cartridge shells.
 
-For automatic GB/GBC/GBA/SNES/PS1/N64/DC/PSP artwork, open `studio/Slot-Auto-Artwork-Studio-v5.html` in Chrome/Edge, choose the Slot folder, let artwork download and save all ready labels together. Read [the studio guide](../studio/README.md). Existing labels from Cart Studio are preserved unless replacement is enabled; you do not need a separate app for Game Boy artwork. Current automatic Studio support does not include Ports: add their PNGs manually. Downloading artwork does not grant redistribution rights; commercial scans are excluded from the sharing package.
+For automatic artwork for all fourteen emulated systems, open `studio/Slot-Auto-Artwork-Studio-v5.html` in Chrome/Edge, choose the Slot folder, let artwork download and save all ready labels together. Read [the studio guide](../studio/README.md). Existing labels from Cart Studio are preserved unless replacement is enabled; you do not need a separate app for Game Boy artwork. Current automatic Studio support does not include Ports: add their PNGs manually. Downloading artwork does not grant redistribution rights; commercial scans are excluded from the sharing package.
 
 ## Controls and troubleshooting
 
@@ -106,3 +106,5 @@ Hold **M/Menu alone for one second** to return to Slot. In native ports use the 
 Emulated systems retain their existing hotkeys, state browser and shaders; see [all controls](../README.md#controls-and-hotkeys). Menu+X/Y and double-Menu save-state browsing do not apply to native ports.
 
 If a port fails, check its required data/version/runtime, then `Slot/Config/ports.log` and that port's own log (for these two examples: `ports/nfsu2/log.txt`, `ports/gtasa/gtasa.log`). A top-level launcher is needed for automatic import. An empty fresh PortMaster catalogue usually needs network/catalogue setup; a listed port still needs installation. A slow heavy game is not proof that Slot is slow: native games run after Slot releases its graphics/audio resources. Do not overwrite working game files while experimenting with another port.
+
+NES, MD/Genesis, SMS, GG, PCE and ARCADE folders are included. See [new systems and arcade requirements](ADDITIONAL-SYSTEMS.md). Artwork Studio installs into Slot/Tools on first boot.

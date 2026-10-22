@@ -4,12 +4,20 @@
 
 Built on [Slot by Brandon Kowalski](https://github.com/BrandonKowalski/slot), with its original cartridge artwork credited to Markus upstream. This expanded studio is independently maintained. See [project credits](../CREDITS.md) and the retained GPL/component licenses.
 
-Open `Slot-Auto-Artwork-Studio-v5.html` in Chrome or Edge. Choose **Slot folder** once, let artwork download, then click **Save ready labels to Slot**. Alternatively download the labels ZIP and merge its `Labels` folder into Slot. Restart Slot to see the new labels. No firmware update or reflash is needed. GB, GBC and GBA now work in this same app; no separate Cart Studio is needed for their artwork.
+**Expanded for firmware 1.1.17 (2026-10-22):** NES, Mega Drive/Genesis, Master System, Game Gear, PC Engine and FBNeo Arcade are included. Use the corresponding 1.1.17 firmware to launch them. See [the new-system guide](../docs/ADDITIONAL-SYSTEMS.md).
+
+Open `Slot-Auto-Artwork-Studio-v5.html` in Chrome or Edge. Choose **Slot folder** once, let artwork download, then click **Save ready labels to Slot**. Alternatively download the labels ZIP and merge its `Labels` folder into Slot. Restart Slot to see the new labels. Updating artwork alone does not require reflashing firmware. GB, GBC and GBA work in this same app; no separate Cart Studio is needed for their artwork.
 
 On G350, choose `GAMES/Slot`. On RG SP / RG35XX SP, choose the `BASEOS` folder containing `Games` and `Labels`. The studio also accepts a parent folder containing `Slot`. Preview results before saving and correct uncertain names using the search on each game tile.
 
 | System folder under Slot | Supported game files | Label PNG |
 |---|---|---|
+| Games/NES | nes, unf, unif | 190×245 |
+| Games/MD | md, gen, bin, smd | 264×151 |
+| Games/SMS | sms | 252×230 |
+| Games/GG | gg | 206×168 |
+| Games/PCE | pce | 276×139 |
+| Games/ARCADE | zip (FBNeo sets, keep archive names) | 204×124 |
 | Games/GB | gb | 220×195 |
 | Games/GBC | gbc, gb | 220×195 |
 | Games/GBA | gba | 266×138 |
@@ -27,8 +35,10 @@ The original 2026-10-09 catalog includes physical media for 740 Dreamcast and 1,
 
 ROM contents are never read or uploaded for matching. Small PS1/DC playlists are read locally to group referenced discs. Choose the Slot folder itself or the card folder containing Slot. The HTML embeds its catalog and ZIP library; no local server or account is needed. Internet access is required to fetch artwork. Offline failures can be retried.
 
-Browser validation for v5 covered all eight systems, exact output names/dimensions, preservation of existing labels, direct writes, ZIP export, parent-folder scanning, physical-scan fallbacks and mobile layout. Live requests fetched physical cartridge artwork for Super Mario Land (GB), Pokémon Crystal Version (GBC) and Mario Kart: Super Circuit (GBA). ROM reads are rejected by the test fixtures. This changes the artwork studio only; console firmware is unchanged.
+Earlier browser validation for v5 covered the original eight systems, exact output names/dimensions, preservation of existing labels, direct writes, ZIP export, parent-folder scanning, physical-scan fallbacks and mobile layout. Live requests fetched physical cartridge artwork for Super Mario Land (GB), Pokémon Crystal Version (GBC) and Mario Kart: Super Circuit (GBA). ROM reads are rejected by the test fixtures. The newer six-system extension has its own [validation record](../docs/ADDITIONAL-SYSTEMS-VALIDATION.json) and accompanying 1.1.17 test firmware.
 
 The ZIP contains the standalone HTML, this guide, and editable source with a portable Python build script and JSZip's license. To rebuild, run `python source/build.py --output Slot-Auto-Artwork-Studio-v5.html` from the extracted folder. Python uses only its standard library. `source/add_gameboy_catalog.py` documents regeneration of the Game Boy metadata from GitHub tree exports and LaunchBox Metadata.zip. `source/cart-shells.json` contains the existing Slot SVG cartridge outlines for the browser preview, under the same GPL license as the frontend.
 
 UMD correction (0.1.9.4): the round window and flared lower shell match the physical UMD front. New PSP scan labels preserve the printed hub rather than cutting a CD spindle hole through it. Existing PNGs still work; enable replacement in Studio to regenerate an older scan if its printed centre is incomplete.
+
+The 2026-10-22 extension adds NES/MD/SMS/GG/PCE cartridge scans and arcade logo/cover matching. Arcade ZIP aliases and BIOS filtering use the exact bundled FBNeo driver DAT. Original scans use platform-specific default crops; Adjust scan crop remains available. New shell previews share geometry with the firmware renderer. Browser tests for the added systems are in source/test-extra-systems.cjs.

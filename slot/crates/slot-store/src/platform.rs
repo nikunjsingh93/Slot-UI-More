@@ -12,10 +12,17 @@ pub enum Platform {
     Dreamcast,
     Psp,
     Ports,
+    Nes,
+    MegaDrive,
+    MasterSystem,
+    GameGear,
+    PcEngine,
+    Arcade,
+
 }
 
 impl Platform {
-    pub const ALL: [Platform; 9] = [
+    pub const ALL: [Platform; 15] = [
         Platform::Gba,
         Platform::Gb,
         Platform::Gbc,
@@ -25,6 +32,13 @@ impl Platform {
         Platform::Dreamcast,
         Platform::Psp,
         Platform::Ports,
+        Platform::Nes,
+        Platform::MegaDrive,
+        Platform::MasterSystem,
+        Platform::GameGear,
+        Platform::PcEngine,
+        Platform::Arcade,
+
     ];
 
     pub fn name(self) -> &'static str {
@@ -38,6 +52,12 @@ impl Platform {
             Platform::Dreamcast => "Dreamcast",
             Platform::Psp => "PSP",
             Platform::Ports => "Ports",
+            Platform::Nes => "Nintendo Entertainment System",
+            Platform::MegaDrive => "Mega Drive / Genesis",
+            Platform::MasterSystem => "Master System",
+            Platform::GameGear => "Game Gear",
+            Platform::PcEngine => "PC Engine / TurboGrafx-16",
+            Platform::Arcade => "Arcade (FinalBurn Neo)",
         }
     }
 
@@ -52,12 +72,24 @@ impl Platform {
             Platform::Dreamcast => "DC",
             Platform::Psp => "PSP",
             Platform::Ports => "PORTS",
+            Platform::Nes => "NES",
+            Platform::MegaDrive => "MD",
+            Platform::MasterSystem => "SMS",
+            Platform::GameGear => "GG",
+            Platform::PcEngine => "PCE",
+            Platform::Arcade => "ARCADE",
         }
     }
 
     pub fn extensions(self) -> &'static [&'static str] {
         match self {
             Platform::Ports => &["port"],
+            Platform::Nes => &["nes", "unf", "unif"],
+            Platform::MegaDrive => &["md", "gen", "bin", "smd"],
+            Platform::MasterSystem => &["sms"],
+            Platform::GameGear => &["gg"],
+            Platform::PcEngine => &["pce"],
+            Platform::Arcade => &["zip"],
             Platform::Gba => &["gba"],
             Platform::Gb | Platform::Gbc => &["gb", "gbc"],
             Platform::Ps1 => &["chd", "cue", "m3u", "pbp", "exe"],
@@ -75,6 +107,8 @@ impl Platform {
             Platform::Ps1 | Platform::Snes | Platform::N64 | Platform::Dreamcast => (640, 480),
             Platform::Psp => (480, 272),
             Platform::Ports => (640, 480),
+            Platform::GameGear => (160, 144),
+            Platform::Nes | Platform::MegaDrive | Platform::MasterSystem | Platform::PcEngine | Platform::Arcade => (640, 480),
         }
     }
 

@@ -93,7 +93,13 @@ pub fn gb_shell_of(cart: &Cart) -> Option<GbShell> {
         | Platform::N64
         | Platform::Dreamcast
         | Platform::Psp
-        | Platform::Ports => None,
+        | Platform::Ports
+        | Platform::Nes
+        | Platform::MegaDrive
+        | Platform::MasterSystem
+        | Platform::GameGear
+        | Platform::PcEngine
+        | Platform::Arcade => None,
         Platform::Gb | Platform::Gbc => Some(match cart.shell.map(|c| c.outline) {
             Some(Outline::Notched) => GbShell::Notched,
             Some(Outline::Rounded) => GbShell::Rounded,
@@ -161,6 +167,13 @@ pub fn seated_box(platform: Platform) -> (u32, u32) {
     match platform {
         Platform::Ps1 | Platform::Dreamcast | Platform::Ports => (312, 312),
         Platform::Psp => (312, 328),
+        Platform::Nes => legacy_box(Platform::Nes, true),
+        Platform::MegaDrive => legacy_box(Platform::MegaDrive, true),
+        Platform::MasterSystem => legacy_box(Platform::MasterSystem, true),
+        Platform::GameGear => legacy_box(Platform::GameGear, true),
+        Platform::PcEngine => legacy_box(Platform::PcEngine, true),
+        Platform::Arcade => legacy_box(Platform::Arcade, true),
+
         Platform::Snes => (240, 147),
         Platform::N64 => (240, 155),
         Platform::Gba => (SEATED_W, SEATED_H),
@@ -169,6 +182,7 @@ pub fn seated_box(platform: Platform) -> (u32, u32) {
 }
 
 pub fn cart_box(platform: Platform) -> (u32, u32) {
+    if legacy_platform(platform) { return legacy_box(platform, false); }
     if platform == Platform::N64 {
         return (360, 232);
     }
@@ -188,7 +202,13 @@ pub fn cart_box(platform: Platform) -> (u32, u32) {
         | Platform::N64
         | Platform::Dreamcast
         | Platform::Psp
-        | Platform::Ports => Shape::Gba,
+        | Platform::Ports
+        | Platform::Nes
+        | Platform::MegaDrive
+        | Platform::MasterSystem
+        | Platform::GameGear
+        | Platform::PcEngine
+        | Platform::Arcade => Shape::Gba,
         Platform::Gb | Platform::Gbc => Shape::Gb(GbShell::Notched),
     });
     (s.w, s.h)
@@ -211,6 +231,7 @@ fn shadow(w: u32, h: u32, mask: &[u8]) -> CartFace {
 }
 
 pub fn cart_face(cart: &Cart) -> CartFace {
+    if legacy_platform(cart.platform) { return legacy_face(cart); }
     if cart.platform == Platform::N64 {
         return n64_face(cart);
     }
@@ -254,7 +275,7 @@ pub fn label_colour(title: &str) -> [u8; 3] {
 }
 
 pub fn label_text(cart: &Cart) -> String {
-    clean_label(&cart.stem)
+    clean_label(if cart.platform==Platform::Arcade { &cart.title } else { &cart.stem })
 }
 
 pub fn clean_label(stem: &str) -> String {
@@ -822,4 +843,56 @@ mod disc_tests {
         assert_eq!(face.rgba[((156 * 312 + 156) * 4 + 3) as usize], 0);
         assert_eq!(face.rgba[((70 * 312 + 156) * 4 + 3) as usize], 255);
     }
+}
+
+// Original stylized shells. Geometry is also used by Artwork Studio previews.
+fn legacy_platform(p: Platform) -> bool {
+    matches!(p, Platform::Nes | Platform::MegaDrive | Platform::MasterSystem | Platform::GameGear | Platform::PcEngine | Platform::Arcade)
+}
+fn legacy_profile(p: Platform) -> (u32,u32,u32,u32,u32,u32,u8) {
+    match p {
+        Platform::Nes => (300,350,80,20,190,245,144),
+        Platform::MegaDrive => (360,220,48,22,264,151,38),
+        Platform::MasterSystem => (300,310,24,24,252,230,42),
+        Platform::GameGear => (250,260,22,38,206,168,42),
+        Platform::PcEngine => (300,190,12,12,276,139,231),
+        Platform::Arcade => (360,260,78,33,204,124,48),
+        _ => unreachable!("not a legacy cartridge"),
+    }
+}
+fn legacy_box(p: Platform, seated: bool) -> (u32,u32) {
+    let (w,h,..)=legacy_profile(p);
+    if seated { (240, h*240/w) } else { (w,h) }
+}
+fn legacy_face(cart: &Cart) -> CartFace {
+    let (w,h,lx,ly,lw,lh,shade)=legacy_profile(cart.platform);
+    let mut rgba=vec![0; (w*h*4) as usize];
+    let colour=label_colour(&cart.stem);
+    let label=cart.label.as_deref().and_then(|p| art::cover(p,lw,lh)).unwrap_or_else(|| {
+        let mut image=vec![0; (lw*lh*4) as usize];
+        for px in image.chunks_exact_mut(4) { px.copy_from_slice(&[colour[0],colour[1],colour[2],255]); }
+        if let Some(font)=text::label_font() {
+            let layout=text::fit_box(font,&label_text(cart),(lw-16) as f32,(lh-16) as f32,4,24.0,9.0);
+            text::draw_centred(&mut image,lw,lh,&layout,ink(colour));
+        }
+        image
+    });
+    for y in 0..h { for x in 0..w {
+        let connector=y>=h-18;
+        if connector && (x<w/5 || x>=w-w/5) {continue;}
+        if !connector && ((x<5 || x>=w-5) && (y<5 || y>=h-23)) {continue;}
+        let o=((y*w+x)*4) as usize;
+        let edge=x<3 || x>=w-3 || y<3;
+        let v=if connector {42} else if edge {shade.saturating_sub(22)} else {shade};
+        let mut c=if cart.platform==Platform::Arcade && !connector { [27,91,65,255] } else { [v,v,v,255] };
+        if connector && x%12<7 { c=[183,151,72,255]; }
+        if cart.platform==Platform::Nes && x<62 && y>15 && y<h-30 && x%10<3 {c=[111,111,111,255];}
+        if x>=lx && x<lx+lw && y>=ly && y<ly+lh {
+            let q=(((y-ly)*lw+x-lx)*4) as usize;
+            let a=label[q+3] as u32;
+            for k in 0..3 {c[k]=((label[q+k] as u32*a+c[k] as u32*(255-a))/255) as u8;}
+        }
+        rgba[o..o+4].copy_from_slice(&c);
+    }}
+    CartFace{rgba,w,h}
 }

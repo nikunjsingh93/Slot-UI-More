@@ -6,7 +6,7 @@ The web app is a Slot-derived GPL-3.0 application, with JSZip under its bundled 
 
 | Provider | Used for | How it is fetched |
 |---|---|---|
-| [LaunchBox Games Database](https://gamesdb.launchbox-app.com/) | GB/GBC/GBA/SNES/N64 cartridge scans, Dreamcast/PSP disc scans, supplemental logos and front covers | Image identifiers from the embedded metadata catalogue; images are fetched from images.launchbox-app.com through [wsrv.nl](https://wsrv.nl/) for browser-compatible access and resizing |
+| [LaunchBox Games Database](https://gamesdb.launchbox-app.com/) | GB/GBC/GBA/SNES/N64/NES/Mega Drive/Master System/Game Gear/PC Engine cartridge scans, Dreamcast/PSP disc scans, supplemental logos and front covers | Image identifiers from the embedded metadata catalogue; images are fetched from images.launchbox-app.com through [wsrv.nl](https://wsrv.nl/) for browser-compatible access and resizing |
 | [PSX1G1B1C1D](https://github.com/UnluckyForSome/PSX1G1B1C1D) | PS1 disc scans | On-demand images from that repository through raw.githubusercontent.com |
 | [Libretro Thumbnails](https://github.com/libretro-thumbnails/libretro-thumbnails) | Fallback game logos, front covers and title screens | On-demand images from its platform repositories through raw.githubusercontent.com |
 
@@ -27,3 +27,5 @@ Fetching artwork sends requests to the selected provider and, for LaunchBox imag
 ## GitHub Pages
 
 The hosted studio is [nikunjsingh93.github.io/Slot-UI-More](https://nikunjsingh93.github.io/Slot-UI-More/). The workflow builds only the standalone HTML and license files, without firmware images, personal files or downloaded game artwork. Changes under studio/ on main automatically redeploy it. Chrome/Edge can request permission to write labels to a chosen folder; other browsers can use folder selection and ZIP export where supported.
+
+Arcade short filenames are resolved locally using metadata from the pinned FBNeo arcade driver DAT (commit in docs/additional-core-sources.json). BIOS archives are excluded. No arcade game data or ROM checksums are uploaded for matching. Cartridge scans for the newly added systems use the same LaunchBox source and fallback providers above.

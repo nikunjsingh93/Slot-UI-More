@@ -89,11 +89,13 @@ pub fn scan(root: &Path) -> Result<Vec<Cart>, StoreError> {
             let Some(stem) = rom.file_stem().and_then(|s| s.to_str()) else {
                 continue;
             };
+            if platform == Platform::Arcade && crate::arcade::entry(stem).is_some_and(|(bios,_)|bios) { continue; }
             let label = root
                 .join("Labels")
                 .join(platform.dir_name())
                 .join(format!("{stem}.png"));
             let (title, code) = match platform {
+                Platform::Arcade => (crate::arcade::entry(stem).map(|(_,title)|title).unwrap_or(stem).to_string(),String::new()),
                 Platform::Gba => (
                     header_title(&rom).unwrap_or_default(),
                     header_code(&rom).unwrap_or_default(),
@@ -103,6 +105,11 @@ pub fn scan(root: &Path) -> Result<Vec<Cart>, StoreError> {
                 | Platform::N64
                 | Platform::Dreamcast
                 | Platform::Psp
+                | Platform::Nes
+                | Platform::MegaDrive
+                | Platform::MasterSystem
+                | Platform::GameGear
+                | Platform::PcEngine
                 | Platform::Ports => (stem.to_string(), String::new()),
                 _ => (crate::gb::title(&rom).unwrap_or_default(), String::new()),
             };

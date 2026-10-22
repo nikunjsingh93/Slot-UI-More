@@ -306,6 +306,10 @@ impl Frontend {
                     | slot_store::Core::ParallelN64
                     | slot_store::Core::Flycast
                     | slot_store::Core::Ppsspp
+                    | slot_store::Core::Fceumm
+                    | slot_store::Core::GenesisPlusGx
+                    | slot_store::Core::BeetlePceFast
+                    | slot_store::Core::Fbneo
             ) && self.session.game_visible()
                 && std::env::var("SLOT_DEVICE").as_deref() != Ok("rgsp"),
         );

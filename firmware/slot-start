@@ -9,14 +9,24 @@ exec >> "$SLOT_ROOT/slot.log" 2>&1
 echo "slot: G350 0.1.14 Ports startup $(date)"
 trap 'result=$?; echo "slot: startup script exited=$result before frontend exec"' EXIT
 echo 'slot: provisioning folders and missing cores' 
-for platform in GBA GB GBC PS1 SNES N64 DC PSP PORTS; do
+for platform in GBA GB GBC PS1 SNES N64 DC PSP PORTS NES MD SMS GG PCE ARCADE; do
     for folder in Games Labels Saves States; do
         mkdir -p "$SLOT_ROOT/$folder/$platform"
     done
 done
 mkdir -p "$SLOT_ROOT/BIOS" "$SLOT_ROOT/Wallpapers"
+# Keep the bundled standalone artwork app available on fresh G350 cards too.
+studio=/usr/share/slot/Tools/Slot-Auto-Artwork-Studio-v5.html
+if [ -f "$studio" ]; then
+    mkdir -p "$SLOT_ROOT/Tools"
+    target="$SLOT_ROOT/Tools/Slot-Auto-Artwork-Studio-v5.html"
+    if ! cmp -s "$studio" "$target"; then
+        cp "$studio" "$target.tmp"
+        mv "$target.tmp" "$target"
+    fi
+fi
 # Provision after first-boot partition resizing, and allow interrupted retries.
-for core in mgba gpsp pcsx_rearmed snes9x snes9x2005_plus mupen64plus_next parallel_n64 flycast ppsspp; do
+for core in mgba gpsp pcsx_rearmed snes9x snes9x2005_plus mupen64plus_next parallel_n64 flycast ppsspp fceumm genesis_plus_gx mednafen_pce_fast fbneo; do
     if [ ! -f "$SLOT_ROOT/System/${core}_libretro.so" ]; then
         echo "slot: adding core $core"
         cp "/usr/share/slot/${core}_libretro.so" "$SLOT_ROOT/System/${core}_libretro.so.tmp"

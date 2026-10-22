@@ -4,17 +4,19 @@ A controller-friendly frontend with cartridge/disc shelves, save-state previews,
 
 **Based on [Slot by Brandon Kowalski](https://github.com/BrandonKowalski/slot).** Credit for the original frontend and its visual foundation belongs to the upstream project and its contributors, including Markus for the skeuomorphic artwork credited upstream. See [credits and attribution](CREDITS.md).
 
-**Release 1.1.16 provides one complete flashable image per device**, with the same version shown in Slot. No older firmware or follow-up update is needed.
+**New in 1.1.17:** NES, Mega Drive/Genesis, Master System, Game Gear, PC Engine and FBNeo Arcade join Slot and Artwork Studio. See [folders, controls, arcade ROM-set requirements and validation](docs/ADDITIONAL-SYSTEMS.md). New-system gameplay and fresh-image first boot still need handheld testing.
+
+**Release 1.1.17 provides one complete flashable image per device**, with the same version shown in Slot. No older firmware or follow-up update is needed.
 
 **RG SP and RG35XX SP:** native Rice N64 with per-game ParaLLEl fallback (press Start on the N64 shelf), the accepted Dreamcast audio/core improvements, full-width PSP presentation, per-system Default/Full screen size, shaders, and native Ports D-pad/left-stick controls. The RG SP predecessor was tested by the owner; the transferred RG35XX SP changes and first boot of these newly packaged images still require handheld validation. The rejected Wave Race VBO experiment and Most Wanted Mobile are excluded.
 
-**G350:** retains the owner-tested threaded Dreamcast audio, optimized N64 cores, gray SLOT boot artwork, Ports integration and removal of 117 unused legacy folders. The frontend now reports 1.1.16 and safely rejects N64 states from incompatible core layouts. Demanding N64 scenes may still slow down. See [G350 validation](docs/G350-2026-10-19-N64-VALIDATION.json).
+**G350:** retains the owner-tested threaded Dreamcast audio, optimized N64 cores, gray SLOT boot artwork, Ports integration and removal of 117 unused legacy folders. The frontend now reports 1.1.17 and safely rejects N64 states from incompatible core layouts. Demanding N64 scenes may still slow down. See [G350 validation](docs/G350-2026-10-19-N64-VALIDATION.json).
 
 The images contain firmware and the PortMaster manager, **not commercial games, BIOS, APK/OBB files, saves or downloaded game artwork**. RG SP owner tests confirmed GTA III, Vice City, GTA SA, NFS U2, RVGL and SuperTuxKart using separately supplied game runtimes/data. Port compatibility varies; the new flash images are not a claim that every PortMaster game works.
 
 ## Screenshots
 
-All eight emulated systems and the native Ports shelf, shown with cartridge/disc labels. These are captures from Slot's actual shelf renderer on its 720 × 480 reference canvas, using original fictional demo artwork. They show the frontend rather than gameplay; physical panel layouts vary by model. Your own PNG labels replace the demo prints. See [how to add labels](#adding-ports-and-disc-labels).
+The original eight emulated systems and the native Ports shelf, shown with cartridge/disc labels. These are captures from Slot's actual shelf renderer on its 720 × 480 reference canvas, using original fictional demo artwork. They show the frontend rather than gameplay; physical panel layouts vary by model. Your own PNG labels replace the demo prints. See [how to add labels](#adding-ports-and-disc-labels).
 
 | Game Boy · GB | Game Boy Color · GBC | Game Boy Advance · GBA |
 |:---:|:---:|:---:|
@@ -28,17 +30,21 @@ All eight emulated systems and the native Ports shelf, shown with cartridge/disc
 |:---:|:---:|:---:|
 | ![Dreamcast shelf with labeled round discs](docs/screenshots/dc.png) | ![PSP shelf with labeled UMD shells](docs/screenshots/psp.png) | ![Native Ports shelf with labeled round discs](docs/screenshots/ports.png) |
 
+The six additional cartridge/PCB shells use original fictional demo labels:
+
+![NES, Mega Drive, Master System, Game Gear, PC Engine and Arcade shells](docs/screenshots/additional-systems.png)
+
 ## Downloads and installation
 
 | Device | Complete flashable image | Setup guide |
 |---|---|---|
-| BATLEXP G350 | [Slot G350 1.1.16](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/g350-v1.1.16) | [G350 installation](docs/G350-INSTALL-AND-PORTS.md) |
-| Anbernic RG SP | [Slot RG SP 1.1.16](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/rgsp-v1.1.16) | [RG SP installation](ports/rgsp/README.md) |
-| Anbernic RG35XX SP | [Slot RG35XX SP 1.1.16](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/rg35xxsp-v1.1.16) | [RG35XX SP installation](ports/rg35xxsp/README.md) |
+| BATLEXP G350 | [Slot G350 1.1.17](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/g350-v1.1.17) | [G350 installation](docs/G350-INSTALL-AND-PORTS.md) |
+| Anbernic RG SP | [Slot RG SP 1.1.17](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/rgsp-v1.1.17) | [RG SP installation](ports/rgsp/README.md) |
+| Anbernic RG35XX SP | [Slot RG35XX SP 1.1.17](https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/rg35xxsp-v1.1.17) | [RG35XX SP installation](ports/rg35xxsp/README.md) |
 
 Download only your model's **`.img.zip`**, extract the `.img`, and flash it. **Flashing erases the selected card.** Use TF1/OS, keep TF2 empty for initial setup, and let first-boot expansion finish before adding games. The three models have different boot files; their images are not interchangeable. No previous release or separate System installation is needed.
 
-Source archives, checksums and validation records are separate supporting downloads; you do not flash them. Older 1.1.15 corresponding core sources remain available for the unchanged bundled components. The [1.1.16 release notes](docs/RELEASE-1.1.16.md) describe transferred changes and hardware-test limits.
+Source archives, checksums and validation records are separate supporting downloads; you do not flash them. Older 1.1.15 corresponding core sources remain available for the unchanged bundled components. The [1.1.17 release notes](docs/RELEASE-1.1.17.md) describe transferred changes and hardware-test limits.
 
 ## Quick start on G350
 
@@ -73,9 +79,9 @@ GAMES/
     Labels/PORTS/My Game.png     (optional disc print)
 ```
 
-Use launcher names containing ASCII letters/numbers, spaces, dots, underscores, hyphens or parentheses. Use the same spelling and capitalization for the PNG. A square PNG (for example 512 × 512) with the disc face centered works well; Slot clips it to a round CD and draws its hub. Missing labels use the generic disc. Restart Slot/the handheld after copying artwork. Artwork Studio covers GB/GBC/GBA/SNES/PS1/N64/DC/PSP; custom Ports labels are added manually.
+Use launcher names containing ASCII letters/numbers, spaces, dots, underscores, hyphens or parentheses. Use the same spelling and capitalization for the PNG. A square PNG (for example 512 × 512) with the disc face centered works well; Slot clips it to a round CD and draws its hub. Missing labels use the generic disc. Restart Slot/the handheld after copying artwork. Artwork Studio covers all fourteen emulated systems; custom Ports labels are added manually.
 
-**SP native input is included in the 1.1.16 images:** Menu + Select switches native games between D-pad and left-stick mode and remembers the choice per game. The manager stays digital. Named GTA SA/NFS U2 profiles and compatible example launchers are included; their game engines/data are supplied separately. Templates are under `System/PortTemplates/`; read [the H700 guide](ports/h700/README.md) before using them. Hold Menu alone to quit.
+**SP native input is included in the 1.1.17 images:** Menu + Select switches native games between D-pad and left-stick mode and remembers the choice per game. The manager stays digital. Named GTA SA/NFS U2 profiles and compatible example launchers are included; their game engines/data are supplied separately. Templates are under `System/PortTemplates/`; read [the H700 guide](ports/h700/README.md) before using them. Hold Menu alone to quit.
 
 **Native port controls:** hold Menu alone for one second to quit. Volume +/− changes the current speaker/headphone level; holding repeats; both together toggle mute. Use the game's own save menu. Emulator save states, double-Menu state browsing and Slot shaders do not apply to native ports. Some third-party launch scripts can override audio/input settings and need adaptation.
 
@@ -92,6 +98,7 @@ These controls are checked against the input/session code. H700 native Rice diff
 | N64 / ParaLLEl, or H700 native Rice | Menu + X | Menu + Y |
 | Dreamcast / Flycast | Menu + X | Menu + Y |
 | PSP / PPSSPP | Menu + X | Menu + Y |
+| NES / Mega Drive / Master System / Game Gear / PC Engine / FBNeo Arcade | Menu + X | Menu + Y |
 | GBA / mGBA or gpSP | Select + R1 | Select + L1 |
 | GB / mGBA | Select + R1 | Select + L1 |
 | GBC / mGBA | Select + R1 | Select + L1 |

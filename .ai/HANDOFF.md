@@ -2,6 +2,83 @@
 
 Last updated: **2026-10-22, America/New_York**. Agent: Codex.
 
+## Publication follow-up in progress
+
+User explicitly requested pushing this update to all three firmwares. Complete
+1.1.17 images have now passed local composition and readbacks, retaining all
+previously accepted cores and model boot files. G350 was rebuilt on native Linux
+storage after a mapped-Windows mtools image failed SYSTEM readback; that failed
+image was replaced and will not be published. Both final SP rootfs regions match
+their checked rootfs files exactly. BusyBox installers, all 15 system directories,
+13 cores, 189 PSP assets and the expanded Studio are checked. The shipping G350
+provision fragment also passes fresh/repeat/custom-core/game-preservation checks.
+
+The local release directory is `outputs/release-1.1.17` in the enclosing workspace;
+native staging is `/tmp/slot-release-117`. New reproducible composition records are
+in `scripts/release-1.1.17`. Source commit, corresponding-source packaging, upload
+verification and publication/Pages deployment are the remaining steps at this
+checkpoint. No card was written. New-system gameplay and physical first boot are
+still unverified. Earlier notes below describe the preceding local-test task.
+
+## New active task: additional console/arcade systems
+
+User requested NES, Arcade, Sega and other common systems in Slot and Artwork
+Studio. Both frontends now have six appended platform IDs: NES, MD (Genesis),
+SMS, GG, PCE and ARCADE. Existing IDs remain stable. Four actual ARM64 cores
+were built from pinned official sources: FCEUmm, Genesis Plus GX, Beetle PCE Fast
+and FBNeo. The accepted nine existing G350 core hashes are preserved.
+The next-build app version is synchronized to **1.1.17**; public images remain
+1.1.16. Nothing from this task has been committed, pushed, flashed or released.
+Historical untracked prototypes remain unrelated; do not bulk-add them.
+
+New runtime behavior includes console save/load chords, full console video,
+Game Gear aspect preservation, H700 per-system screen entries, original stylized
+cartridge/PCB shells, FBNeo friendly names/BIOS filtering and portrait rotation.
+Do not add the digital cores to H700's 3D-only analog conversion/toggle clauses;
+they must keep Select/coin and digital D-pad input. The newly added regression
+tests cover this distinction. Existing single-cart refusal-to-eject behavior is
+unchanged; tests use a multi-game shelf like the accepted control tests.
+
+Studio supports fourteen emulated systems. NES/MD/SMS/GG/PCE use physical scans
+with logo/cover fallback; Arcade uses logos/covers and pinned FBNeo short-name
+aliases. Existing label protection and no-ROM-read behavior are retained.
+Original eight-system catalogs compare exactly to HEAD. Source pins are in
+`docs/additional-core-sources.json`; guide is `docs/ADDITIONAL-SYSTEMS.md`.
+
+Software checks so far: 46 targeted Rust tests pass across both workspaces
+(scanner/platform, cartridge geometry, arcade rotation, controls, H700 menus).
+Real NES/MD/SMS/GG/PCE cores passed original test-ROM video/PCM/state roundtrips;
+FBNeo handled an invalid archive without crashing. Six-system browser tests pass
+for matching, aliases, BIOS filtering, PNG dimensions, ZIP/direct save, existing
+labels, nested folders and mobile layout. Live artwork downloads succeeded for
+all six. G350 optimized entrypoint selects KMSDRM. No actual arcade ROM/gameplay,
+handheld boot, audio quality or performance check has been performed.
+
+Build cache: ARM64 Docker `slot-g350-compiler`; `/tmp/slot-extra` holds pinned
+sources/cores/logs and staging. G350 target `/tmp/slot-release-116/g350-target`;
+H700 target `/tmp/slot-sp-036/target`. Test outputs are under the enclosing
+workspace's `outputs/extra-systems-1.1.17`. `scripts/build_extra_cores.py` and
+`scripts/package_extra_systems_test.py` are portable entry points with explicit
+paths. Packages are system-file overlays for existing Slot cards, NOT full flash
+images. G350 SYSTEM is read back and checked against all new/accepted core hashes.
+
+Final optimized binaries and package payload hashes have been checked. H700
+frontend SHA-256 is `048dc4a7a7052233e191469eef056fb24b1a37210ca8a8e5503f592d9bfd6a25`
+in both SP ZIPs; G350 is `81f01d3df8effd12bf461d08fd1ffdcf1ce9b6f29262a4dd178cc004d77f2817`.
+`docs/ADDITIONAL-SYSTEMS-VALIDATION.json` records the 46 targeted Rust tests,
+real-core smoke tests, six live artwork requests and physical-test limits.
+Outer packages retain explicit licenses (including FCEUmm's case-sensitive
+`Copying` file), with separate complete pinned core-source archives. A clean
+frontend/source snapshot and SHA256SUMS accompany the local test downloads.
+No commit/push/card installation or public image refresh was performed.
+
+Next, the owner can install the model's test system files onto an existing Slot
+card using START-HERE.txt, then test NES, Sega/PCE and compatible arcade games,
+audio, Menu exit, states, screen settings and labels. For future publication,
+compose clean full images for all three
+models, add these cores/notices/sources and update system manifests/installer
+checks; do not imply these test overlays already replaced public image downloads.
+
 ## Current task and result
 
 The user asked for persistent cross-agent memory using AGENTS.md, CLAUDE.md,

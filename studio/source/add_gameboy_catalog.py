@@ -12,10 +12,16 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--trees',type=Path,required=True)
     p.add_argument('--launchbox',type=Path,required=True)
+    p.add_argument('--systems',choices=['gameboy','extra'],default='gameboy')
+    p.add_argument('--fbneo-dat',type=Path,help='Exact bundled Arcade-only FBNeo XML DAT for --systems extra')
     args=p.parse_args(); here=Path(__file__).resolve().parent
     catalog=json.loads((here/'catalog.json').read_text(encoding='utf-8'))
     platforms={'Nintendo Game Boy':'GB','Nintendo Game Boy Color':'GBC','Nintendo Game Boy Advance':'GBA'}
     repos={'GB':'Nintendo_-_Game_Boy','GBC':'Nintendo_-_Game_Boy_Color','GBA':'Nintendo_-_Game_Boy_Advance'}
+    if args.systems=='extra':
+        if not args.fbneo_dat:p.error('--systems extra requires --fbneo-dat')
+        platforms={'Nintendo Entertainment System':'NES','Sega Genesis':'MD','Sega Master System':'SMS','Sega Game Gear':'GG','NEC TurboGrafx-16':'PCE','Arcade':'ARCADE'}
+        repos={'NES':'Nintendo_-_Nintendo_Entertainment_System','MD':'Sega_-_Mega_Drive_-_Genesis','SMS':'Sega_-_Master_System_-_Mark_III','GG':'Sega_-_Game_Gear','PCE':'NEC_-_PC_Engine_-_TurboGrafx_16','ARCADE':'FBNeo_-_Arcade_Games'}
     selected={}; images=collections.defaultdict(list)
     with zipfile.ZipFile(args.launchbox) as z,z.open('Metadata.xml') as f:
         context=ET.iterparse(f,events=('start','end'));_,root=next(context)
@@ -50,8 +56,15 @@ def main():
         catalog['physical'][platform]=physical
         catalog['supplemental'][platform]=supplemental
         print(platform,len(titles),'matching titles;',len(physical),'physical cartridge scans',flush=True)
-    catalog['gameboy_added']='2026-10-19'
-    catalog['gameboy_launchbox_snapshot']='2026-10-09'
+    if args.systems=='gameboy':
+        catalog['gameboy_added']='2026-10-19'
+        catalog['gameboy_launchbox_snapshot']='2026-10-09'
+    else:
+        data=ET.parse(args.fbneo_dat).getroot()
+        catalog['arcade_aliases']={g.attrib['name']:g.findtext('description') for g in data.findall('game') if g.attrib.get('isbios')!='yes'}
+        catalog['arcade_bios']=[g.attrib['name'] for g in data.findall('game') if g.attrib.get('isbios')=='yes']
+        catalog['additional_systems_added']='2026-10-22'
+        catalog['additional_launchbox_snapshot']='2026-10-09'
     (here/'catalog.json').write_text(json.dumps(catalog,ensure_ascii=False,separators=(',',':')),encoding='utf-8')
 
 if __name__=='__main__':main()

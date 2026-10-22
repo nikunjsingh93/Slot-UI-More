@@ -77,6 +77,9 @@ fn open_named(
         Core::PcsxRearmed => root.join("Saves/PS1"),
         Core::Flycast => root.join("Saves/DC"),
         Core::Ppsspp => root.join("Saves/PSP/MemoryStick"),
+        Core::Fceumm => root.join("Saves/NES"),
+        Core::BeetlePceFast => root.join("Saves/PCE"),
+        Core::Fbneo => root.join("Saves/ARCADE"),
         _ => root::saves_dir(root),
     };
     let _ = std::fs::create_dir_all(&saves);
@@ -124,7 +127,11 @@ pub fn colour_option(which: Core, on: bool) -> Option<(&'static str, &'static st
         | Core::Mupen64plus
         | Core::ParallelN64
         | Core::Flycast
-        | Core::Ppsspp => None,
+        | Core::Ppsspp
+        | Core::Fceumm
+        | Core::GenesisPlusGx
+        | Core::BeetlePceFast
+        | Core::Fbneo => None,
         Core::Mgba => Some(("mgba_color_correction", if on { "Auto" } else { "OFF" })),
         Core::Gpsp => Some((
             "gpsp_color_correction",

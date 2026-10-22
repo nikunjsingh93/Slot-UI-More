@@ -2,6 +2,16 @@
 
 This is an independent GPL-3.0 Slot adaptation. Preserve the root and upstream licenses, attribution and change history. PortMaster GUI is MIT-licensed; its helpers and each port retain their own licenses. Emulator and OS licenses vary; some components may impose additional redistribution/noncommercial terms. Nothing here grants rights to commercial games, BIOS, artwork or trademarks.
 
+## Release 1.1.17
+
+The three complete images add FCEUmm, Genesis Plus GX, Beetle PCE Fast and FBNeo.
+The release's additional-core source ZIP supplies their exact complete source
+archives and build pins. Their complete notices are retained with the runtime;
+Genesis Plus GX/FBNeo noncommercial terms and FBNeo's donation restriction apply.
+Current frontend/native N64 sources and unchanged compatibility-library sources
+are provided with 1.1.17. Preserve the still-required historical OS/core sources.
+No game, proprietary BIOS or downloaded commercial artwork is included.
+
 ## What this release contains
 
 Release 1.1.16 provides complete model-specific images and current full

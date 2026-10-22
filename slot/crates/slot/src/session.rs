@@ -171,6 +171,10 @@ impl Session {
                     | slot_store::Core::ParallelN64
                     | slot_store::Core::Flycast
                     | slot_store::Core::Ppsspp
+                    | slot_store::Core::Fceumm
+                    | slot_store::Core::GenesisPlusGx
+                    | slot_store::Core::BeetlePceFast
+                    | slot_store::Core::Fbneo
             ) && matches!(self.app.phase(), Phase::Playing { .. })
             {
                 use slot_input::Btn;
@@ -557,6 +561,13 @@ mod ps1_controls {
             (Platform::N64, slot_store::Core::Mupen64plus, "Cart.n64"),
             (Platform::Dreamcast, slot_store::Core::Flycast, "Disc.chd"),
             (Platform::Psp, slot_store::Core::Ppsspp, "Disc.iso"),
+            (Platform::Nes, slot_store::Core::Fceumm, "Cart.nes"),
+            (Platform::MegaDrive, slot_store::Core::GenesisPlusGx, "Cart.md"),
+            (Platform::MasterSystem, slot_store::Core::GenesisPlusGx, "Cart.sms"),
+            (Platform::GameGear, slot_store::Core::GenesisPlusGx, "Cart.gg"),
+            (Platform::PcEngine, slot_store::Core::BeetlePceFast, "Cart.pce"),
+            (Platform::Arcade, slot_store::Core::Fbneo, "Cart.zip"),
+
         ] {
             let root = tempfile::tempdir().unwrap();
             let mut session = Session::boot(root.path().to_path_buf());

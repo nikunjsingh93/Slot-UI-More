@@ -18,7 +18,7 @@ cp -R "$STAGE/System/." "$SD/System/"
 # Verify the copied frontend before committing the installation marker.
 (cd "$SD" && sha256sum -c "$STAGE/system.sha256")
 for category in Games Labels Saves States; do
-    for platform in GB GBC GBA SNES PS1 N64 DC PSP PORTS; do
+    for platform in GB GBC GBA SNES PS1 N64 DC PSP PORTS NES MD SMS GG PCE ARCADE; do
         mkdir -p "$SD/$category/$platform"
     done
 done
@@ -35,4 +35,4 @@ sync
 : > "$SD/System/.$VERSION"
 sync
 rm -f "$SD/.slot-sp-installing"
-echo 'slot-sp: eight emulated systems and native Ports installed and verified'
+echo 'slot-sp: fourteen emulated systems and native Ports installed and verified'

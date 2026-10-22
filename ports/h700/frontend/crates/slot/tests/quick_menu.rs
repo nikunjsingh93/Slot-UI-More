@@ -60,6 +60,39 @@ fn press(a: &mut App, btn: Btn) {
     a.apply(Action::GbaUp(btn));
 }
 
+#[test]
+fn added_system_screen_values_are_distinct_and_persist() {
+    use slot_store::Platform;
+    let (d, _, _) = on_carousel();
+    let systems=[Platform::Nes, Platform::MegaDrive, Platform::MasterSystem, Platform::GameGear, Platform::PcEngine, Platform::Arcade];
+    for p in systems {
+        std::fs::write(d.path().join(format!("Games/{}/Probe.{}",p.dir_name(),p.extensions()[0])),b"scan fixture").unwrap();
+    }
+    let (mut a, _)=app_booting_at(d.path(),CLOCK_IS_SET);
+    let mut values=std::collections::HashSet::new();
+    for p in systems {
+        for _ in 0..Platform::ALL.len() {
+            if a.shelf_platform_name()==Some(p.name()) {break;}
+            press(&mut a,Btn::R1);
+        }
+        assert_eq!(a.shelf_platform_name(),Some(p.name()));
+        open_at(&mut a,QuickRow::ScreenSize);
+        let default=QuickValue::screen(p as usize,false);
+        let full=QuickValue::screen(p as usize,true);
+        assert!(values.insert(default.index())); assert!(values.insert(full.index()));
+        assert_eq!(a.quick_value(QuickRow::ScreenSize),Some(default));
+        press(&mut a,Btn::Right);
+        assert_eq!(a.quick_value(QuickRow::ScreenSize),Some(full));
+        assert_eq!(slot_store::ini::value(d.path(),"Config/screen-size.ini",p.dir_name()).as_deref(),Some("full"));
+        a.apply(Action::QuickMenu);
+    }
+    let (mut loaded,_)=app_booting_at(d.path(),CLOCK_IS_SET);
+    for p in Platform::ALL {
+        loaded.set_platform(p);
+        assert_eq!(loaded.picture_stretched(),p as usize>Platform::Ports as usize);
+    }
+}
+
 fn open_at(a: &mut App, row: QuickRow) {
     a.apply(Action::QuickMenu);
     for _ in 0..row.index() {

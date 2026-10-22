@@ -90,10 +90,23 @@ pub enum QuickValue {
     ScreenPspFull,
     ScreenPortsDefault,
     ScreenPortsFull,
+    ScreenNesDefault,
+    ScreenNesFull,
+    ScreenMegaDriveDefault,
+    ScreenMegaDriveFull,
+    ScreenMasterSystemDefault,
+    ScreenMasterSystemFull,
+    ScreenGameGearDefault,
+    ScreenGameGearFull,
+    ScreenPcEngineDefault,
+    ScreenPcEngineFull,
+    ScreenArcadeDefault,
+    ScreenArcadeFull,
+
 }
 
 impl QuickValue {
-    pub const ALL: [QuickValue; 29] = [
+    pub const ALL: [QuickValue; 41] = [
         QuickValue::Speed2,
         QuickValue::Speed3,
         QuickValue::Speed4,
@@ -123,6 +136,19 @@ impl QuickValue {
         QuickValue::ScreenPspFull,
         QuickValue::ScreenPortsDefault,
         QuickValue::ScreenPortsFull,
+        QuickValue::ScreenNesDefault,
+        QuickValue::ScreenNesFull,
+        QuickValue::ScreenMegaDriveDefault,
+        QuickValue::ScreenMegaDriveFull,
+        QuickValue::ScreenMasterSystemDefault,
+        QuickValue::ScreenMasterSystemFull,
+        QuickValue::ScreenGameGearDefault,
+        QuickValue::ScreenGameGearFull,
+        QuickValue::ScreenPcEngineDefault,
+        QuickValue::ScreenPcEngineFull,
+        QuickValue::ScreenArcadeDefault,
+        QuickValue::ScreenArcadeFull,
+
     ];
 
     pub fn index(self) -> usize {
@@ -160,12 +186,25 @@ impl QuickValue {
             QuickValue::ScreenPspFull => "PSP: Full",
             QuickValue::ScreenPortsDefault => "PORTS: Default",
             QuickValue::ScreenPortsFull => "PORTS: Full",
+            QuickValue::ScreenNesDefault => "NES: Default",
+            QuickValue::ScreenNesFull => "NES: Full",
+            QuickValue::ScreenMegaDriveDefault => "MD: Default",
+            QuickValue::ScreenMegaDriveFull => "MD: Full",
+            QuickValue::ScreenMasterSystemDefault => "SMS: Default",
+            QuickValue::ScreenMasterSystemFull => "SMS: Full",
+            QuickValue::ScreenGameGearDefault => "GG: Default",
+            QuickValue::ScreenGameGearFull => "GG: Full",
+            QuickValue::ScreenPcEngineDefault => "PCE: Default",
+            QuickValue::ScreenPcEngineFull => "PCE: Full",
+            QuickValue::ScreenArcadeDefault => "ARCADE: Default",
+            QuickValue::ScreenArcadeFull => "ARCADE: Full",
+
 
         }
     }
 
     pub fn screen(system: usize, full: bool) -> QuickValue {
-        Self::ALL[11 + system.min(8) * 2 + full as usize]
+        Self::ALL[11 + system.min(slot_store::Platform::ALL.len() - 1) * 2 + full as usize]
     }
 
     pub fn shader(id: u8) -> QuickValue {
