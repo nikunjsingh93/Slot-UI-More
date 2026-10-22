@@ -2,23 +2,37 @@
 
 Last updated: **2026-10-22, America/New_York**. Agent: Codex.
 
-## Publication follow-up in progress
+## Publication follow-up completed
 
 User explicitly requested pushing this update to all three firmwares. Complete
-1.1.17 images have now passed local composition and readbacks, retaining all
-previously accepted cores and model boot files. G350 was rebuilt on native Linux
-storage after a mapped-Windows mtools image failed SYSTEM readback; that failed
-image was replaced and will not be published. Both final SP rootfs regions match
-their checked rootfs files exactly. BusyBox installers, all 15 system directories,
-13 cores, 189 PSP assets and the expanded Studio are checked. The shipping G350
-provision fragment also passes fresh/repeat/custom-core/game-preservation checks.
+1.1.17 images are published under g350-v1.1.17, rgsp-v1.1.17 and
+rg35xxsp-v1.1.17, with consistent Complete Image titles and G350 marked Latest.
+All 19 uploaded assets match the local exact size/SHA-256 records. Source/tag
+commit is `23c04f7883df86b146e890c2bc1def34f0f32530`. Corresponding native N64,
+four added cores and compatibility-library sources are included/retained.
+No card was written. Old releases/source obligations were preserved.
 
-The local release directory is `outputs/release-1.1.17` in the enclosing workspace;
-native staging is `/tmp/slot-release-117`. New reproducible composition records are
-in `scripts/release-1.1.17`. Source commit, corresponding-source packaging, upload
-verification and publication/Pages deployment are the remaining steps at this
-checkpoint. No card was written. New-system gameplay and physical first boot are
-still unverified. Earlier notes below describe the preceding local-test task.
+All three images passed local composition and readbacks, retaining the accepted
+cores and model boot files. G350 was rebuilt on native Linux after a mapped-
+Windows mtools image failed readback; the failed image was replaced, not shipped.
+Both final SP rootfs regions match their checked files exactly. Actual BusyBox
+installers check all 15 system folders, 13 cores, 189 PSP assets, installed Studio,
+idempotence, corrupted payload rejection and interrupted retry/game preservation.
+The G350 provisioning fragment passes fresh/repeat/Studio refresh and custom-core/
+game-preservation checks. Physical first boot, new-system gameplay, audio quality
+and performance remain unverified; the 46 software tests are not hardware tests.
+
+Release files: enclosing workspace `outputs/release-1.1.17`; native staging
+`/tmp/slot-release-117`. Build/composition records: `scripts/release-1.1.17`.
+Exact public records: `docs/releases/assets-1.1.17.json`, `uploads-1.1.17.json`,
+`validation-1.1.17.json` and per-model manifests. This metadata follow-up updates
+README/download records on main. Pages deployment verification is the remaining
+publication check at this checkpoint; the push includes Studio changes.
+
+Next physical check, when the owner is ready: fresh boot and one game from each
+added system; verify arcade BIOS/set matching, audio, states, Menu quit, labels
+and H700 per-system screen settings. Do not assume a card is connected. Earlier
+notes below describe the preceding local-test task and are historical.
 
 ## New active task: additional console/arcade systems
 

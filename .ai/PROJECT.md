@@ -62,10 +62,10 @@ Under the Slot root: `Games/<SYSTEM>`, `Labels/<SYSTEM>`, `BIOS`, `Saves`,
 Labels use the exact game/launcher filename stem plus `.png`. Preserve normal
 game saves separately from emulator state snapshots.
 
-The 2026-10-22 working tree for **1.1.17 testing** appends `NES`, `MD`, `SMS`,
+Release **1.1.17** (2026-10-22) appends `NES`, `MD`, `SMS`,
 `GG`, `PCE`, `ARCADE` to both Platform enums (never reorder the existing IDs,
-which index H700 persisted screen settings). These are not yet in public 1.1.16
-images. New core/source pins, exact arcade-set requirements and component-license
+which index H700 persisted screen settings). They are included in the three published complete images; the earlier 1.1.16
+images lack them. New core/source pins, exact arcade-set requirements and component-license
 notes are in `docs/ADDITIONAL-SYSTEMS.md` and `docs/additional-core-sources.json`.
 Sega here means Genesis/Master System/Game Gear; Sega CD/32X/Saturn are outside
 this addition. PCE Fast covers HuCards, not SuperGrafx. FBNeo archives must match
@@ -200,7 +200,7 @@ python3 studio/source/build.py --output /tmp/Slot-Auto-Artwork-Studio-v5.html
 
 ## Artwork, distribution and scope
 
-Studio v5 supports all eight emulated systems in one standalone HTML app. It
+Studio v5 supports all fourteen emulated systems in one standalone HTML app. It
 matches filenames, requests artwork online and writes labels locally through
 Chrome/Edge folder access or exports ZIP. It does not upload ROM contents.
 Ports art remains manual. Sources include LaunchBox, PSX1G1B1C1D and Libretro
@@ -209,7 +209,7 @@ thumbnails, with wsrv.nl for some browser-compatible image requests. See
 merely because the app can fetch it. Edit `studio/source/` and rebuild the HTML.
 
 Release convention: one synchronized version and one complete image per model,
-e.g. `slot-rgsp-1.1.16.img.zip`, with consistently named GitHub release pages.
+e.g. `slot-rgsp-1.1.17.img.zip`, with consistently named GitHub release pages.
 Firmware binaries belong in release assets; source belongs in Git. Keep hashes,
 validation notes, credits and corresponding source archives accessible. Historical
 source assets may still be required by currently distributed binaries.

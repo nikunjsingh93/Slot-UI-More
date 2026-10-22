@@ -173,5 +173,100 @@
     "size": 499,
     "sha256": "598b14729d6cbe07e9974c2481605e7baaba09d0c79835a752b72f8595e5f342",
     "tag": "rg35xxsp-v1.1.16"
+  },
+  "slot-g350-1.1.17.img.zip": {
+    "sha256": "910ed37ba43531acabfc5fc6de49124876022a845bef427eb242cc7804d61ade",
+    "size": 1175998618,
+    "tag": "g350-v1.1.17"
+  },
+  "slot-g350-1.1.17-manifest.json": {
+    "sha256": "89c07f6c4b0cd63f2bfa6a820d4884defbb48aa8cef4333960d1d41c39f2df11",
+    "size": 3736,
+    "tag": "g350-v1.1.17"
+  },
+  "slot-g350-1.1.17-START-HERE.txt": {
+    "sha256": "52dc76aec0f9f004b12c7de49036cd6e953ad562cadd4dbf5958da746de69357",
+    "size": 1959,
+    "tag": "g350-v1.1.17"
+  },
+  "slot-g350-1.1.17-VALIDATION.txt": {
+    "sha256": "bd22f452846a2e7d28339e0aa4ec6c535abc523c285f874ba4da82f27c7348c3",
+    "size": 398,
+    "tag": "g350-v1.1.17"
+  },
+  "slot-1.1.17-sources.zip": {
+    "sha256": "844874d43470fe9c9e481a6e589fc8dfd1daa4272e273565209ad4c6824508d8",
+    "size": 13676142,
+    "tag": "g350-v1.1.17"
+  },
+  "slot-1.1.17-additional-core-sources.zip": {
+    "sha256": "b07bde3a783ef5b0147f0af85b299149b8a0ae6d51fbb6b246e8e5633875e67d",
+    "size": 46330065,
+    "tag": "g350-v1.1.17"
+  },
+  "slot-1.1.17-compatibility-sources.zip": {
+    "sha256": "f5f4eb30fae6fe38f7099b24d53baee20f91b5bfd400a754c33993a3c2309a7a",
+    "size": 81000656,
+    "tag": "g350-v1.1.17"
+  },
+  "Slot-Auto-Artwork-Studio-v5.html": {
+    "sha256": "0b62483ab2bcc4eda70574d81c0891536c9319ace6e8d1ce44310784249d4747",
+    "size": 8801557,
+    "tag": "g350-v1.1.17"
+  },
+  "slot-g350-1.1.17-SHA256SUMS.txt": {
+    "sha256": "fcb3662e78ff74548b0bb81487c1ea48747773770ab5bbc957bc43c25d6aab08",
+    "size": 783,
+    "tag": "g350-v1.1.17"
+  },
+  "slot-rgsp-1.1.17.img.zip": {
+    "sha256": "2c0b9de5581b788fd7801ba037e8025ad5c3cf73b59485f74ccc1f9fb059f8b7",
+    "size": 315111726,
+    "tag": "rgsp-v1.1.17"
+  },
+  "slot-rgsp-1.1.17-manifest.json": {
+    "sha256": "e57f6f712a25501a8ee7e562ea5aaa00f6f0fade3f70878215e6aff38b092f05",
+    "size": 6693,
+    "tag": "rgsp-v1.1.17"
+  },
+  "slot-rgsp-1.1.17-START-HERE.txt": {
+    "sha256": "bb219f3aa1a92ad92447043007faf48799096786a6127051fa246d16103aee23",
+    "size": 2781,
+    "tag": "rgsp-v1.1.17"
+  },
+  "slot-rgsp-1.1.17-VALIDATION.txt": {
+    "sha256": "23d64d11c0ba53930ce0575340964989f6a0763206d3a76d8e3a5e31f2e9c09f",
+    "size": 501,
+    "tag": "rgsp-v1.1.17"
+  },
+  "slot-rgsp-1.1.17-SHA256SUMS.txt": {
+    "sha256": "38d0c172f594e82851559871f2420ed47988797f9df5038cdc7677ab235c787f",
+    "size": 384,
+    "tag": "rgsp-v1.1.17"
+  },
+  "slot-rg35xxsp-1.1.17.img.zip": {
+    "sha256": "5ad6c1f30a54334c30379b87cd91142f0a2038cc35197056e4cbe4ceccb79b7e",
+    "size": 288589112,
+    "tag": "rg35xxsp-v1.1.17"
+  },
+  "slot-rg35xxsp-1.1.17-manifest.json": {
+    "sha256": "724fe1b7ba8335f94ccb523d2585e64593b23edb7fd11c948c947654be41ebf2",
+    "size": 6704,
+    "tag": "rg35xxsp-v1.1.17"
+  },
+  "slot-rg35xxsp-1.1.17-START-HERE.txt": {
+    "sha256": "fa1febe2f60c7ebd2e59630a471ae72f17c613b639fac3796161b043b185d00e",
+    "size": 2793,
+    "tag": "rg35xxsp-v1.1.17"
+  },
+  "slot-rg35xxsp-1.1.17-VALIDATION.txt": {
+    "sha256": "2cfbfb22174875128c1095e33012565c5d52b3b4e1fbce3e8607fc0c412c1bbc",
+    "size": 505,
+    "tag": "rg35xxsp-v1.1.17"
+  },
+  "slot-rg35xxsp-1.1.17-SHA256SUMS.txt": {
+    "sha256": "3fbf0fd0c18b207f318df1150afd1a2563ef1d9eb4f7562abdb4572fe2de2f9d",
+    "size": 400,
+    "tag": "rg35xxsp-v1.1.17"
   }
 }

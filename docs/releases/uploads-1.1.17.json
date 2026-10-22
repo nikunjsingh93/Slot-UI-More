@@ -1,0 +1,128 @@
+{
+  "version": "1.1.17",
+  "source_commit": "23c04f7883df86b146e890c2bc1def34f0f32530",
+  "models": {
+    "g350": {
+      "release_id": 421108958,
+      "tag": "g350-v1.1.17",
+      "draft": false,
+      "assets": {
+        "slot-g350-1.1.17.img.zip": {
+          "bytes": 1175998618,
+          "sha256": "910ed37ba43531acabfc5fc6de49124876022a845bef427eb242cc7804d61ade",
+          "asset_id": 666838090
+        },
+        "slot-g350-1.1.17-manifest.json": {
+          "bytes": 3736,
+          "sha256": "89c07f6c4b0cd63f2bfa6a820d4884defbb48aa8cef4333960d1d41c39f2df11",
+          "asset_id": 666838091
+        },
+        "slot-g350-1.1.17-START-HERE.txt": {
+          "bytes": 1959,
+          "sha256": "52dc76aec0f9f004b12c7de49036cd6e953ad562cadd4dbf5958da746de69357",
+          "asset_id": 666838088
+        },
+        "slot-g350-1.1.17-VALIDATION.txt": {
+          "bytes": 398,
+          "sha256": "bd22f452846a2e7d28339e0aa4ec6c535abc523c285f874ba4da82f27c7348c3",
+          "asset_id": 666838089
+        },
+        "slot-1.1.17-sources.zip": {
+          "bytes": 13676142,
+          "sha256": "844874d43470fe9c9e481a6e589fc8dfd1daa4272e273565209ad4c6824508d8",
+          "asset_id": 666838086
+        },
+        "slot-1.1.17-additional-core-sources.zip": {
+          "bytes": 46330065,
+          "sha256": "b07bde3a783ef5b0147f0af85b299149b8a0ae6d51fbb6b246e8e5633875e67d",
+          "asset_id": 666838123
+        },
+        "slot-1.1.17-compatibility-sources.zip": {
+          "bytes": 81000656,
+          "sha256": "f5f4eb30fae6fe38f7099b24d53baee20f91b5bfd400a754c33993a3c2309a7a",
+          "asset_id": 666838125
+        },
+        "Slot-Auto-Artwork-Studio-v5.html": {
+          "bytes": 8801557,
+          "sha256": "0b62483ab2bcc4eda70574d81c0891536c9319ace6e8d1ce44310784249d4747",
+          "asset_id": 666838127
+        },
+        "slot-g350-1.1.17-SHA256SUMS.txt": {
+          "bytes": 783,
+          "sha256": "fcb3662e78ff74548b0bb81487c1ea48747773770ab5bbc957bc43c25d6aab08",
+          "asset_id": 666838282
+        }
+      },
+      "url": "https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/g350-v1.1.17",
+      "published_at": "2026-10-22T19:25:39Z"
+    },
+    "rgsp": {
+      "release_id": 421109003,
+      "tag": "rgsp-v1.1.17",
+      "draft": false,
+      "assets": {
+        "slot-rgsp-1.1.17.img.zip": {
+          "bytes": 315111726,
+          "sha256": "2c0b9de5581b788fd7801ba037e8025ad5c3cf73b59485f74ccc1f9fb059f8b7",
+          "asset_id": 666838193
+        },
+        "slot-rgsp-1.1.17-manifest.json": {
+          "bytes": 6693,
+          "sha256": "e57f6f712a25501a8ee7e562ea5aaa00f6f0fade3f70878215e6aff38b092f05",
+          "asset_id": 666838198
+        },
+        "slot-rgsp-1.1.17-START-HERE.txt": {
+          "bytes": 2781,
+          "sha256": "bb219f3aa1a92ad92447043007faf48799096786a6127051fa246d16103aee23",
+          "asset_id": 666838194
+        },
+        "slot-rgsp-1.1.17-VALIDATION.txt": {
+          "bytes": 501,
+          "sha256": "23d64d11c0ba53930ce0575340964989f6a0763206d3a76d8e3a5e31f2e9c09f",
+          "asset_id": 666838195
+        },
+        "slot-rgsp-1.1.17-SHA256SUMS.txt": {
+          "bytes": 384,
+          "sha256": "38d0c172f594e82851559871f2420ed47988797f9df5038cdc7677ab235c787f",
+          "asset_id": 666838200
+        }
+      },
+      "url": "https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/rgsp-v1.1.17",
+      "published_at": "2026-10-22T19:25:36Z"
+    },
+    "rg35xxsp": {
+      "release_id": 421108961,
+      "tag": "rg35xxsp-v1.1.17",
+      "draft": false,
+      "assets": {
+        "slot-rg35xxsp-1.1.17.img.zip": {
+          "bytes": 288589112,
+          "sha256": "5ad6c1f30a54334c30379b87cd91142f0a2038cc35197056e4cbe4ceccb79b7e",
+          "asset_id": 666838103
+        },
+        "slot-rg35xxsp-1.1.17-manifest.json": {
+          "bytes": 6704,
+          "sha256": "724fe1b7ba8335f94ccb523d2585e64593b23edb7fd11c948c947654be41ebf2",
+          "asset_id": 666838102
+        },
+        "slot-rg35xxsp-1.1.17-START-HERE.txt": {
+          "bytes": 2793,
+          "sha256": "fa1febe2f60c7ebd2e59630a471ae72f17c613b639fac3796161b043b185d00e",
+          "asset_id": 666838104
+        },
+        "slot-rg35xxsp-1.1.17-VALIDATION.txt": {
+          "bytes": 505,
+          "sha256": "2cfbfb22174875128c1095e33012565c5d52b3b4e1fbce3e8607fc0c412c1bbc",
+          "asset_id": 666838099
+        },
+        "slot-rg35xxsp-1.1.17-SHA256SUMS.txt": {
+          "bytes": 400,
+          "sha256": "3fbf0fd0c18b207f318df1150afd1a2563ef1d9eb4f7562abdb4572fe2de2f9d",
+          "asset_id": 666838097
+        }
+      },
+      "url": "https://github.com/nikunjsingh93/Slot-UI-More/releases/tag/rg35xxsp-v1.1.17",
+      "published_at": "2026-10-22T19:25:34Z"
+    }
+  }
+}

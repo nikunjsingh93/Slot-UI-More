@@ -1,0 +1,26 @@
+{
+  "version": "1.1.17",
+  "targeted_software_tests": 46,
+  "physical_first_boot_tested": false,
+  "new_system_games_hardware_tested": false,
+  "models": {
+    "g350": {
+      "image_sha256": "faa7144b75b448e8a5e9132d52371d24f2c7c2119f31b087aba1679a3af85b56",
+      "zip_sha256": "910ed37ba43531acabfc5fc6de49124876022a845bef427eb242cc7804d61ade",
+      "frontend_sha256": "81f01d3df8effd12bf461d08fd1ffdcf1ce9b6f29262a4dd178cc004d77f2817",
+      "zip_bytes": 1175998618
+    },
+    "rgsp": {
+      "image_sha256": "cf06c39c9d32bd45f973d2e2e403876d67192f5aa599e55caccc6c0c6b285378",
+      "zip_sha256": "2c0b9de5581b788fd7801ba037e8025ad5c3cf73b59485f74ccc1f9fb059f8b7",
+      "frontend_sha256": "048dc4a7a7052233e191469eef056fb24b1a37210ca8a8e5503f592d9bfd6a25",
+      "zip_bytes": 315111726
+    },
+    "rg35xxsp": {
+      "image_sha256": "0f88b76219e056fd8be51a01d5ba52f39917bb6c62fca5b7ff86897771ab388d",
+      "zip_sha256": "5ad6c1f30a54334c30379b87cd91142f0a2038cc35197056e4cbe4ceccb79b7e",
+      "frontend_sha256": "048dc4a7a7052233e191469eef056fb24b1a37210ca8a8e5503f592d9bfd6a25",
+      "zip_bytes": 288589112
+    }
+  }
+}
