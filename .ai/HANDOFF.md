@@ -26,8 +26,11 @@ Release files: enclosing workspace `outputs/release-1.1.17`; native staging
 `/tmp/slot-release-117`. Build/composition records: `scripts/release-1.1.17`.
 Exact public records: `docs/releases/assets-1.1.17.json`, `uploads-1.1.17.json`,
 `validation-1.1.17.json` and per-model manifests. This metadata follow-up updates
-README/download records on main. Pages deployment verification is the remaining
-publication check at this checkpoint; the push includes Studio changes.
+README/download records on main (`990616a`). Pages workflow run **39840058314**
+completed successfully for that commit. A live HTTP check confirmed all fourteen
+system catalogs, the six additions and the `sf2` FBNeo alias. The record is
+`docs/releases/pages-1.1.17.json`. Publication and website verification are complete;
+this final checkpoint is documentation-only and does not alter the firmware.
 
 Next physical check, when the owner is ready: fresh boot and one game from each
 added system; verify arcade BIOS/set matching, audio, states, Menu quit, labels

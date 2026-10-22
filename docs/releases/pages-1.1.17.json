@@ -1,0 +1,17 @@
+{
+  "url": "https://nikunjsingh93.github.io/Slot-UI-More/",
+  "workflow_run": 39840058314,
+  "deployment_commit": "990616a920032f8e4939f9bac735e832987161a5",
+  "workflow_conclusion": "success",
+  "live_page_verified": true,
+  "emulated_systems": 14,
+  "added_systems": [
+    "NES",
+    "MD",
+    "SMS",
+    "GG",
+    "PCE",
+    "ARCADE"
+  ],
+  "fbneo_short_name_alias_verified": "sf2"
+}
